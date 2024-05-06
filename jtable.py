@@ -14,47 +14,90 @@ try:
 except:
     pass
 
-default_outs = "json,text"
-# loader = DataLoader()
-
+global path
+global path_var_name
+path_var_name = "stdin"
+global path_loop_var
+path_loop_var = "{}"
+path = path_var_name + path_loop_var
 
 def ansible_filter(dataset,select=[]):
-    return jtable_cls().render_object(dataset,path="",select=select)
+    return jtable_cls().render_object(dataset,path=path,select=select)
 
+
+class Inspect:
+    def __init__(self):
+        self.out = []
+    def add_row(self,row):
+        self.out = self.out + [ row ]
+    def view_paths(self,dataset):
+        self.cover_data(dataset)
+        # return('\n'.join(self.out))
+        return self.out
+    def cover_data(self,dataset,path=""):
+        if type(dataset) is dict:
+            for key,value in dataset.items():
+                the_path = path + "['" + str(key) + "']"
+                self.cover_data(value,the_path )
+        elif type(dataset) is list:
+            index=0
+            for item in dataset:
+                the_path = path + "[" + str(index) + "]"
+                index += 1
+                self.cover_data(item,the_path)
+        else:
+            self.add_row([path] + [str(dataset)])
 
 class jtable_cli:
+    def __init__(self):
+        self.path = path
+        
     def parse_args(self):
-        # import os, sys, yaml
         if 'JTABLE_RENDER' in os.environ:
             render=os.environ['JTABLE_RENDER']
         else:
             render="jinja_native"
 
-
-        # from jtable import jtable_cls
         import argparse
 
         select = []
         format="text"
-        path = ""
-        parser = argparse.ArgumentParser(description='Tabulate your json data and render them using jinja')
+        parser = argparse.ArgumentParser(description='Tabulate your JSON/Yaml data and transform it using Jinja')
 
-        # parser.add_argument("-s", "--select", help = "{ user.firstname as firstname, user.lastname as lastname}")
         parser.add_argument("-q", "--query_file", help = "Show Output")
         parser.add_argument("-p", "--json_path", help = "Show Output")
         parser.add_argument("-f", "--format", help = "text,json,th,td")
+        parser.add_argument("--inspect", action="store_true", help="inspect json")
+
 
         args = parser.parse_args()
         dataset = {}
         stdin=""
         for line in sys.stdin:
             stdin = stdin + line
-        dataset = yaml.safe_load(stdin)
-        # dataset = {**dataset, **{ 'stdin': yaml.safe_load(stdin) } }
+        # dataset = yaml.safe_load(stdin)
+        dataset = { path_var_name: yaml.safe_load(stdin) }
+        # dataset = {**dataset, **{ path_var_name: yaml.safe_load(stdin) } }
+        
+        
+
     
 
         if args.json_path:
-            path = args.json_path
+            new_path = args.json_path
+            # if path is not erminated by {} or {something} then adding {} at the end
+            expr_end_by_braces=(re.sub('.*({).*(})$',r'\1\2',args.json_path))
+            expr_path_var_name=(re.sub('^(.{' + str(len(path_var_name)) + '}).*$',r'\1',args.json_path))
+            if expr_path_var_name != path_var_name:
+                new_path = path_var_name + '.' + new_path
+                
+            if expr_end_by_braces != "{}":
+                new_path = new_path + "{}"
+                
+            self.path = new_path
+            # print('debug path_var_name: ' + path_var_name)
+            # print('debug self.path: ' + self.path)
+            # exit(0)
             
         if args.format:
             format = args.format
@@ -65,11 +108,14 @@ class jtable_cli:
                 if 'select' in query_set:
                     select = query_set['select']
                     
-
-        print(jtable_cls(render=render).render_object(dataset,path=path,select=select)[format])
-
-
-
+        if args.inspect:
+            print('insptc')
+            inspected_paths = Inspect().view_paths(dataset)
+            tbl = tabulate(inspected_paths,['path','value'])
+            print(tbl)
+            exit(0)
+            
+        print(jtable_cls(render=render).render_object(dataset,path=self.path,select=select)[format])
 
 
 class jtable_cls:
@@ -85,38 +131,153 @@ class jtable_cls:
             self.loader = DataLoader()
         else:
             self.loader=BaseLoader()
-
+    
+    def cross_path(self,dataset,path,context={}):
+        level = len(path)
+        if level> 0:
+            next_path = path[1:]
+            current_path = str(path[0])
+            current_path_value = "unknown"
+            current_path_value = current_path_value
+            if current_path[0:2] == "['":
+                current_path_value = current_path[2:-2]
+                if current_path_value in list(dataset):
+                    self.cross_path(dataset[current_path_value],next_path, context = context)
+                else:
+                    print("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
+                    exit(1)
+            elif current_path[0] == ".":
+                current_path_value = current_path[1:]
+                if current_path_value in list(dataset):
+                    self.cross_path(dataset[current_path_value],next_path, context = context)
+                else:
+                    print("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
+                    exit(1)
+                    
+            elif current_path[0] == "[":
+                current_path_value = current_path[1:-1]
+                # print('debug typ dataset: ' + str(type(dataset)))
+                # print('debug dataset: ' + str(dataset))
+                
+                if int(current_path_value) <= len(dataset):
+                    self.cross_path(dataset[int(current_path_value)],next_path, context = context)
+                    
+                else:
+                    print("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
+                    exit(1)
+            
+            elif current_path[0] == "{":
+                item_name = current_path[1:-1]
+                if level > 1:
+                    if type(dataset) is dict:
+                        for key,value in dataset.items():
+                            next_path = path[1:]
+                            new_context = {item_name: {"key": key, "value": value}}
+                            context = { **context, **new_context}
+                            self.cross_path(dataset[key],next_path,context=context)
+                            
+                    elif type(dataset) is list:
+                        index = 0
+                        for item in dataset:
+                            next_path = path[1:]
+                            new_context = { item_name: item }
+                            context = { **context, **new_context}
+                            self.cross_path(dataset[index],next_path,context=context)
+                            index += 1
+                else:
+                    self.render_table(dataset,select=self.select, item_name = item_name, context = context)
+            else:
+                print("[ERROR] was looking for path...")
+                exit(1)
+                
+            
+        else:
+            print('last path: ' + str(dataset))
+            self.render_table(dataset,select=self.select,context=context)
+        # print('debug path count': + str(len(paths)))
+        
 
     
-    def render_object(self,dataset,path="",select=[]):
-        fields_label = None
+    def render_object(self,dataset,path=path,select=[]):
+        self.dataset = dataset
+        self.select = select
         
-        # if path.split('.')[0] != "stdin":
-        #     path = "stdin." + path
+        self.splitted_path =   path_splitter().split_path(path)
         
-        # # # print(path)
-        # # self.splitted_path = (path_splitter().crunch_path(path))
+        # print('debug self.splitted_path: ' + str(self.splitted_path))
+        # self.cross_path_old()
+        
+        
+        self.cross_path(dataset,self.splitted_path )
 
-        # # self.dataset_to_cover = []
-        # # self.path_pickup(dataset=dataset,path=self.splitted_path)
-        # # print(self.dataset_to_cover)
-        
-        # # exit(0)
-        
-        
-        
-        
-        if path != "":
-            template = '{{ ' + path + '}}'
-            dataset = self.jinja_render_value( template = template, context = dataset )
+        # exit(0)
+            
+        out_return = {
+            "th": self.th,
+            "td": self.td,
+            "text": tabulate(self.td,self.th),
+            "json": self.json_content
+        }
+        return out_return
+    
 
+    def jinja_render_value(self,template,context):
+        if self.render == "jinja_ansible":
+            templar = Templar(loader=self.loader, variables = context)
+            
+            try:
+                out = templar.template(template)
+            except Exception as error:
+                if str(error)[0:30] == "'dict object' has no attribute":
+                    out = None
+                elif str(error)[0:30] == "'list object' has no attribute":
+                    out = None
+                else:
+                    out = error
+                    print("[ERROR] error while jinja_ansible rendering value, error was: " + str(error))
+        else:
+            tenv = Environment(loader=self.loader)
+            mplate = tenv.from_string(template)
+            try:
+                out_str =  mplate.render(**context)
+            except Exception as error:
+                if str(error)[0:30] == "'dict object' has no attribute":
+                    out = out_str =""
+                elif str(error)[0:30] == "'list object' has no attribute":
+                    out = out_str =""
+                elif self.item_name == "":
+                    out = out_str =""
+                else:
+                    out = error
+                    print("[ERROR] error while jinja_native rendering value, error was: " + str(error))
+                    exit(1)
+            if out_str == "":
+                out = None
+            else:
+                try:
+                    expr = ast.parse(out_str, mode='eval').body
+                    expr_type = expr.__class__.__name__
+                    if expr_type == 'List' or expr_type == 'Dict':
+                        out =  ast.literal_eval(mplate.render(**context))
+                    elif expr_type == 'Name':
+                        out = out_str
+                    else:
+                        out = str(out_str)
+                except:
+                    out = out_str
+        return out
+
+    
+    def render_table(self,dataset,select=[],item_name = '',context={}):
         if len(select) > 0:
             expressions = [expressions['expr'] for expressions in select]
             fields_label = [fields_label['as'] for fields_label in select]
         else:
             fields = path_auto_discover().discover_paths(dataset)
             fields_label = list(map(lambda item: '.'.join(item), fields))
-            expressions = list(map(lambda item:  'item[\'' + '\'][\''.join(item) + '\']' , fields))
+            # expressions = list(map(lambda item:  'item[\'' + '\'][\''.join(item) + '\']' , fields))
+            item_name = 'item' if item_name == '' else item_name
+            expressions = list(map(lambda item:  item_name + '[\'' + '\'][\''.join(item) + '\']' , fields))
             
         if type(dataset) is dict:
             dataset_to_cover = []
@@ -125,9 +286,10 @@ class jtable_cls:
         elif type(dataset) is list:
             dataset_to_cover = dataset
         else:
-            print('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
+            # print('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
             print(dataset)
-            exit(2)
+            raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
+
             
         for item in dataset_to_cover:
             row = []
@@ -135,7 +297,11 @@ class jtable_cls:
             row_index = 0
             for expr in expressions:
                 jinja_expr = '{{ ' + expr  + ' }}'
-                value_for_json = value = self.jinja_render_value( template = jinja_expr, context = { 'item': item } )
+                loop_context = { item_name: item } if item_name != '' else item
+                context = { **context, **loop_context, **self.dataset}
+                # print(context)
+                # exit(0)
+                value_for_json = value = self.jinja_render_value( template = jinja_expr, context = context )
 
                 if value_for_json != None:
                     key = fields_label[row_index]
@@ -159,121 +325,19 @@ class jtable_cls:
         self.th = fields_label
             
         try:
-            json_content = json.dumps(self.json)
+            self.json_content = json.dumps(self.json)
         except Exception as error:
 
             print(tabulate(self.td,self.th))
             print("\nERROR!!  sometinh wrong with json rendering, tabme maight contains the error \nErrors was:")
             print(error)
             exit(2)
-            
-        out_return = {
-            "th": self.th,
-            "td": self.td,
-            "text": tabulate(self.td,self.th),
-            "json": json_content
-        }
-        return out_return
-    
-
-    def jinja_render_value(self,template,context):
-        if self.render == "jinja_ansible":
-            templar = Templar(loader=self.loader, variables = context)
-            
-            try:
-                out = templar.template(template)
-            except Exception as error:
-                if str(error)[0:30] == "'dict object' has no attribute":
-                    out = None
-                elif str(error)[0:30] == "'list object' has no attribute":
-                    out = None
-                else:
-                    out = error
-                    print("error while rendering value, error was: " + str(error))
-        else:
-            tenv = Environment(loader=self.loader)
-            mplate = tenv.from_string(template)
-            try:
-                out_str =  mplate.render(**context)
-            except Exception as error:
-                if str(error)[0:30] == "'dict object' has no attribute":
-                    out = out_str =""
-                elif str(error)[0:30] == "'list object' has no attribute":
-                    out = out_str =""
-                else:
-                    out = error
-                    print("error while rendering value, error was: " + str(error))
-            if out_str == "":
-                out = None
-            else:
-                try:
-                    expr = ast.parse(out_str, mode='eval').body
-                    expr_type = expr.__class__.__name__
-                    if expr_type == 'List' or expr_type == 'Dict':
-                        out =  ast.literal_eval(mplate.render(**context))
-                    elif expr_type == 'Name':
-                        out = out_str
-                    else:
-                        out = str(out_str)
-                except:
-                    out = out_str
-        return out
-
-    def path_pickup(self,dataset,path,current_path="dataset"):
-        floor = path[0]
-        print(path)
-        # print('debug path count: ' + str(len(path)))
-        # print(path[:-1])
-        context = {}
-        if floor[:3] == "['{":
-            action = "store_object"
-            object_name = floor[3:-3]
-        elif floor[:2] == "['":
-            action = "cross_dict"
-            object_name = floor[2:-2]
-        elif floor[:1] == "[":
-            action = "cross_list"
-            object_name = floor[1:-1]
-        
-        current_path =  current_path + floor
-        
-        print('debug action: ' + action )
-        print('debug object_name: ' + object_name )
-        print('debug current_path: ' + current_path )
-        current_data = self.jinja_render_value( template = "{{" + current_path + "}}", context = {'dataset': dataset} )
-        print('debug current_data: ' + str(current_data) )
-        
-        if len(path) > 1:
-            next_path = path[:-1]
-            print('debug path: ' + str(path))
-            print('debug next_path: ' + str(next_path))
-            self.path_pickup(dataset=current_data,path=next_path)
-        
-        # if floor[:3] == "['{":
-        #     store_namespace=(floor[3:-3])
-        #     context = { **context, ** {store_namespace: current_data }}
-        #     current_data = self.jinja_render_value( template = "{{" + floor + "}}",context = {'dataset': dataset})
-        # else:
-        #     current_data = self.jinja_render_value( template = "{{" + floor + "}}",context = {'dataset': dataset})
-        #     self.path_pickup()
-            
-        
-        
-            # current_data = self.jinja_render_value( template = "{{" + current_path + "}}",context = {'dataset': dataset})
-            # print(current_data)
-        # self.dataset_to_cover = current_data
-        
-
-
-
-
 class FilterModule(object):
 
   def filters(self):
     return {
       'jtable': ansible_filter
     }
-
 
 
 class path_auto_discover:
@@ -301,65 +365,91 @@ class path_auto_discover:
         
         # when input is dict transform as list like dict2items
         if type(dataset) is dict:
-            the_list = []
+            dataset_as_list = []
             for key,value in dataset.items():
-                the_list = the_list + [ {'key': key, 'value': value} ]
-            self.discover_paths(the_list)
-        # then call itself because dataset is sure a list
-        elif type(dataset) is list:
-            index=0
-            for item in dataset:
-                for key,value in item.items():
-                    self.cover_paths(value,[str(index),key])
-                    index+=1
-                self.raw_rows = self.raw_rows + [ item ]
+                dataset_as_list = dataset_as_list + [ {'key': key, 'value': value} ]
+            dataset = dataset_as_list
+            
+        index=0
+        for item in dataset:
+            for key,value in item.items():
+                self.cover_paths(value,[str(index),key])
+                index+=1
+            self.raw_rows = self.raw_rows + [ item ]
 
         return self.fields
 
-
-
-
-
-
-
-
-
 class path_splitter:
-    def __init__(self):
-        self.opened_bracketed_paths = []
-        self.closed_bracketed_paths = []
-        self.dotted_paths = []
 
-    def crunch_path(self,path):
-        opened_bracketed_paths = self.crunch_opened_braket_paths(path)
-        for opened_bracketed_path in opened_bracketed_paths:
-          self.crunch_closed_braket_paths(opened_bracketed_path)
-            
-        return self.closed_bracketed_paths
-
-    def crunch_opened_braket_paths(self,path):
-        left_open_braket_part=re.sub(r'([^\[]]*)\[.*', r'\1', path)
-        if left_open_braket_part != "":
-            self.opened_bracketed_paths = self.opened_bracketed_paths + [ left_open_braket_part ]
-            remaining_path = path[len(left_open_braket_part):]
-            self.crunch_opened_braket_paths(remaining_path)
-        return self.opened_bracketed_paths
-    
-    def crunch_closed_braket_paths(self,path):
-        first_char = path[0]
-        if first_char == "[":
-            left_closed_braket_part=re.sub(r'([^\]]*\]).*', r'\1', path)
-            self.closed_bracketed_paths = self.closed_bracketed_paths + [ left_closed_braket_part ]
-            
-            remaining_path = path[len(left_closed_braket_part):]
-            if remaining_path != "":
-                self.crunch_closed_braket_paths(remaining_path)
-        else:
-            for splitted_path in path.split('.') :
-                if splitted_path != "":
-                    surrounded_key = "['"+ splitted_path + "']"
-                    self.closed_bracketed_paths = self.closed_bracketed_paths + [ surrounded_key ]
+    def cover_path(self,path=""):
+        if len(path) > 0:
+            if path[0:2] == "['":
+                if "']" in path:
+                    left_part = path[2:].split("']")[0]
+                    if left_part == "":
+                        print("Error dict expression empty, starting at " + str("".join(self.path_list)) )
+                    else:
+                        left_part = "['" + left_part + "']"
+                        remaining_path = path[len(left_part):]
+                        self.path_list = self.path_list + [ left_part ]
+                        if remaining_path != "":
+                            self.cover_path(remaining_path)
+                        
+                else:
+                    print('error expect "\']" was not found')
+                    exit(1)
+                
+            if path[0] == ".":
+                left_part = re.sub(r'^([^[^{]*).*',r'.\1',path[1:])
+                remaining_path = path[len(left_part):]
+                self.path_list = self.path_list + [ left_part ]
+                if remaining_path != "":
+                    self.cover_path(remaining_path)
+                
+            elif path[0] == "{":
+                if "}" in path:
+                    left_part = re.sub(r'^([^}]*).*',r'\1}',path)
+                    remaining_path = path[len(left_part):]
+                    self.path_list = self.path_list + [ left_part ]
+                    if remaining_path != "":
+                        self.cover_path(remaining_path)
+                else:
+                    print('error expect "}" was not found')
+                    exit(1)
                     
+            elif path[0] == "[":
+                if "]" in path:
+                    left_part = re.sub(r'^([^]]*).*',r'\1]',path)
+                    remaining_path = path[len(left_part):]
+                    self.path_list = self.path_list + [ left_part ]
+                    if remaining_path != "":
+                        self.cover_path(remaining_path)
+                else:
+                    print('error expect "}" was not found')
+                    exit(1)
+                    
+            else:
+                if path == "" or path[0:2] == "['" or path[0] == "{" or path[0] == ".":
+                    pass
+                else:
+                    print(path[0:2])
+                    print('Error what know to do with ' + path)
+                    print('Error hapenned there ' + ''.join(self.path_list))
+                    exit(1)
+
+    def extract_var_from_path(self,path):
+        if len(path) > 0:
+            left_part = re.sub(r'^([^[^\.^{]*).*',r'\1',path)
+            self.path_list = [ "['" + left_part + "']" ]
+            remaining_path = path[len(left_part):]
+            return remaining_path
+    
+    def split_path(self,path=""):
+        remaining_path = self.extract_var_from_path(path)
+        # print('debug remaining_path: ' + remaining_path)
+        self.cover_path(remaining_path)
+        return self.path_list
+
 
 if __name__ == '__main__':
     jtable_cli().parse_args()
