@@ -44,5 +44,5 @@ template = open(template_file_name, 'r').read()
 loader = DataLoader()
 templar = Templar(loader=loader,variables = dataset )
 table_object = templar.template(template)
-print(table_object['text'])
+print(table_object)
 

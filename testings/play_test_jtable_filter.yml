@@ -1,0 +1,52 @@
+- hosts: localhost
+  gather_facts: no
+  vars:
+    hosts:
+      - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_3"}  }
+      - { hostname: host_2, os: linux1, cost: 200, state: alive }
+      - { hostname: host_3, os: windows, cost: 200, state: alive }
+      - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+      - { hostname: host_5, os: windows, cost: 5000, state: decom, ips: [] }
+    cloud:
+      - { hostname: cloud_1, os: linux, cost: 5000, state: "a\nlive",service: {name: bob\njackgregegegergergre} }
+      - { hostname: cloud_2, os: linux1, cost: 200, state: alive }
+      - { hostname: cloud_3, os: windows, cost: 200}
+      - { hostname: cloud_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+      - { hostname: cloud_5, os: windows, cost: 5000, state: decom, ips: [] }
+    datacenter:
+      dc_a: [{ hostname: host_a_1,os: linux, cost: 5000, state: alive }, { hostname: host_a_2,os: linux1, cost: 200, state: alive }]
+      dc_b: [{ hostname: host_b_1,os: linux1, cost: 200, state: alive }]
+      dc_c: [{ hostname: host_c_1,os: windows, cost: 200, state: alive }]
+      dc_d: [{ hostname: host_d_1,os: windows, cost: 5000 }]
+      #, ips: ['192.168.1.1','192.168.1.2'] }
+    transform:
+      linux: super_os
+
+  tasks:
+
+
+      
+  - debug:
+      msg: "{{ datacenter | jtable(select=select,path=path) }}"
+    vars:
+      path: "stdin{dc}{}"
+      select:
+      - as: dc
+        expr: "dc.key"
+      - as: the hostname
+        expr: "hostname"
+      - as: cost
+        expr: "cost * 2"
+      
+        
+      # - as: os
+      #   expr: item.os | replace("linux", "youpi")
+
+  # - debug:
+  #     msg: "{{ (lookup('file', '../dataset.yml') | from_yaml).host | jtable(select) }}"
+  #   vars:
+  #     select: "{{ (lookup('file', 'jtable_query_sample.yml') | from_yaml).select }}"
+
+        
+
+

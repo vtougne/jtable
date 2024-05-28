@@ -1,0 +1,11 @@
+host_1:
+  os: linux
+  cost: 5000
+  state: alive
+host_2:
+  os: linux,
+  cost: 200
+  state: alive
+host_3:
+  os: linux,
+  state: unreachable
