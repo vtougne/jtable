@@ -1,3 +1,3 @@
-import jtable.cli
+import jtable
 
-jtable.cli.main()
+jtable.main()
