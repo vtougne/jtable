@@ -23,7 +23,7 @@ else:
 
 
 if args.output:
-    outfile = open(args.output, "w")
+    outfile = open(args.output, "w", encoding='utf-8')
     outfile.write("[[_TOC_]]\n")
 
 with open(play_doc_book_file_name, 'r') as input_yaml:
