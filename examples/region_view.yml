@@ -1,0 +1,11 @@
+select:
+- as: dc name
+  expr: dc.key
+- as: region
+  expr: region.value.region_name
+- as: hostname
+  expr: hostname
+- as: hostname
+  expr: os
+- as: hostname
+  expr: state
