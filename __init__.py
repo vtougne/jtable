@@ -1,1 +1,0 @@
-from .jtable import JtableCls
