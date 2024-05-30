@@ -1,3 +1,0 @@
-import jtable
-
-jtable.main()
