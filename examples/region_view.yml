@@ -2,10 +2,10 @@ select:
 - as: dc name
   expr: dc.key
 - as: region
-  expr: region.value.region_name
+  expr: region.key
 - as: hostname
-  expr: hostname
-- as: hostname
-  expr: os
-- as: hostname
-  expr: state
+  expr: host.hostname
+- as: os
+  expr: host.os
+- as: state
+  expr: host.state

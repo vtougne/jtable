@@ -158,7 +158,7 @@
   box_as: yaml
   collapse: the dataset
 
-- play_cmd: 'cat region_dataset.yml | jtable -p "stdin.regions{region}.dc{dc_name}{host}" -q region_view.yml'
+- play_cmd: 'cat region_dataset.yml | jtable -p "stdin.regions{region}.dc{dc}{host}" -q region_view.yml'
   collapse: command & output
 
 - eval_cmd: cat region_view.yml

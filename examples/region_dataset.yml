@@ -1,6 +1,5 @@
 regions:
   west coast:
-    region_name: truc
     dc:
       dc_a: 
         - { hostname: host_a_1, os: linux, state: alive }

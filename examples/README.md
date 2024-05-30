@@ -537,7 +537,6 @@ select:
 ```yaml
 regions:
   west coast:
-    region_name: truc
     dc:
       dc_a: 
         - { hostname: host_a_1, os: linux, state: alive }
@@ -565,12 +564,23 @@ regions:
 
 command: 
 ```bash
-cat region_dataset.yml | jtable -p "stdin.regions{region}.dc{dc_name}{host}" -q region_view.yml
+cat region_dataset.yml | jtable -p "stdin.regions{region}.dc{dc}{host}" -q region_view.yml
 ```
 output:
 
 ```
-💥 Something was wrong with this report
+dc name    region      hostname    os     state
+---------  ----------  ----------  -----  -----------
+dc_a       west coast  host_a_1    linux  alive
+dc_a       west coast  host_a_2    linux  unreachable
+dc_a       west coast  host_a_3    linux  alive
+dc_b       west coast  host_b_1    linux  alive
+dc_b       west coast  host_b_2    linux  alive
+dc_b       west coast  host_b_3    linux  alive
+dc_c       east        host_c_1    linux  alive
+dc_c       east        host_c_2    linux  alive
+dc_c       east        host_c_3    linux  alive
+
 ```
 </details>
 
@@ -584,13 +594,13 @@ select:
 - as: dc name
   expr: dc.key
 - as: region
-  expr: region.value.region_name
+  expr: region.key
 - as: hostname
-  expr: hostname
-- as: hostname
-  expr: os
-- as: hostname
-  expr: state
+  expr: host.hostname
+- as: os
+  expr: host.os
+- as: state
+  expr: host.state
 ```
 </details>
 
@@ -647,29 +657,7 @@ ansible-playbook ansible_playbook_example.yml
 output:
 
 ```bash
-[WARNING]: Unable to parse /tmp/ansible_inventory.txt as an inventory source
-[WARNING]: No inventory was parsed, only implicit localhost is available
-[WARNING]: provided hosts list is empty, only localhost is available. Note that
-the implicit localhost does not match 'all'
-
-PLAY [localhost] ***************************************************************
-
-TASK [debug] *******************************************************************
-ok: [localhost] => 
-  msg: |-
-    hostname    os         cost  state    service.name    ips
-    ----------  -------  ------  -------  --------------  ------------------------------
-    host_1      linux      5000  alive    service1
-                                          service_3
-    host_2      linux1      200  alive
-    host_3      windows     200  alive
-    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
-    host_5      windows    5000  decom                    []
-
-PLAY RECAP *********************************************************************
-localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-
-
+💥 Something was wrong with this report
 ```
 </details>
 
