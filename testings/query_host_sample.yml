@@ -1,0 +1,76 @@
+
+
+# vars:
+#   eval: jack
+#   feel:
+#     name: "{{ 'youhou' if host.os == 'linux' else 'bof'   }}"
+
+# path: "stdin.hosts{host}"
+
+select:
+  - as: my hostname
+    expr: hostname
+  - as: os
+    expr: os
+
+  # - as: short_env
+  #   expr: host.env
+  # - as: long_env
+  #   expr: "env_corresp.env[host.env] | default('unknown env: ' + host.env)"
+
+# select:
+#   - as: my hostname
+#     expr: host.hostname
+#   - as: os
+#     expr: host.os
+#   - as: cost
+#     expr: "'pas cher' if host.cost < 1000 else 'hyper cher'"
+#   - as: report_name
+#     expr: stdin.report_name
+
+
+  
+# select:
+#   - as: my hostname
+#     expr: "item.hostname"
+#   - as: os
+#     expr: "{ 'name': item.os }"
+#   - as: service
+#     expr: item.service
+
+
+# select:
+#   - hostname
+#   - os | replace('windows','arf' )
+#   - state | truncate(10)
+#   - "'youpi' if os == 'linux' else 'bof'"
+#   # - cost * 2 if os == "linux" else cost
+#   # - ips | first
+#   # - service.name
+#   # - transform
+
+# select:
+#   - as: hostname
+#     expr: hostname
+#   - as: os
+#     expr: os | replace('windows','arf' ) | replace('linux','youhou' )
+#   - as: ip_adresses
+#     expr: "ips | default([]) | join(', ') "
+#   - as: service_name
+#     expr: "service.name | default('none')"
+
+
+# table:
+#   select:
+#     - as: hostname
+#       expr: hostname
+#       agregate: count
+#     - as: os
+#       jexpr: |
+#         {% if os == "linux" %}
+#         {{   'youpi' }}
+#         {% else %}
+#         {{   'arf' }}
+#         {% endif %}
+
+    

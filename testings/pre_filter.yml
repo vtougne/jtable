@@ -1,0 +1,18 @@
+facts:
+  # host_filtered: "{{ stdin.host_list }}"
+  host_filtered: "{{ stdin.host_list | selectattr('os','==','linux') | list }}"
+
+path: "host_filtered{host}"
+select:
+  - as: my hostname
+    expr: host.hostname
+  - as: os
+    expr: host.os
+  - as: states
+    expr: host.state
+
+
+
+
+
+# out: "{{ host_list | jtable(select=select) }}"

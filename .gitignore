@@ -1,0 +1,4 @@
+lab/
+build/
+jtable.egg-info/
+**/__pycache__
