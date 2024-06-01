@@ -1,0 +1,206 @@
+- text: |
+      ## Overview  
+      - jtable helps you to render table from key / lists / values sources like json, yaml, and Python objects.  
+      - It works as a cli in a shell and as a Jinja filter that may be integrated in a Python framework like Ansible, Django, Flask and others  
+      ## Simple usage
+
+- name: "json coming from curl"
+  play_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p books
+  box_as: text
+  collapse: command & output
+
+- eval_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json
+  box_as: json
+  collapse: json returned by curl cmd
+  
+- text: |
+    ### display a list of dictionnaries as a table
+    Considering the following dataset you want to display as a table  
+
+- eval_cmd: cat host_list_of_dict.yml
+  text: "```file: host_list_of_dict.yml```"
+  box_as: yaml
+  collapse: dataset sample
+
+- play_cmd: cat host_list_of_dict.yml  | jtable
+  box_as: text
+  collapse: command & output
+
+
+- name: display dictionnaries of dictionnaries as a able
+  play_cmd: cat host_dict_of_dict.yml  | jtable
+  box_as: text
+  collapse: command & output
+
+- text: |
+    ## Use path  
+    This argument allow you accessing  your dataset when located under a key or a list  
+    example when datset under a key:  
+
+
+- eval_cmd: cat host_list_of_dict_in_key.yml
+  text: "```host_list_of_dict_in_key.yml```"
+  box_as: yaml
+  collapse: dataset sample
+
+
+- name: access to key in path
+  play_cmd: cat host_list_of_dict_in_key.yml  | jtable -p hosts
+  box_as: text
+  collapse: command & output
+
+
+- text: |
+    ### Inspect Option
+    Here is what would look to if the path is omitted:  
+
+- play_cmd: cat host_list_of_dict_in_key.yml | jtable
+  box_as: text
+  collapse: command & output
+
+- text: |
+    It looks to nothing... :)  
+    Here is the way to inspect what is inside your dataset.  
+    All paths are covered until meeting a value, the path is display on the lef and the value on the right.
+
+- name: Inspect dataset command
+  play_cmd: cat host_list_of_dict_in_key.yml  | jtable --inspect
+  box_as: text
+  collapse: command & output
+
+- text: |
+    <!-- -->  
+    > as you can see a new key appeared: **stdin**. This is because you can add more context / input in your table:  
+      stdin represent the variable contained in the piped input  
+    So, the following acceped command:  
+    ```
+    cat host_list_of_dict_in_key.yml  | jtable -p hosts
+    ```
+    Should writtend as this:  
+    ```
+    cat host_list_of_dict_in_key.yml  | jtable -p stdin.hosts
+    ```
+    and in fact should be written as this, but the previous notations are accepted for filitating.
+    ```
+    cat host_list_of_dict_in_key.yml  | jtable -p stdin.hosts{}
+    ```
+    What can be done with "stdin" and "{}" will be explained in exxtended path usage section.
+    If the key targeted in the path contains space, consindering the key "host properties" the syntaxe would be:  
+    #### Example with key contaning space and dataset in a deep path
+
+- eval_cmd: cat key_containing_space.yml
+  box_as: yaml
+  collapse: dataset sample
+
+- play_cmd: "cat key_containing_space.yml | jtable -p \"region.East['Data Center'].dc_1.hosts\""
+  collapse: command & output
+
+- text: "## Use query set"
+- text: "if you want to hode, show a given filter you have to build a query file"
+- text: "### Query file sample:"
+
+- eval_cmd: cat host_list_of_dict_in_key.yml
+  box_as: yaml
+  collapse: dataset sample
+
+- play_cmd: "cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml"
+  collapse: command & output
+
+
+- text: |
+    ## Transform table content using Jinja  
+    Your data may not arrived exatcly how you want to represent them.  
+    In fact they never arrived as you want.  
+    The following example transform the uptime coming in seconds to days
+
+- name: Transform uptime coming in seconds to days
+  eval_cmd: cat uptime_dataset.yml
+  box_as: yaml
+  collapse: the dataset
+
+- eval_cmd: cat uptime_view.yml
+  box_as: yaml
+  collapse: the query
+
+- play_cmd: cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
+  collapse: command & output
+
+- text: |
+    ## Use variables in your query file
+    this will helps to make mapping table, or behalf like view
+
+- name: Use variables mapping table or view
+  eval_cmd: cat uptime_view_with_vars.yml
+  box_as: yaml
+  collapse: the query
+
+- play_cmd: cat uptime_dataset.yml | jtable -p hosts -q uptime_view_with_vars.yml
+  collapse: command & output
+
+- text: |
+    ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
+    This feature will help you for the suite describe after to add more context in your  
+    and avoid your variable coming from your input and the ones present.
+
+- name: Store data in a namespace using path syntaxe stdin.hosts{```item```}
+  text: |
+    ```
+    cat uptime_dataset.yml | jtable -p "stdin.hosts{host}" -q name_incoming_attribute.yml
+    ```
+  collapse: The command
+
+- eval_cmd: cat name_incoming_attribute.yml
+  box_as: yaml
+  collapse: the query
+
+- name: 'store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"'
+  eval_cmd: cat region_dataset.yml
+  box_as: yaml
+  collapse: the dataset
+
+- play_cmd: 'cat region_dataset.yml | jtable -p "stdin.regions{region}.dc{dc}{host}" -q region_view.yml'
+  collapse: command & output
+
+- eval_cmd: cat region_view.yml
+  box_as: yaml
+  collapse: the query
+
+# - play_cmd: 'cat uptime_dataset.yml | jtable -p "stdin.hosts{host}" -q name_incoming_attribute.yml'
+#   collapse: command & output
+
+- text: "## Use jtable with Ansible"
+- text: "The plabybook"
+
+- eval_cmd: cat ansible_playbook_example.yml
+  box_as: yaml
+
+- play_cmd: 'ansible-playbook ansible_playbook_example.yml'
+  collapse: command & output
+  box_as: bash
+
+- text: "## Load multiple files"
+
+- text: "Considering the files below returned by ```ls -1 data/*/*/config.yml```"
+  eval_cmd: "ls -1 data/*/*/config.yml"
+
+- text: cat data/dev/it_services/config.yml
+  eval_cmd: cat data/dev/it_services/config.yml
+
+
+- play_cmd: 'jtable -jfs "{input}:data/*/*/config.yml" -p input{file}.content -q load_multi_json_queryset.yml'
+  collapse: command & output
+  box_as: bash
+
+- box_as: yaml
+  eval_cmd: cat load_multi_json_queryset.yml
+  collapse: The query
+
+- text: "# Embded filters"
+
+- name: strf_time
+- box_as: yaml
+  eval_cmd: cat strf_time_example.yml
+  collapse: dataset & query
+
+- play_cmd: jtable -q strf_time_example.yml
+  collapse: command & output

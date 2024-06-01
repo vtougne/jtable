@@ -1,0 +1,5 @@
+select:
+  - as: host
+    expr: hostname
+  - as: os type
+    expr: os
