@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
             'console_scripts': [
-                'jtable=jtable:main',
+                'jtable=jtable.jtable:main',
             ],
         },
 

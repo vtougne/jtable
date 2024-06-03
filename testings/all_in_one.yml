@@ -16,8 +16,8 @@ select:
     expr: host.state
   - as: env
     expr: "env_corresp[host.env] | default('unknown env, was: ' + host.env)"
-  - as: is_list
-    expr: "[host.os] | is_list"
+  - as: type_debug
+    expr: "host.os | type_debug"
 
 
 

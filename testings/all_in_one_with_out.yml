@@ -1,14 +1,14 @@
 context:
   host_list:
-    - { hostname: host_1, os: linux, cost: 5000, state: alive, env: qua  }
     - { hostname: host_2, os: linux, cost: 200, env: test }
+    - { hostname: host_1, os: linux, cost: 5000, state: alive, env: qua  }
     - { hostname: host_3, os: linux, cost: 200, state: alive, env: qua  }
   env_corresp:
     qua: qualification
-
+  host_list_sorted: "{{ host_list | sort(attribute='hostname')}}"
 
 queryset:
-  path: "host_list{host}"
+  path: "host_list_sorted{host}"
   select:
     - as: my hostname
       expr: host.hostname
@@ -18,15 +18,12 @@ queryset:
       expr: host.state
     - as: env
       expr: "env_corresp[host.env] | default('unknown env, was: ' + host.env)"
-    - as: is_list
-      expr: "[host.os] | is_list"
+    - as: type_debug
+      expr: "host.os | type_debug"
   views:
-    uptime_in_days: "{{ host.uptime_seconds / 60 / 60 / 24 }}"
+    uptime_in_days:
+      uptime_in_day: "{{ ((( uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] }}"
+  format: text
 
 
-out: "{{ host_list | jtable(select=select, path=path, views=views) }}"
-
-
-
-
-# out: "{{ host_list | jtable(select=select) }}"
+out: "{{ host_list_sorted | jtable(select=select,path=path,format=format)  }}"
