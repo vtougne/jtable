@@ -12,7 +12,7 @@
 - eval_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json
   box_as: json
   collapse: json returned by curl cmd
-  
+
 - text: |
     ### display a list of dictionnaries as a table
     Considering the following dataset you want to display as a table  

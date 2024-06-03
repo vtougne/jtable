@@ -657,7 +657,25 @@ ansible-playbook ansible_playbook_example.yml
 output:
 
 ```bash
-💥 Something was wrong with this report
+
+PLAY [localhost] ***************************************************************
+
+TASK [debug] *******************************************************************
+ok: [localhost] => 
+  msg: |-
+    hostname    os         cost  state    service.name    ips
+    ----------  -------  ------  -------  --------------  ------------------------------
+    host_1      linux      5000  alive    service1
+                                          service_3
+    host_2      linux1      200  alive
+    host_3      windows     200  alive
+    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
+    host_5      windows    5000  decom                    []
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
 ```
 </details>
 
@@ -764,7 +782,7 @@ select:
   - as: order_date
     expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
   - as: strftime 
-    expr: "  (order_date|to_datetime).strftime('%s') "
+    expr: "  (order_date|to_datetime).strftime('%S') "
 ```
 </details>
 
@@ -782,10 +800,10 @@ output:
 ```
 hostname    os       cost  state      order_date    strftime
 ----------  -----  ------  -------  ------------  ----------
-host_1      linux    5000  alive     2.02032e+07  1471204812
-host_2      linux     200  alive     2.02032e+07  1471204812
-host_3      linux     200  alive     2.02032e+07  1487016012
-host_3      linux     200  alive     2.02032e+07  1536933612
+host_1      linux    5000  alive     2.02032e+07          12
+host_2      linux     200  alive     2.02032e+07          12
+host_3      linux     200  alive     2.02032e+07          12
+host_3      linux     200  alive     2.02032e+07          12
 
 ```
 </details>

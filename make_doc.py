@@ -8,6 +8,7 @@ import argparse
 parser = argparse.ArgumentParser(description='play play_doc and render memaid')
 parser.add_argument("-i", "--input", help = "cmd and doc playlist")
 parser.add_argument("-o", "--output", help = "gitlab mermaid format")
+parser.add_argument("--halt", action="store_true", help="inspect stdin")
 
 args = parser.parse_args()
 
@@ -91,6 +92,9 @@ for play_doc in play_doc_book:
                 if is_play_cmd:
                     out_err = "output:\n" + out_err
                 outfile.write(out_err)
+            if args.halt:
+                exit(1)
+                
         else:
             # print("Output: \n{}\n".format(output))
             print(output)

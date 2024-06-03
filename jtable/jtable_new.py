@@ -64,7 +64,7 @@ logging.config.dictConfig(logging_config)
 class Filters:
     def jtable(dataset,select=[],path="stdin{}",format="text"):
         # from jtable import JtableCls
-        # logging.info(f"select: {select}")
+        logging.info(f"select: {select}")
         return JtableCls(render="jinja_ansible").render_object({"stdin": dataset},path=path, select=select)[format]
     def from_json(str):
         return json.loads(str)
@@ -138,7 +138,7 @@ class JtableCli:
         format = "text"
         vars = {}
         facts = {}
-        query_set = {}
+        queryset = {}
         input_path_var_name="stdin"
         if 'JTABLE_RENDER' in os.environ:
             render=os.environ['JTABLE_RENDER']
@@ -162,16 +162,19 @@ class JtableCli:
         
         if args.query_file:
             with open(args.query_file, 'r') as file:
-                query_set = yaml.safe_load(file)
+                query_file = yaml.safe_load(file)
                 
-        if 'vars' in query_set:
-            vars = query_set['vars']
-        if 'select' in query_set:
-            select = query_set['select']
-        if 'path' in query_set:
-            self.path = query_set['path']
+        if 'views' in query_file['queryset']:
+            queryset['views'] = query_file['queryset']['views']
+        if 'select' in query_file['queryset']:
+            queryset['select'] = query_file['queryset']['select']
+        if 'path' in query_file['queryset']:
+            queryset['path'] = query_file['queryset']['path']
+        if 'format' in query_file['queryset']:
+            queryset['format'] = query_file['queryset']['format']
 
-
+        # logging.info(f"queryset: {queryset}")
+        # exit(0)
         is_pipe = not isatty(sys.stdin.fileno())
 
         stdin=""
@@ -262,9 +265,9 @@ class JtableCli:
             print(tbl)
             exit(0)
 
-        if 'facts' in query_set:
+        if 'context' in query_file:
             facts = {}
-            for key,value in query_set['facts'].items():
+            for key,value in query_file['context'].items():
                 jinja_eval = JtableCls().jinja_render_value(str(value),self.dataset)
                 facts.update({key: jinja_eval})
                 self.dataset = {**self.dataset,**facts}
@@ -278,8 +281,8 @@ class JtableCli:
                 self.path = list(self.dataset)[0]
             
         # out_expr = "{{ stdin | jtable(select=select) }}"
-        if 'out' in query_set:
-            out_expr = query_set['out']
+        if 'out' in query_file:
+            out_expr = query_file['out']
             out = JtableCls().jinja_render_value(str(out_expr),self.dataset)
         else:
             out = JtableCls(render=render).render_object(dataset=self.dataset,path=self.path,select=select,vars=vars)[format]
@@ -420,8 +423,8 @@ class JtableCls:
                     out = out_str =""
                 else:
                     out = error
-                    logging.error("Failed while jinja_native rendering value, context was: " + str(context) + "\n" )
-                    logging.error("Failed error while rendering context: \nb" + str(error) + "\n" )
+                    logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
+                    logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
                     exit(1)
             if out_str == "":
                 out = None
