@@ -92,6 +92,7 @@ for play_doc in play_doc_book:
                 if is_play_cmd:
                     out_err = "output:\n" + out_err
                 outfile.write(out_err)
+                print(out_err)
             if args.halt:
                 exit(1)
                 

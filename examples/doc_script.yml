@@ -63,30 +63,10 @@
     Here is the way to inspect what is inside your dataset.  
     All paths are covered until meeting a value, the path is display on the lef and the value on the right.
 
-- name: Inspect dataset command
+- name: Inspect inputs command
   play_cmd: cat host_list_of_dict_in_key.yml  | jtable --inspect
   box_as: text
   collapse: command & output
-
-- text: |
-    <!-- -->  
-    > as you can see a new key appeared: **stdin**. This is because you can add more context / input in your table:  
-      stdin represent the variable contained in the piped input  
-    So, the following acceped command:  
-    ```
-    cat host_list_of_dict_in_key.yml  | jtable -p hosts
-    ```
-    Should writtend as this:  
-    ```
-    cat host_list_of_dict_in_key.yml  | jtable -p stdin.hosts
-    ```
-    and in fact should be written as this, but the previous notations are accepted for filitating.
-    ```
-    cat host_list_of_dict_in_key.yml  | jtable -p stdin.hosts{}
-    ```
-    What can be done with "stdin" and "{}" will be explained in exxtended path usage section.
-    If the key targeted in the path contains space, consindering the key "host properties" the syntaxe would be:  
-    #### Example with key contaning space and dataset in a deep path
 
 - eval_cmd: cat key_containing_space.yml
   box_as: yaml
@@ -95,9 +75,17 @@
 - play_cmd: "cat key_containing_space.yml | jtable -p \"region.East['Data Center'].dc_1.hosts\""
   collapse: command & output
 
-- text: "## Use query set"
-- text: "if you want to hode, show a given filter you have to build a query file"
+- text: "## Use query file"
+- text: "if you want to hide, show a given filter you have to build a query file"
+- text: "You can display the query and redirect it to a given file using the following option:"
+
+- name: view_query option
+  play_cmd: "cat key_containing_space.yml | jtable -p \"region.East['Data Center'].dc_1.hosts\" --view_query"
+  box_as: yaml
+  collapse: command & output
+
 - text: "### Query file sample:"
+
 
 - eval_cmd: cat host_list_of_dict_in_key.yml
   box_as: yaml
@@ -134,7 +122,7 @@
   box_as: yaml
   collapse: the query
 
-- play_cmd: cat uptime_dataset.yml | jtable -p hosts -q uptime_view_with_vars.yml
+- play_cmd: cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
   collapse: command & output
 
 - text: |
@@ -145,7 +133,7 @@
 - name: Store data in a namespace using path syntaxe stdin.hosts{```item```}
   text: |
     ```
-    cat uptime_dataset.yml | jtable -p "stdin.hosts{host}" -q name_incoming_attribute.yml
+    cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
     ```
   collapse: The command
 
@@ -158,7 +146,7 @@
   box_as: yaml
   collapse: the dataset
 
-- play_cmd: 'cat region_dataset.yml | jtable -p "stdin.regions{region}.dc{dc}{host}" -q region_view.yml'
+- play_cmd: 'cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view.yml'
   collapse: command & output
 
 - eval_cmd: cat region_view.yml
@@ -187,7 +175,7 @@
   eval_cmd: cat data/dev/it_services/config.yml
 
 
-- play_cmd: 'jtable -jfs "{input}:data/*/*/config.yml" -p input{file}.content -q load_multi_json_queryset.yml'
+- play_cmd: 'jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_queryset.yml'
   collapse: command & output
   box_as: bash
 

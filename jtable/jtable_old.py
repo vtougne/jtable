@@ -62,10 +62,10 @@ logging_config = {
 logging.config.dictConfig(logging_config)
 
 class Filters:
-    def jtable(dataset,select=[],path="{}",format="text",vars={}):
-        # logging.info(f"path: {path}")
-        return JtableCls().render_object( dataset,path=path, select=select,vars=vars)[format]
-        # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
+    def jtable(dataset,select=[],path="stdin{}",format="text"):
+        # from jtable import JtableCls
+        # logging.info(f"select: {select}")
+        return JtableCls(render="jinja_ansible").render_object({"stdin": dataset},path=path, select=select)[format]
     def from_json(str):
         return json.loads(str)
     def to_json(a, *args, **kw):
@@ -136,10 +136,10 @@ class JtableCli:
     def parse_args(self):
         select = []
         format = "text"
-        views = {}
+        vars = {}
         facts = {}
-        queryset = {}
-        self.tabulate_var_name="stdin"
+        query_set = {}
+        input_path_var_name="stdin"
         if 'JTABLE_RENDER' in os.environ:
             render=os.environ['JTABLE_RENDER']
         else:
@@ -156,137 +156,133 @@ class JtableCli:
         parser.add_argument("-jf", "--json_file", help = "load json")
         parser.add_argument("-jfs", "--json_files",action='append', help = "load multiple Json's")
         parser.add_argument("-yfs", "--yaml_files", help = "load multiple Yaml's")
-        parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
 
 
         args = parser.parse_args()
         
         if args.query_file:
             with open(args.query_file, 'r') as file:
-                query_file = yaml.safe_load(file)
-            if 'queryset' in query_file:
-                queryset =query_file['queryset']
+                query_set = yaml.safe_load(file)
                 
+        if 'vars' in query_set:
+            vars = query_set['vars']
+        if 'select' in query_set:
+            select = query_set['select']
+        if 'path' in query_set:
+            self.path = query_set['path']
+
+
         is_pipe = not isatty(sys.stdin.fileno())
 
         stdin=""
         if is_pipe:
             for line in sys.stdin:
                 stdin = stdin + line
-            self.dataset = { self.tabulate_var_name: yaml.safe_load(stdin) }
-            # self.dataset = yaml.safe_load(stdin)
+            self.dataset = { input_path_var_name: yaml.safe_load(stdin) }
 
         if not is_pipe and not args.json_file and not args.json_files and not args.query_file:
             args = parser.parse_args(['--help'])
             exit(0)
 
         if args.json_file:
-            self.tabulate_var_name = args.json_file.split(':')[0]
+            # err_help = "\n[ERROR] json_file must looks like this:\n\n\
+            #     jtable --json_file \"{var_name_to_store}:folder_1/*/*/config.yml\"\n"
+            input_path_var_name = args.json_file.split(':')[0]
             file_name = ':'.join(args.json_file.split(':')[1:])
             with open(file_name, 'r') as input_yaml:
-                self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
+                self.dataset = {**self.dataset, **{ input_path_var_name: yaml.safe_load(input_yaml) } }
                 
         def load_multiple_inputs(input,format):
             err_help = f"\n[ERROR] {format}_files must looks like this:\n\n\
-                jtable --{format}_files \"var_name_to_store:folder_1/*/*/config.yml\"\n"
+                jtable --json_files \"var_name_to_store:folder_1/*/*/config.yml\"\n"
             if input[0] != "{":
                 logging.error(err_help)
                 exit(1)
             else:
+                # logging.warning(input)
                 splitted_path = input[1:].split('}:')
-                self.tabulate_var_name = splitted_path[0]
-                # print(tabulate_var_name) ; exit(0)
-                path = input[len(self.tabulate_var_name) + 3 :]
+                input_path_var_name = splitted_path[0]
+                # print(input_path_var_name)
+                # exit(0)
+                path = input[len(input_path_var_name) + 3 :]
                 files_str = os.popen("ls -1 " + path).read()
                 file_list_dataset = []
-                for file_name_full_path in files_str.split('\n'):
-                    if file_name_full_path != '':
-                        with open(file_name_full_path, 'r') as input_yaml:
-                            try:
-                                file_content =  yaml.safe_load(input_yaml)
-                                file_path = "/".join(file_name_full_path.split('/')[:-1])
-                                file_name = file_name_full_path.split('/')[-1]
-                                file = { 
-                                        "name": file_name,
-                                        "path": file_path,
-                                        "content": file_content
-                                        }
-                                file_list_dataset = file_list_dataset + [{ **file }]
-                            except Exception as error:
-                                logging.error(f"fail loading file {file_name_full_path}, skipping")
-                self.dataset = {**self.dataset, **{ self.tabulate_var_name: file_list_dataset } }
+                for full_file_name in files_str.split('\n'):
+                    if full_file_name != '':
+                        with open(full_file_name, 'r') as input_yaml:
+                            file_content =  yaml.safe_load(input_yaml)
+                            file_path = "/".join(full_file_name.split('/')[:-1])
+                            file_name = full_file_name.split('/')[-1]
+                            file = { 
+                                    "name": file_name,
+                                    "path": file_path,
+                                    "content": file_content
+                                    }
+                            file_list_dataset = file_list_dataset + [{ **file }]
+                self.dataset = {**self.dataset, **{ input_path_var_name: file_list_dataset } }
                 
         if args.json_files:
             for file in args.json_files:
-                # print(file) ; exit(0)
                 load_multiple_inputs(file,"json")
+
+        
         
         if args.json_path:
             new_path = args.json_path
+            
+            input_path_var_name  = JinjaPathSplitter().split_path(args.json_path)[0][2:-2]
+            
+            # logging.info(f'input_path_var_name: {input_path_var_name}')
             expr_end_by_braces=(re.sub('.*({).*(})$',r'\1\2',args.json_path))
+            expr_path_var_name=(re.sub('^(.{' + str(len(input_path_var_name)) + '}).*$',r'\1',args.json_path))
+            # print(expr_path_var_name) ; exit(0)
+            # logging.info(f'expr_path_var_name: {expr_path_var_name}')
+            if not expr_path_var_name in self.dataset:
+                new_path =  list(self.dataset)[0] + "." + new_path
+
             if expr_end_by_braces != "{}":
                 new_path = new_path + "{}"
-            self.path = queryset['path'] = new_path
+            self.path = new_path
+            
+        # logging.info(f'path: {self.path}')
+        # logging.info(f'self.dataset: {self.dataset}')
+
+
         
-        if 'format' in queryset:
-            format = queryset['format']
+        
+        
         if args.format:
-            queryset['format'] = args.format
+            format = args.format
+        
+
                     
-
-        if args.query_file:
-            if 'context' in query_file:
-                facts = {}
-                for key,value in query_file['context'].items():
-                    jinja_eval = JtableCls().jinja_render_value(str(value),self.dataset)
-                    facts.update({key: jinja_eval})
-                    self.dataset = {**self.dataset,**facts}
-
-        if 'select' in queryset:
-            select = queryset['select']
-
-        if not 'path' in queryset:
-            if "stdin" in self.dataset:
-                self.path = "{}"
-            else:
-                self.path = list(self.dataset)[0]
-            queryset['path'] = self.path
-                    
-        # print(queryset['path']) ; exit(0)
-        # out_expr = "{{ stdin | jtable(select=select) }}"
-        queryset['format'] = 'text'
-        if args.view_query:
-            queryset['format'] = "th"
-            
-        def out_expr_fct(select,path,format):
-            return "{{ " + self.tabulate_var_name + " | jtable(select=" + select + ",path=\"" + path + "\", format='" + format + "' ) }}"
-            
-        out_expr = out_expr_fct(str(select), self.path, queryset['format'])
-        # print(out_expr) ; exit(0)
-        if args.query_file:
-            if 'out' in query_file:
-                out_expr = query_file['out']
-            
         if args.inspect:
             inspected_paths = Inspect().view_paths(self.dataset)
             tbl = tabulate(inspected_paths,['path','value'])
             print(tbl)
             exit(0)
+
+        if 'facts' in query_set:
+            facts = {}
+            for key,value in query_set['facts'].items():
+                jinja_eval = JtableCls().jinja_render_value(str(value),self.dataset)
+                facts.update({key: jinja_eval})
+                self.dataset = {**self.dataset,**facts}
+
+        # logging.info(f"dataset: {self.dataset}")
         
-        out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
-        
-        if args.view_query:
-            query_file_out = {}
-            query_set_out = {}
-            fields = out
-            if select == []:
-                for field in fields:
-                    select = select + [ {'as': field, 'expr':field }  ]
-            query_file_out['out'] = out_expr_fct('select', self.path, 'text')
-            query_set_out['select'] = select
-            query_set_out['path'] = self.path
-            query_file_out['queryset'] = query_set_out
-            out = yaml.dump(query_file_out, allow_unicode=True)
+        if self.path == "":
+            if "stdin" in self.dataset:
+                self.path = "stdin{}"
+            else:
+                self.path = list(self.dataset)[0]
+            
+        # out_expr = "{{ stdin | jtable(select=select) }}"
+        if 'out' in query_set:
+            out_expr = query_set['out']
+            out = JtableCls().jinja_render_value(str(out_expr),self.dataset)
+        else:
+            out = JtableCls(render=render).render_object(dataset=self.dataset,path=self.path,select=select,vars=vars)[format]
             
         print(out)
         
@@ -310,8 +306,7 @@ class JtableCls:
     
     def cross_path(self,dataset,path,context={}):
         level = len(path)
-        if level > 1:
-            # logging.info(f"path: {path}")
+        if level > 0:
             next_path = path[1:]
             current_path = str(path[0])
             current_path_value = "unknown"
@@ -321,7 +316,7 @@ class JtableCls:
                 if current_path_value in list(dataset):
                     self.cross_path(dataset[current_path_value],next_path, context = context)
                 else:
-                    logging.error('keys dataset were:')
+                    logging.error('key dataset were:')
                     logging.error(list(dataset))
                     logging.error("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
                     exit(1)
@@ -345,7 +340,7 @@ class JtableCls:
             
             elif current_path[0] == "{":
                 item_name = current_path[1:-1]
-                if level > 0:
+                if level > 1:
                     if type(dataset) is dict:
                         for key,value in dataset.items():
                             next_path = path[1:]
@@ -362,29 +357,21 @@ class JtableCls:
                             self.cross_path(dataset[index],next_path,context=context)
                             index += 1
                 else:
-                    logging.info(f"item_name: {item_name}")
                     self.render_table(dataset=dataset,select=self.select, item_name = item_name, context = context)
             else:
                 print("[ERROR] was looking for path...")
                 exit(1)
         else:
-            item_name = path[0][1:-1]
-            # logging.info(f"item_name: {item_name}")
-            self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
+            self.render_table(dataset,select=self.select,context=context)
     
-    def render_object(self,dataset,path="{}",select=[],vars={}):
+    def render_object(self,dataset,path="stdin{}",select=[],vars={}):
         self.dataset = dataset
         self.select = select
         self.vars = vars
 
-        self.splitted_path = JinjaPathSplitter().split_path(path)
-        # logging.info(f"self.splitted_path: {self.splitted_path}")
-        if self.splitted_path[0] == "['']":
-            self.splitted_path[0] = "['input']"
-            # logging.info(f"self.splitted_path: {self.splitted_path}")
-            self.dataset = {"input": self.dataset}
-            
-        self.cross_path(self.dataset, self.splitted_path )
+        self.splitted_path =   JinjaPathSplitter().split_path(path)
+        
+        self.cross_path(self.dataset,self.splitted_path )
 
         out_return = {
             "th": self.th,
@@ -392,15 +379,9 @@ class JtableCls:
             "text": tabulate(self.td,self.th),
             "json": self.json_content
         }
-        
         return out_return
 
     def jinja_render_value(self,template,context):
-
-        # inspected_paths = Inspect().view_paths(context)
-        # tbl = tabulate(inspected_paths,['path','value'])
-        # print(tbl)
-        # exit(0)
         if self.render == "jinja_ansible":
             templar = Templar(loader=self.loader, variables = context)
             
@@ -439,10 +420,9 @@ class JtableCls:
                     out = out_str =""
                 else:
                     out = error
-                    logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
-                    logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
-                    # exit(1)
-                    raise out
+                    logging.error("Failed while jinja_native rendering value, context was: " + str(context) + "\n" )
+                    logging.error("Failed error while rendering context: \nb" + str(error) + "\n" )
+                    exit(1)
             if out_str == "":
                 out = None
             else:
@@ -465,7 +445,6 @@ class JtableCls:
             fields_label = [fields_label['as'] for fields_label in select]
         else:
             fields = path_auto_discover().discover_paths(dataset)
-            # print(fields) ; exit(0)
             fields_label = list(map(lambda item: '.'.join(item), fields))
             # expressions = list(map(lambda item:  'item[\'' + '\'][\''.join(item) + '\']' , fields))
             item_name = 'item' if item_name == '' else item_name
@@ -490,7 +469,6 @@ class JtableCls:
             for expr in expressions:
                 jinja_expr = '{{ ' + expr  + ' }}'
                 loop_context = { item_name: item } if item_name != '' else item
-                # logging.info(f"self.dataset: {self.dataset}")
                 context = { **context, **loop_context, **self.dataset}
                 # print(context)
                 # exit(0)
@@ -532,7 +510,7 @@ class JtableCls:
         except Exception as error:
 
             print(tabulate(self.td,self.th))
-            print("\nERROR!!  something wrong with json rendering, tabme maight contains the error \nErrors was:")
+            print("\nERROR!!  sometinh wrong with json rendering, tabme maight contains the error \nErrors was:")
             print(error)
             exit(2)
 
