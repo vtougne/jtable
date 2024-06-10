@@ -1,0 +1,16 @@
+out: '{{ stdin | jtable(select=[],path="region.East[''Data Center''].dc_1.hosts{}",
+  format=''text'' ) }}'
+queryset:
+  path: region.East['Data Center'].dc_1.hosts{}
+  select:
+  - as: hostname
+    expr: hostname
+  - as: os
+    expr: os
+  - as: cost
+    expr: cost
+  - as: state
+    expr: state
+  - as: env
+    expr: env
+
