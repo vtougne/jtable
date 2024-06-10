@@ -1,5 +1,7 @@
-select:
-  - as: hostname
-    expr: host.hostname
-  - as: os
-    expr: host.os
+
+queryset:
+  select:
+    - as: hostname
+      expr: host.hostname
+    - as: os
+      expr: host.os

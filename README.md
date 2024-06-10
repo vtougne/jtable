@@ -38,4 +38,5 @@ host_3      linux          unreachable  qua
 ```
 ## Examples
 
-[Examples](./examples/README.md)
+- [Setup](./setup/README.md)
+- [Examples](./examples/README.md)

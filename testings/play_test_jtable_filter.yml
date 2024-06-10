@@ -27,7 +27,7 @@
 
       
   - debug:
-      msg: "{{ datacenter | jtable(select=select,path=path) }}"
+      msg: "{{ datacenter | jtable(select=select,path=path,format='text') }}"
     vars:
       path: "stdin{dc}{}"
       select:

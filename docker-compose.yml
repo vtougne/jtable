@@ -27,7 +27,7 @@ services:
 
         
         # RUN ln -s /usr/bin/python3 /usr/bin/python
-        # RUN echo localhost > /tmp/ansible_inventory.txt
+        RUN echo localhost > /tmp/ansible_inventory.txt
         # RUN ln -s /project/jtable /usr/local/lib/python3.10/dist-packages/jtable
         # RUN pip install tabulate
     environment:

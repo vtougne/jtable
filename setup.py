@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="jtable",
-    version="0.6",
+    version="0.72",
     packages=find_packages(),
     install_requires=[
         'tabulate',
@@ -13,7 +13,7 @@ setup(
     ],
     entry_points={
             'console_scripts': [
-                'jtable=jtable:main',
+                'jtable=jtable.jtable:main',
             ],
         },
 
