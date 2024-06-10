@@ -1,0 +1,6 @@
+
+[
+{ "hostname": "host_dev_its_1", "os": "linux", "cost": 5000 },
+{ "hostname": "host_dev_its_2", "os": "linux", "cost": 200  },
+{ "hostname": "host_dev_its_3", "os": "win", "cost": 200  }
+]

@@ -1,13 +1,13 @@
 
-
-select:
-  - as: env
-    expr: file.path.split('/')[1]
-  - as: dept
-    expr: file.path.split('/')[2]
-  - as: hostname
-    expr: hostname
-  - as: os
-    expr: os
-  - as: cost
-    expr: cost
+queryset:
+  select:
+    - as: env
+      expr: file.path.split('/')[1]
+    - as: dept
+      expr: file.path.split('/')[2]
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost

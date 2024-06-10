@@ -15,7 +15,7 @@ pip install .
 pip install . --no-deps
 
 ```
-## Manual install externallm dependencies
+## Manual install external dependencies
   
 #### pip install tabulate
 

@@ -129,8 +129,8 @@ output:
 key     value.os      value.cost  value.state
 ------  ----------  ------------  -------------
 host_1  linux               5000  alive
-host_2  linux,               200  alive
-host_3  linux,                    unreachable
+host_2  linux                200  alive
+host_3  linux                     unreachable
 
 ```
 </details>
@@ -216,7 +216,7 @@ Here is the way to inspect what is inside your dataset.
 All paths are covered until meeting a value, the path is display on the lef and the value on the right.
 
   
-#### Inspect dataset command
+#### Inspect inputs command
 <details>
 
 <summary>command & output...........................(⬇️ Click to expand)</summary>  
@@ -248,25 +248,6 @@ stdin.hosts[2].env       qua
 
 ```
 </details>
-
-<!-- -->  
-> as you can see a new key appeared: **stdin**. This is because you can add more context / input in your table:  
-  stdin represent the variable contained in the piped input  
-So, the following acceped command:  
-```
-cat host_list_of_dict_in_key.yml  | jtable -p hosts
-```
-Should writtend as this:  
-```
-cat host_list_of_dict_in_key.yml  | jtable -p stdin.hosts
-```
-and in fact should be written as this, but the previous notations are accepted for filitating.
-```
-cat host_list_of_dict_in_key.yml  | jtable -p stdin.hosts{}
-```
-What can be done with "stdin" and "{}" will be explained in exxtended path usage section.
-If the key targeted in the path contains space, consindering the key "host properties" the syntaxe would be:  
-#### Example with key contaning space and dataset in a deep path
 
 <details>
 
@@ -319,8 +300,43 @@ host_3      linux          unreachable  qua
 ```
 </details>
 
-## Use query set
-if you want to hode, show a given filter you have to build a query file
+## Use query file
+if you want to hide, show a given filter you have to build a query file
+You can display the query and redirect it to a given file using the following option:
+  
+#### view_query option
+<details>
+
+<summary>command & output...........................(⬇️ Click to expand)</summary>  
+
+
+command: 
+```bash
+cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts" --view_query
+```
+output:
+
+```yaml
+out: '{{ stdin | jtable(select=select,path="region.East[''Data Center''].dc_1.hosts{}",
+  format=''text'' ) }}'
+queryset:
+  path: region.East['Data Center'].dc_1.hosts{}
+  select:
+  - as: hostname
+    expr: hostname
+  - as: os
+    expr: os
+  - as: cost
+    expr: cost
+  - as: state
+    expr: state
+  - as: env
+    expr: env
+
+
+```
+</details>
+
 ### Query file sample:
 <details>
 
@@ -433,11 +449,11 @@ cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
 output:
 
 ```
-host    os type    uptime in days
-------  ---------  ----------------
-host_1  linux      21 days
-host_2  linux      79 days
-host_3  linux      0 days
+hostname    os       uptime  state        env    dc
+----------  -----  --------  -----------  -----  ----
+host_1      linux   1879723  alive        qua    dc_1
+host_2              6879723  alive        qua    dc_2
+host_3      linux     23455  unreachable  qua    dc_3
 
 ```
 </details>
@@ -453,26 +469,31 @@ this will helps to make mapping table, or behalf like view
 
 
 ```yaml
-vars:
-  dc_location:
-    dc_1: East
-    dc_2: North
-  uptime_in_day: "{{ ((( uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] }}"
 
-select:
-  - as: region
-    expr: dc_location[dc]
-  - as: dc name
-    expr: dc
-  - as: host
-    expr: hostname
-  - as: os type
-    expr: os
-  - as: uptime in days
-    expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 
-      else (uptime_in_day | string ) +  ' day'"
-  - as: sanity status
-    expr: "'🔥 uptime exceed' if  uptime_in_day | int > 31 else '✅'"
+queryset:
+  path: hosts{host}
+  select:
+    - as: region
+      expr: dc_location[host.dc]
+    - as: dc name
+      expr: host.dc
+    - as: hostname
+      expr: host.hostname
+    - as: os type
+      expr: host.os
+    - as: uptime in days
+      expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 
+        else (uptime_in_day | string ) +  ' day'"
+    - as: sanity status
+      expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
+  views:
+    dc_location:
+      dc_1: East
+      dc_2: North
+    uptime_in_day: "{{ ((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] }}"
+
+
+out: "{{ stdin | jtable(select=select,vars=views,path=path)}}"
 ```
 </details>
 
@@ -483,16 +504,16 @@ select:
 
 command: 
 ```bash
-cat uptime_dataset.yml | jtable -p hosts -q uptime_view_with_vars.yml
+cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
 ```
 output:
 
 ```
-region    dc name    host    os type    uptime in days    sanity status
---------  ---------  ------  ---------  ----------------  ---------------
-East      dc_1       host_1  linux      21 days           ✅
-North     dc_2       host_2  linux      79 days           🔥 uptime exceed
-          dc_3       host_3  linux      0 day             ✅
+region    dc name    hostname    os type    uptime in days    sanity status
+--------  ---------  ----------  ---------  ----------------  --------------------
+East      dc_1       host_1      linux      21 days           ✅
+North     dc_2       host_2                 79 days           🔥 host.uptime exceed
+          dc_3       host_3      linux      0 day             ✅
 
 ```
 </details>
@@ -508,7 +529,7 @@ and avoid your variable coming from your input and the ones present.
 <summary>The command................................(⬇️ Click to expand)</summary>  
 
 ```
-cat uptime_dataset.yml | jtable -p "stdin.hosts{host}" -q name_incoming_attribute.yml
+cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
 ```
 
 </details>
@@ -519,11 +540,13 @@ cat uptime_dataset.yml | jtable -p "stdin.hosts{host}" -q name_incoming_attribut
 
 
 ```yaml
-select:
-  - as: hostname
-    expr: host.hostname
-  - as: os
-    expr: host.os
+
+queryset:
+  select:
+    - as: hostname
+      expr: host.hostname
+    - as: os
+      expr: host.os
 ```
 </details>
 
@@ -564,7 +587,7 @@ regions:
 
 command: 
 ```bash
-cat region_dataset.yml | jtable -p "stdin.regions{region}.dc{dc}{host}" -q region_view.yml
+cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view.yml
 ```
 output:
 
@@ -590,17 +613,18 @@ dc_c       east        host_c_3    linux  alive
 
 
 ```yaml
-select:
-- as: dc name
-  expr: dc.key
-- as: region
-  expr: region.key
-- as: hostname
-  expr: host.hostname
-- as: os
-  expr: host.os
-- as: state
-  expr: host.state
+queryset:
+  select:
+  - as: dc name
+    expr: dc.key
+  - as: region
+    expr: region.key
+  - as: hostname
+    expr: host.hostname
+  - as: os
+    expr: host.os
+  - as: state
+    expr: host.state
 ```
 </details>
 
@@ -697,6 +721,7 @@ cat data/dev/it_services/config.yml
 
 - { hostname: host_dev_its_1, os: linux, cost: 5000 }
 - { hostname: host_dev_its_2, os: linux, cost: 200  }
+dirty line
 - { hostname: host_dev_its_3, os: win, cost: 200  }
 
 ```
@@ -707,25 +732,23 @@ cat data/dev/it_services/config.yml
 
 command: 
 ```bash
-jtable -jfs "{input}:data/*/*/config.yml" -p input{file}.content -q load_multi_json_queryset.yml
+jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_queryset.yml
 ```
 output:
 
 ```bash
-env    dept         hostname          os       cost
------  -----------  ----------------  -----  ------
-dev    it_services  host_dev_its_1    linux    5000
-dev    it_services  host_dev_its_2    linux     200
-dev    it_services  host_dev_its_3    win       200
-dev    pay          host_dev_pay_1    linux    5000
-dev    pay          host_dev_pay_2    linux     200
-dev    pay          host_dev_pay_3    win       200
-prod   pay          host_dev_pay_22   linux    5000
-prod   pay          host_dev_pay_44   linux     200
-prod   pay          host_dev_pay_33   win       200
-qua    pay          host_qua_pay_22   linux    5000
-qua    pay          host_qua_pay_444  linux     200
-qua    pay          host_qua_pay_3R3  win       200
+16:13:37 (line 216) | ERROR fail loading file data/dev/it_services/config.yml, skipping
+env    dept    hostname          os       cost
+-----  ------  ----------------  -----  ------
+dev    pay     host_dev_pay_1    linux    5000
+dev    pay     host_dev_pay_2    linux     200
+dev    pay     host_dev_pay_3    win       200
+prod   pay     host_prd_pay_22   linux    5000
+prod   pay     host_prd_pay_44   linux     200
+prod   pay     host_prd_pay_33   win       200
+qua    pay     host_qua_pay_22   linux    5000
+qua    pay     host_qua_pay_444  linux     200
+qua    pay     host_qua_pay_3R3  win       200
 
 ```
 </details>
@@ -737,18 +760,18 @@ qua    pay          host_qua_pay_3R3  win       200
 
 ```yaml
 
-
-select:
-  - as: env
-    expr: file.path.split('/')[1]
-  - as: dept
-    expr: file.path.split('/')[2]
-  - as: hostname
-    expr: hostname
-  - as: os
-    expr: os
-  - as: cost
-    expr: cost
+queryset:
+  select:
+    - as: env
+      expr: file.path.split('/')[1]
+    - as: dept
+      expr: file.path.split('/')[2]
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost
 ```
 </details>
 
@@ -761,28 +784,31 @@ select:
 
 
 ```yaml
-facts:
+context:
   host_list:
     - { hostname: host_1, os: linux, cost: 5000, state: alive, env: '{ "env": "qua" }', order_date: "2016-08-14 20:00:12"  }
     - { hostname: host_2, os: linux, cost: 200, env: '{ "env": "test" }', order_date: "2016-08-14 20:00:12"}
     - { hostname: host_3, os: linux, cost: 200, state: alive, env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
     - { hostname: host_3, os: linux, cost: 200, state: alive, env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
 
-path: "host_list{}"
 
-select:
-  - as: hostname
-    expr: hostname
-  - as: os
-    expr: os
-  - as: cost
-    expr: cost 
-  - as: state
-    expr: state
-  - as: order_date
-    expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
-  - as: strftime 
-    expr: "  (order_date|to_datetime).strftime('%S') "
+queryset:
+  path: "{}"
+  select:
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost 
+    - as: state
+      expr: state
+    - as: order_date
+      expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
+    - as: strftime 
+      expr: "  (order_date|to_datetime).strftime('%S') "
+
+out: "{{ host_list | jtable(select=select) }}"
 ```
 </details>
 
