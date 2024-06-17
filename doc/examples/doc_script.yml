@@ -153,18 +153,15 @@
   box_as: yaml
   collapse: the query
 
-# - play_cmd: 'cat uptime_dataset.yml | jtable -p "stdin.hosts{host}" -q name_incoming_attribute.yml'
-#   collapse: command & output
-
 - text: "## Use jtable with Ansible"
 - text: "The plabybook"
 
 - eval_cmd: cat ansible_playbook_example.yml
   box_as: yaml
 
-- play_cmd: 'ansible-playbook ansible_playbook_example.yml'
-  collapse: command & output
-  box_as: bash
+# - play_cmd: 'ansible-playbook ansible_playbook_example.yml'
+#   collapse: command & output
+#   box_as: bash
 
 - text: "## Load multiple files"
 
@@ -192,3 +189,67 @@
 
 - play_cmd: jtable -q strf_time_example.yml
   collapse: command & output
+
+- text: "# Conditional styling"
+
+- name: Styling option
+  play_cmd: "jtable -q uptime_view_colored.yml -f json"
+  box_as: bash
+  collapse: dataset & query
+
+# - name: Styling view screenshot
+#   eval_cmd: "../../screenshot.py -i jack.html -o jack.png"
+#   box_as: bash
+#   collapse: dataset & query
+
+- name: Ansible again
+  play_cmd: |
+    export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
+    export ANSIBLE_ACTION_WARNINGS=False && \
+    export ANSIBLE_STDOUT_CALLBACK=yaml && \
+    ansible-playbook ansible_playbook_example.yml
+  
+  box_as: bash
+  collapse: dataset & query
+
+
+
+- text: "![uptime_view_colored](./jack.png)"
+
+
+# - text: "# Html"
+
+# - text: |
+#     $`\textcolor{red}{\text{your text}}`$ 
+#     f1  | f2 | f3
+#     -- | -- | --
+#     vince | touch | john
+#     $`\textcolor{red}{\text{redmon}}`$  | touch | john
+
+#     - `#F00` fejfje
+#     - `#F00A ejfkfklze`
+#     - `#FF0000`
+#     - `#FF0000AA`
+#     - `RGB(0,255,0)`
+#     - `RGB(0%,100%,0%)`
+#     - `RGBA(0,255,0,0.3)`
+#     - `HSL(540,70%,50%)`
+#     - `HSLA(540,70%,50%,0.3)`  
+    
+#     I need to highlight these ==very important words==.
+
+
+#     coucou `#F00` bob
+#     <pre>
+#     <span color="red">red</span>
+#       <span color="orange">orange</span>
+#     <span color="yellow">yellow</span>
+#       <span color="lime">lime</span>
+#     <span color="green">green</span>
+#       <span color="turquoise">turquoise</span>
+#       <span color="cyan">cyan</span>
+#     <span color="blue">blue</span>
+#       <span color="purple">purple</span>
+#       <span color="magenta">magenta</span>
+#     <span color="red">red</span>
+#     </pre>

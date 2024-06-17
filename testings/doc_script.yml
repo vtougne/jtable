@@ -1,0 +1,4 @@
+- text: "# coucou"
+
+- eval_cmd: cat dataset.yml | jtable -q query_test.yml
+  box_as: bash

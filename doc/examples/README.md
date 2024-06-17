@@ -510,7 +510,7 @@ output:
 
 ```
 region    dc name    hostname    os type    uptime in days    sanity status
---------  ---------  ----------  ---------  ----------------  --------------------
+--------  ---------  ----------  ---------  ----------------  ---------------------
 East      dc_1       host_1      linux      21 days           ✅
 North     dc_2       host_2                 79 days           🔥 host.uptime exceed
           dc_3       host_3      linux      0 day             ✅
@@ -644,71 +644,21 @@ The plabybook
   tasks:
       
   - debug:
+      msg: "{{ ansible_python_interpreter  }}"
+
+  - debug:
       msg: "{{ host_list | jtable }}"
-    # vars:
-      # path: "stdin{dc}{}"
-      # select:
-      # - as: dc
-      #   expr: "dc.key"
-      # - as: the hostname
-      #   expr: "hostname"
-      # - as: cost
-      #   expr: "cost * 2"
-      
-        
-      # - as: os
-      #   expr: item.os | replace("linux", "youpi")
-
-  # - debug:
-  #     msg: "{{ (lookup('file', '../dataset.yml') | from_yaml).host | jtable(select) }}"
-  #   vars:
-  #     select: "{{ (lookup('file', 'jtable_query_sample.yml') | from_yaml).select }}"
-
-        
 
 
 
 ```
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
-
-command: 
-```bash
-ansible-playbook ansible_playbook_example.yml
-```
-output:
-
-```bash
-
-PLAY [localhost] ***************************************************************
-
-TASK [debug] *******************************************************************
-ok: [localhost] => 
-  msg: |-
-    hostname    os         cost  state    service.name    ips
-    ----------  -------  ------  -------  --------------  ------------------------------
-    host_1      linux      5000  alive    service1
-                                          service_3
-    host_2      linux1      200  alive
-    host_3      windows     200  alive
-    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
-    host_5      windows    5000  decom                    []
-
-PLAY RECAP *********************************************************************
-localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-
-
-```
-</details>
-
 ## Load multiple files
 Considering the files below returned by ```ls -1 data/*/*/config.yml```
 
 ```
 data/dev/it_services/config.yml
 data/dev/pay/config.yml
+data/prod/it_services/config.yml
 data/prod/pay/config.yml
 data/qua/pay/config.yml
 
@@ -737,18 +687,21 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-16:13:37 (line 216) | ERROR fail loading file data/dev/it_services/config.yml, skipping
-env    dept    hostname          os       cost
------  ------  ----------------  -----  ------
-dev    pay     host_dev_pay_1    linux    5000
-dev    pay     host_dev_pay_2    linux     200
-dev    pay     host_dev_pay_3    win       200
-prod   pay     host_prd_pay_22   linux    5000
-prod   pay     host_prd_pay_44   linux     200
-prod   pay     host_prd_pay_33   win       200
-qua    pay     host_qua_pay_22   linux    5000
-qua    pay     host_qua_pay_444  linux     200
-qua    pay     host_qua_pay_3R3  win       200
+18:44:26 (line 205) | ERROR fail loading file data/dev/it_services/config.yml, skipping
+env    dept         hostname          os       cost
+-----  -----------  ----------------  -----  ------
+dev    pay          host_dev_pay_1    linux    5000
+dev    pay          host_dev_pay_2    linux     200
+dev    pay          host_dev_pay_3    win       200
+prod   it_services  host_dev_its_1    linux    5000
+prod   it_services  host_dev_its_2    linux     200
+prod   it_services  host_dev_its_3    win       200
+prod   pay          host_prd_pay_22   linux    5000
+prod   pay          host_prd_pay_44   linux     200
+prod   pay          host_prd_pay_33   win       200
+qua    pay          host_qua_pay_22   linux    5000
+qua    pay          host_qua_pay_444  linux     200
+qua    pay          host_qua_pay_3R3  win       200
 
 ```
 </details>
@@ -827,10 +780,79 @@ output:
 hostname    os       cost  state      order_date    strftime
 ----------  -----  ------  -------  ------------  ----------
 host_1      linux    5000  alive     2.02032e+07          12
-host_2      linux     200  alive     2.02032e+07          12
+host_2      linux     200            2.02032e+07          12
 host_3      linux     200  alive     2.02032e+07          12
 host_3      linux     200  alive     2.02032e+07          12
 
 ```
 </details>
 
+# Conditional styling
+  
+#### Styling option
+<details>
+
+<summary>dataset & query............................(⬇️ Click to expand)</summary>  
+
+
+command: 
+```bash
+jtable -q uptime_view_colored.yml -f json
+```
+output:
+
+```bash
+region    dc name    hostname    os     state        uptime
+--------  ---------  ----------  -----  -----------  --------
+East      dc_1       host_1      linux  [1;31munreachable[0m  [1;32m6 days[0m
+North     dc_2       host_1      linux  [1;32malive[0m        [1;32m21 days[0m
+North     dc_2       host_2      linux  [1;32malive[0m        [1;31m79 days[0m
+
+```
+</details>
+
+  
+#### Ansible again
+<details>
+
+<summary>dataset & query............................(⬇️ Click to expand)</summary>  
+
+
+command: 
+```bash
+export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
+export ANSIBLE_ACTION_WARNINGS=False && \
+export ANSIBLE_STDOUT_CALLBACK=yaml && \
+ansible-playbook ansible_playbook_example.yml
+
+```
+output:
+
+```bash
+
+PLAY [localhost] ***************************************************************
+
+TASK [debug] *******************************************************************
+ok: [localhost] => 
+  msg: /home/vince/.local/pipx/venvs/ansible-core/bin/python
+
+TASK [debug] *******************************************************************
+ok: [localhost] => 
+  msg: |-
+    hostname    os         cost  state    service.name    ips                             ips
+    ----------  -------  ------  -------  --------------  ------------------------------  ------------------------------
+    host_1      linux      5000  alive    service1
+                                          service_3
+    host_2      linux1      200  alive
+    host_3      windows     200  alive
+    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']  ['192.168.1.1', '192.168.1.2']
+    host_5      windows    5000  decom                    []                              []
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+```
+</details>
+
+![uptime_view_colored](./jack.png)
