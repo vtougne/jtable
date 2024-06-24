@@ -1,0 +1,19 @@
+context:
+  queryset:
+    path: host_list{}
+    select:
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost
+    - as: state
+      expr: state
+    - as: env
+      expr: env
+    - as: order_date
+      expr: order_date
+
+
+out: '{{ stdin | jtable(path="host_list{}" ) }}'

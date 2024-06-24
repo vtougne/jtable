@@ -318,7 +318,7 @@ output:
 
 ```yaml
 out: '{{ stdin | jtable(select=select,path="region.East[''Data Center''].dc_1.hosts{}",
-  format=''text'' ) }}'
+  format=format ) }}'
 queryset:
   path: region.East['Data Center'].dc_1.hosts{}
   select:
@@ -490,7 +490,7 @@ queryset:
     dc_location:
       dc_1: East
       dc_2: North
-    uptime_in_day: "{{ ((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] }}"
+    uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
 out: "{{ stdin | jtable(select=select,vars=views,path=path)}}"
@@ -510,7 +510,7 @@ output:
 
 ```
 region    dc name    hostname    os type    uptime in days    sanity status
---------  ---------  ----------  ---------  ----------------  ---------------------
+--------  ---------  ----------  ---------  ----------------  --------------------
 East      dc_1       host_1      linux      21 days           ✅
 North     dc_2       host_2                 79 days           🔥 host.uptime exceed
           dc_3       host_3      linux      0 day             ✅
@@ -687,7 +687,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-18:44:26 (line 205) | ERROR fail loading file data/dev/it_services/config.yml, skipping
+14:45:32 (line 215) | ERROR fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -829,12 +829,15 @@ ansible-playbook ansible_playbook_example.yml
 output:
 
 ```bash
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that
+the implicit localhost does not match 'all'
 
 PLAY [localhost] ***************************************************************
 
 TASK [debug] *******************************************************************
 ok: [localhost] => 
-  msg: /home/vince/.local/pipx/venvs/ansible-core/bin/python
+  msg: /usr/bin/python3
 
 TASK [debug] *******************************************************************
 ok: [localhost] => 

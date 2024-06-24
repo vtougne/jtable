@@ -19,6 +19,6 @@ setup(
 
     author="Vincent Tougne",
     author_email="vtougne@gmail.com",
-    description="tabulate json data and transform your them using jinja",
+    description="tabulate json data and transform them using jinja",
     url="https://github/vtougne",
 )

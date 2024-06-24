@@ -53,19 +53,27 @@ logging_config = {
 logging.config.dictConfig(logging_config)
 
 class Filters:
-    def jtable(dataset,select=[],path="{}",format="text",vars={}, when=[]):
+    def jtable(dataset,select=[],path="{}",format="text",vars={}, when=[],queryset={}):
         # logging.info(f"path: {path}")
-        return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when)[format]
+        return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when, queryset=queryset)[format]
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
     def from_json(str):
         return json.loads(str)
-    def to_json(a, *args, **kw):
-        """ Convert the value to JSON """
-        return json.dumps(a, *args, **kw)
     def from_yaml(data):
         return yaml.safe_load(data)
     def from_yaml_all(data):
         return yaml.safe_load_all(data)
+    def intersect(a, b):
+        # logging.info(b)
+        # return set(a).intersection(b)
+        return list(set(a).intersection(b))
+    def to_json(a, *args, **kw):
+        """ Convert the value to JSON """
+        return json.dumps(a, *args, **kw)
+    def to_yaml(v):
+        """ Convert the value to JSON """
+        return yaml.dump(v, allow_unicode=True)
+    
     def type_debug(o):
         return  o.__class__.__name__
 
@@ -154,7 +162,7 @@ class JtableCli:
             with open(args.query_file, 'r') as file:
                 query_file = yaml.safe_load(file)
             if 'queryset' in query_file:
-                queryset =query_file['queryset']
+                queryset = query_file['queryset']
                 
         is_pipe = not isatty(sys.stdin.fileno())
 
@@ -175,9 +183,11 @@ class JtableCli:
             with open(file_name, 'r') as input_yaml:
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
                 
+        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
+                
         def load_multiple_inputs(input,format):
             err_help = f"\n[ERROR] {format}_files must looks like this:\n\n\
-                jtable --{format}_files \"var_name_to_store:folder_1/*/*/config.yml\"\n"
+                jtable --{format}_files \"{{var_name_to_store}}:folder_1/*/*/config.yml\"\n"
             if input[0] != "{":
                 logging.error(err_help)
                 exit(1)
@@ -187,6 +197,7 @@ class JtableCli:
                 # print(tabulate_var_name) ; exit(0)
                 path = input[len(self.tabulate_var_name) + 3 :]
                 files_str = os.popen("ls -1 " + path).read()
+                # for windows syntax will be --> # dir /s /b data\*config.yml
                 file_list_dataset = []
                 for file_name_full_path in files_str.split('\n'):
                     if file_name_full_path != '':
@@ -205,6 +216,7 @@ class JtableCli:
                                 logging.error(f"fail loading file {file_name_full_path}, skipping")
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: file_list_dataset } }
                 
+        
         if args.json_files:
             for file in args.json_files:
                 # print(file) ; exit(0)
@@ -222,20 +234,24 @@ class JtableCli:
 
         if args.query_file:
             if 'context' in query_file:
-                facts = {}
+                context = {}
                 for key,value in query_file['context'].items():
                     jinja_eval = JtableCls().jinja_render_value(str(value),self.dataset)
-                    facts.update({key: jinja_eval})
-                    self.dataset = {**self.dataset,**facts}
+                    context.update({key: jinja_eval})
+                    self.dataset = {**self.dataset,**context}
 
         if 'select' in queryset:
             select = queryset['select']
 
         if not 'path' in queryset:
-            if "stdin" in self.dataset:
-                queryset['path'] = "{}"
-            else:
-                queryset['path'] = list(self.dataset)[0]
+            queryset['path'] = "{}"
+            # if "stdin" in self.dataset:
+            #     queryset['path'] = "{}"
+            # else:
+            #     queryset['path'] = list(self.dataset)[0]
+        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
+                
+        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
                     
         if not "format" in queryset:
             queryset['format'] = 'text'
@@ -249,7 +265,7 @@ class JtableCli:
             queryset['format'] = "th"
             
         def out_expr_fct(select,path,format):
-            return "{{ " + self.tabulate_var_name + " | jtable(select=" + select + ",path=\"" + path + "\", format='" + format + "' ) }}"
+            return "{{ " + self.tabulate_var_name + " | jtable(select=" + select + ",path=\"" + path + "\", format=format ) }}"
             
         out_expr = out_expr_fct(str(select), queryset['path'] , queryset['format'])
         # print(out_expr) ; exit(0)
@@ -263,7 +279,8 @@ class JtableCli:
             print(tbl)
             exit(0)
         
-        out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
+        # out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
+        out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**queryset})
         
         if args.view_query:
             query_file_out = {}
@@ -288,6 +305,10 @@ class JtableCls:
         self.json = []
         self.render = render
         self.splitted_path = []
+        self.when = []
+        self.select = []
+        self.vars = {}
+        self.path = "{}"
 
         if self.render == "jinja_ansible":
             global Templar,AnsibleContext,AnsibleEnvironment
@@ -298,7 +319,6 @@ class JtableCls:
             self.loader=BaseLoader()
         # global undefined
         # undefined = Undefined()
-        
     
     def cross_path(self,dataset,path,context={}):
         level = len(path)
@@ -364,20 +384,42 @@ class JtableCls:
             # logging.info(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
     
-    def render_object(self,dataset,path="{}",select=[],vars={}, when=[]):
-        self.dataset = dataset
-        self.select = select
-        self.vars = vars
-        self.when = when
+    def render_object(self,dataset,path="{}",select=[],vars={}, when=[],queryset={}):
+        for query_item,query_data in queryset.items():
+            if query_item == "select":
+                self.select = query_data
+            elif query_item == "path":
+                # logging.info(f"self.path query_data: {query_data}")
+                self.path = query_data
+            elif query_item == "vars":
+                self.vars = query_data
+            elif query_item == "when":
+                self.when = query_data
+            else:
+                 raise f"the queryset argument contains a non accepted key: {query_item}"
 
-        self.splitted_path = JinjaPathSplitter().split_path(path)
+        self.path = path if path != "{}" else self.path
+        self.select = select if select != [] else self.select
+        self.vars = vars if vars != {} else self.vars
+        self.when = when if when != [] else self.when
+
+        self.dataset = dataset
+
+        # logging.info(f"self.select: {self.select}")
+        
+        for k,v in vars.items():
+            self.vars = {**self.vars, **{ k: '{{' + str(v) + '}}' } }
+            
+
+        self.splitted_path = JinjaPathSplitter().split_path(self.path)
         # logging.info(f"self.splitted_path: {self.splitted_path}")
         if self.splitted_path[0] == "['']":
             self.splitted_path[0] = "['input']"
             # logging.info(f"self.splitted_path: {self.splitted_path}")
             self.dataset = {"input": self.dataset}
             
-        self.cross_path(self.dataset, self.splitted_path )
+        self.cross_path(self.dataset, self.splitted_path, context=self.vars )
+        # self.cross_path(self.dataset, self.splitted_path )
 
         out_return = {
             "th": self.th,
@@ -432,7 +474,7 @@ class JtableCls:
                     out = out_str =""
                 else:
                     out = error
-                    logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
+                    # logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
                     logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
                     # exit(1)
                     raise out
@@ -474,7 +516,7 @@ class JtableCls:
             dataset_to_cover = dataset
         else:
             # print('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
-            print(dataset)
+            # print(dataset)
             raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
 
             

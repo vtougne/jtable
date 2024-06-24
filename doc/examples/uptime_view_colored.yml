@@ -37,6 +37,6 @@ queryset:
     dc_location:
       dc_1: East
       dc_2: North 
-    uptime_in_day: "{{ ((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] }}"
+    uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 out: "{{ hosts | sort (attribute='dc')| jtable(select=select,vars=views,path=path)}}"
