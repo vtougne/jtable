@@ -3,10 +3,11 @@ inputs:
     type: json_files
     path: "data/*/*/entity.json"
   ref_data:
-    type: yaml
+    type: yaml_files
     path: "data/*/*/entity.yaml"
 
 context:
+  dataset: "{{ stdin }}"
   host_list:
     - { hostname: host_1, os: linux, cost: 5000, state: alive, env: qua, orga_id: 53  }
     - { hostname: host_2, os: linux, cost: 200, env: test, orga_id: 32 }

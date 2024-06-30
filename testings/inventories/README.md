@@ -19,13 +19,9 @@ export ANSIBLE_STDOUT_CALLBACK=json
 export ANSIBLE_SHOW_CUSTOM_STATS=true
 ```
 
-### view groups and vars ansible play 
+### view whole inventory
 
 ```bash
-ansible-playbook -i dev/pay/hosts_dc_1.ini play_view_inventoy.yml | jtable -q view_hosts.yml
-```
-### read multi jsons
-
-```bash
-jtable -jfs {config}:export*.json -p [0].content.global_custom_stats
+ansible-playbook $(find . -name hosts_dc*.ini |  sed "s/.*/-i &/g") \
+  play_view_inventoy_use_debug.yml | jtable -q view_hosts_use_debug.yml
 ```

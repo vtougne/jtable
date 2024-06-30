@@ -55,7 +55,7 @@ logging.config.dictConfig(logging_config)
 class Filters:
     def jtable(dataset,select=[],path="{}",format="text",vars={}, when=[],queryset={}):
         # logging.info(f"path: {path}")
-        return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when, queryset=queryset)[format]
+        return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)[format]
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
     def from_json(str):
         return json.loads(str)
@@ -160,7 +160,13 @@ class JtableCli:
         
         if args.query_file:
             with open(args.query_file, 'r') as file:
-                query_file = yaml.safe_load(file)
+                try:
+                    query_file = yaml.safe_load(file)
+                except Exception as error:
+                    logging.error(f"Fail to load query file {args.query_file}, check Yaml format")
+                    logging.error(f"error was:\n{error}")
+                    exit(2)
+                
             if 'queryset' in query_file:
                 queryset = query_file['queryset']
                 
@@ -175,7 +181,7 @@ class JtableCli:
 
         if not is_pipe and not args.json_file and not args.json_files and not args.query_file:
             args = parser.parse_args(['--help'])
-            exit(0)
+            exit(1)
 
         if args.json_file:
             self.tabulate_var_name = args.json_file.split(':')[0]
@@ -187,7 +193,7 @@ class JtableCli:
                 
         def load_multiple_inputs(input,format):
             err_help = f"\n[ERROR] {format}_files must looks like this:\n\n\
-                jtable --{format}_files \"{{var_name_to_store}}:folder_1/*/*/config.yml\"\n"
+                jtable --{format}_files \"{{target_var_name}}:folder_1/*/*/config.yml\"\n"
             if input[0] != "{":
                 logging.error(err_help)
                 exit(1)
@@ -213,9 +219,8 @@ class JtableCli:
                                         }
                                 file_list_dataset = file_list_dataset + [{ **file }]
                             except Exception as error:
-                                logging.error(f"fail loading file {file_name_full_path}, skipping")
+                                logging.warning(f"fail loading file {file_name_full_path}, skipping")
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: file_list_dataset } }
-                
         
         if args.json_files:
             for file in args.json_files:
@@ -228,9 +233,6 @@ class JtableCli:
             if expr_end_by_braces != "{}":
                 new_path = new_path + "{}"
             queryset['path'] = new_path
-        
-
-                    
 
         if args.query_file:
             if 'context' in query_file:
@@ -238,28 +240,19 @@ class JtableCli:
                 for key,value in query_file['context'].items():
                     jinja_eval = JtableCls().jinja_render_value(str(value),self.dataset)
                     context.update({key: jinja_eval})
-                    self.dataset = {**self.dataset,**context}
+                    self.dataset = {**self.dataset,**context, **{"context": context}}
 
         if 'select' in queryset:
             select = queryset['select']
 
         if not 'path' in queryset:
             queryset['path'] = "{}"
-            # if "stdin" in self.dataset:
-            #     queryset['path'] = "{}"
-            # else:
-            #     queryset['path'] = list(self.dataset)[0]
-        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
-                
-        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
                     
         if not "format" in queryset:
             queryset['format'] = 'text'
 
         if args.format:
             queryset['format'] = args.format
-        
-        # print(queryset['format'])
 
         if args.view_query:
             queryset['format'] = "th"
@@ -294,8 +287,11 @@ class JtableCli:
             query_set_out['path'] = queryset['path']
             query_file_out['queryset'] = query_set_out
             out = yaml.dump(query_file_out, allow_unicode=True)
-            
-        print(out)
+        
+        if queryset['format'] == "json":
+            print(json.dumps(out))
+        else:
+            print(out)
 
 class JtableCls:
     def __init__(self, render="jinja_native"):
@@ -384,7 +380,7 @@ class JtableCls:
             # logging.info(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
     
-    def render_object(self,dataset,path="{}",select=[],vars={}, when=[],queryset={}):
+    def render_object(self,dataset,path="{}",select=[],vars={}, when=[],format="text",queryset={}):
         for query_item,query_data in queryset.items():
             if query_item == "select":
                 self.select = query_data
@@ -395,8 +391,12 @@ class JtableCls:
                 self.vars = query_data
             elif query_item == "when":
                 self.when = query_data
+            elif query_item == "format":
+                self.format = query_data
             else:
-                 raise f"the queryset argument contains a non accepted key: {query_item}"
+                error =  "the queryset argument contains a non accepted key" + query_item
+                # exit(1)
+                raise "the queryset argument contains a non accepted key" + query_item
 
         self.path = path if path != "{}" else self.path
         self.select = select if select != [] else self.select
@@ -425,7 +425,7 @@ class JtableCls:
             "th": self.th,
             "td": self.td,
             "text": tabulate(self.td,self.th,tablefmt="simple"),
-            "json": self.json_content
+            "json": json.dumps(self.json)
         }
         
         return out_return
@@ -624,7 +624,8 @@ class path_auto_discover:
                 for item in dataset:
                     self.cover_paths(item,path)
             else:
-                self.fields = self.fields + [path[1:]]
+                if path[1:] not in self.fields:
+                    self.fields = self.fields + [path[1:]]
         else:
             self.paths = self.paths + [ path + [dataset] ]
             if path[1:] not in self.fields:

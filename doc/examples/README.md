@@ -510,7 +510,7 @@ output:
 
 ```
 region    dc name    hostname    os type    uptime in days    sanity status
---------  ---------  ----------  ---------  ----------------  --------------------
+--------  ---------  ----------  ---------  ----------------  ---------------------
 East      dc_1       host_1      linux      21 days           ✅
 North     dc_2       host_2                 79 days           🔥 host.uptime exceed
           dc_3       host_3      linux      0 day             ✅
@@ -687,7 +687,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-14:45:32 (line 215) | ERROR fail loading file data/dev/it_services/config.yml, skipping
+18:58:43 (line 222) | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -802,11 +802,7 @@ jtable -q uptime_view_colored.yml -f json
 output:
 
 ```bash
-region    dc name    hostname    os     state        uptime
---------  ---------  ----------  -----  -----------  --------
-East      dc_1       host_1      linux  [1;31munreachable[0m  [1;32m6 days[0m
-North     dc_2       host_1      linux  [1;32malive[0m        [1;32m21 days[0m
-North     dc_2       host_2      linux  [1;32malive[0m        [1;31m79 days[0m
+"region    dc name    hostname    os     state        uptime\n--------  ---------  ----------  -----  -----------  --------\nEast      dc_1       host_1      linux  \u001b[1;31munreachable\u001b[0m  \u001b[1;32m6 days\u001b[0m\nNorth     dc_2       host_1      linux  \u001b[1;32malive\u001b[0m        \u001b[1;32m21 days\u001b[0m\nNorth     dc_2       host_2      linux  \u001b[1;32malive\u001b[0m        \u001b[1;31m79 days\u001b[0m"
 
 ```
 </details>
@@ -829,27 +825,24 @@ ansible-playbook ansible_playbook_example.yml
 output:
 
 ```bash
-[WARNING]: No inventory was parsed, only implicit localhost is available
-[WARNING]: provided hosts list is empty, only localhost is available. Note that
-the implicit localhost does not match 'all'
 
 PLAY [localhost] ***************************************************************
 
 TASK [debug] *******************************************************************
 ok: [localhost] => 
-  msg: /usr/bin/python3
+  msg: /home/vince/.local/pipx/venvs/ansible-core/bin/python
 
 TASK [debug] *******************************************************************
 ok: [localhost] => 
   msg: |-
-    hostname    os         cost  state    service.name    ips                             ips
-    ----------  -------  ------  -------  --------------  ------------------------------  ------------------------------
+    hostname    os         cost  state    service.name    ips
+    ----------  -------  ------  -------  --------------  ------------------------------
     host_1      linux      5000  alive    service1
                                           service_3
     host_2      linux1      200  alive
     host_3      windows     200  alive
-    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']  ['192.168.1.1', '192.168.1.2']
-    host_5      windows    5000  decom                    []                              []
+    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
+    host_5      windows    5000  decom                    []
 
 PLAY RECAP *********************************************************************
 localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

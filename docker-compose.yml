@@ -1,8 +1,8 @@
-version: "3.9"
-networks:
-  default:
-    name: my_infra
-    external: true
+# version: "3.9"
+# networks:
+#   default:
+#     name: my_infra
+#     external: true
       
 
 services:
