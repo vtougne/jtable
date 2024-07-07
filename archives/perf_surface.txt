@@ -1,0 +1,45 @@
+Running: cat ../testings/big_facts.json | ./jtable_0.1.1b.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    0m9.755s
+user    0m9.602s
+sys     0m0.087s
+Running: cat ../testings/big_facts.json | ./jtable_0.1.2b.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    0m9.611s
+user    0m9.421s
+sys     0m0.125s
+Running: cat ../testings/big_facts.json | ./jtable_0.2.0_a.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    0m10.034s
+user    0m9.863s
+sys     0m0.079s
+Running: cat ../testings/big_facts.json | ./jtable_0.3.2_a.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    0m9.492s
+user    0m9.352s
+sys     0m0.051s
+Running: cat ../testings/big_facts.json | ./jtable_0.4.0_a.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    0m9.701s
+user    0m9.586s
+sys     0m0.030s
+Running: cat ../testings/big_facts.json | ./jtable_0.5.4_a.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    0m9.698s
+user    0m9.565s
+sys     0m0.040s
+Running: cat ../testings/big_facts.json | ./jtable_0.6.7_a.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    0m17.118s
+user    0m13.533s
+sys     0m0.402s
+Running: cat ../testings/big_facts.json | ./jtable_0.8.0_a.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    0m17.052s
+user    0m13.597s
+sys     0m0.332s
+Running: cat ../testings/big_facts.json | ./jtable_0.9.2_a.py -p plays[0].tasks[0].hosts>/dev/null
+
+real    2m29.710s
+user    1m56.824s
+sys     0m3.104s

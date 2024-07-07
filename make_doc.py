@@ -88,7 +88,8 @@ for play_doc in play_doc_book:
                 box_as = ""
                 if "box_as" in play_doc:
                     box_as = play_doc['box_as']
-                out_err = "\n```" + box_as + "\n💥 Something was wrong with this report\n```\n"
+                # out_err = "\n```" + box_as + "\n💥 Something was wrong with this report\n```\n"
+                out_err = f"\n```\n{box_as}💥 Something was wrong with this report\n cmd was  ->  {cmd}\n```\n"
                 if is_play_cmd:
                     out_err = "output:\n" + out_err
                 outfile.write(out_err)

@@ -1,0 +1,89 @@
+queryset:
+  path: '{file}.content.global_custom_stats{}'
+  select:
+  - as: env
+    expr: file.name.split('_')[2]
+  - as: dept
+    expr: file.name.split('_')[3]
+  - as: hostname
+    expr: key
+  - as: app
+    expr: value.app
+  - as: group_names
+    expr: value.group_names
+  # - as: value.ansible_check_mode
+  #   expr: value.ansible_check_mode
+  # - as: value.ansible_config_file
+  #   expr: value.ansible_config_file
+  # - as: value.ansible_diff_mode
+  #   expr: value.ansible_diff_mode
+  # - as: value.ansible_forks
+  #   expr: value.ansible_forks
+  # - as: value.ansible_inventory_sources
+  #   expr: value.ansible_inventory_sources
+  # - as: value.ansible_playbook_python
+  #   expr: value.ansible_playbook_python
+  # - as: value.ansible_run_tags
+  #   expr: value.ansible_run_tags
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.ansible_verbosity
+  #   expr: value.ansible_verbosity
+  # - as: value.ansible_version.full
+  #   expr: value.ansible_version.full
+  # - as: value.ansible_version.major
+  #   expr: value.ansible_version.major
+  # - as: value.ansible_version.minor
+  #   expr: value.ansible_version.minor
+  # - as: value.ansible_version.revision
+  #   expr: value.ansible_version.revision
+  # - as: value.ansible_version.string
+  #   expr: value.ansible_version.string
+  # - as: value.app
+  #   expr: value.app
+  # - as: value.group_names
+  #   expr: value.group_names
+  # - as: value.groups.all
+  #   expr: value.groups.all
+  # - as: value.groups.app
+  #   expr: value.groups.app
+  # - as: value.groups.dc1
+  #   expr: value.groups.dc1
+  # - as: value.groups.dc1_app
+  #   expr: value.groups.dc1_app
+  # - as: value.groups.dc1_rmp
+  #   expr: value.groups.dc1_rmp
+  # - as: value.groups.rmp
+  #   expr: value.groups.rmp
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+  # - as: value.inventory_dir
+  #   expr: value.inventory_dir
+  # - as: value.inventory_file
+  #   expr: value.inventory_file
+  # - as: value.inventory_hostname
+  #   expr: value.inventory_hostname
+  # - as: value.inventory_hostname_short
+  #   expr: value.inventory_hostname_short
+  # - as: value.playbook_dir
+  #   expr: value.playbook_dir
+  # - as: value.rmp_port
+  #   expr: value.rmp_port
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+
+out: '{{ inv | jtable(select=select,path=path, format=format  ) }}'

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="jtable",
-    version="0.72",
+    version="0.9.4",
     packages=find_packages(),
     install_requires=[
         'tabulate',
@@ -19,6 +19,6 @@ setup(
 
     author="Vincent Tougne",
     author_email="vtougne@gmail.com",
-    description="tabulate json data and transform your them using jinja",
+    description="tabulate json data and transform them using jinja",
     url="https://github/vtougne",
 )
