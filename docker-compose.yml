@@ -1,8 +1,8 @@
-version: "3.9"
-networks:
-  default:
-    name: my_infra
-    external: true
+# version: "3.9"
+# networks:
+#   default:
+#     name: my_infra
+#     external: true
       
 
 services:
@@ -20,7 +20,7 @@ services:
         RUN apt-get install -y pip
         RUN echo 'set -o vi' >> /root/.bashrc
         RUN echo 'alias ll="ls -lrt"' >> /root/.bashrc
-        RUN apt-get install -y curl
+        RUN apt-get install -y curl less
         RUN pip install ansible-core==2.13.13
         RUN pip install jmespath
         RUN ansible-galaxy collection install community.general ansible.posix

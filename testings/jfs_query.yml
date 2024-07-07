@@ -1,0 +1,15 @@
+out: '{{ configs | jtable(select=select,path=path, format=format ) }}'
+queryset:
+  path: '{file}.content{}'
+  select:
+  - as: env
+    expr: file.path.split('/')[1]
+  - as: dept
+    expr: file.path.split('/')[2]
+  - as: hostname
+    expr: hostname
+  - as: content.os
+    expr: os
+  - as: content.cost
+    expr: cost
+

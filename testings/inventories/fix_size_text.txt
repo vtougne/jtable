@@ -1,0 +1,15 @@
+West Coast  dc1   dev_pay_host_11  dev    pay     rmp
+West Coast  dc1   dev_pay_host_12  dev    pay     rmp
+West Coast  dc1   dev_pay_host_13  dev    pay     rmp
+West Coast  dc1   dev_pay_host_14  dev    pay     app
+West Coast  dc1   dev_pay_host_15  dev    pay     app
+East Coast  dc2   dev_pay_host_21  dev    pay     rmp
+East Coast  dc2   dev_pay_host_22  dev    pay     rmp
+East Coast  dc2   dev_pay_host_23  dev    pay     rmp
+East Coast  dc2   dev_pay_host_24  dev    pay     app
+East Coast  dc2   dev_pay_host_25  dev    pay     app
+West Coast  dc1   qua_pay_host_11  qua    pay     rmp
+West Coast  dc1   qua_pay_host_12  qua    pay     rmp
+West Coast  dc1   qua_pay_host_13  qua    pay     rmp
+West Coast  dc1   qua_pay_host_14  qua    pay     app
+West Coast  dc1   qua_pay_host_15  qua    pay     app

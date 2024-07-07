@@ -2,14 +2,19 @@
 import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config
 from os import isatty
 from tabulate import tabulate
-from typing import Any, Dict,Optional
+# tabulate.PRESERVE_WHITESPACE = True
+# import tabulate
 
+from typing import Any, Dict, Optional
 
 class _ExcludeErrorsFilter(logging.Filter):
     def filter(self, record):
         """Only lets through log messages with log level below ERROR ."""
         return record.levelno < logging.ERROR
 
+"""
+https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-messages-to-stdout-in-addition-to-log-file
+"""
 logging_config = {
     'version': 1,
     'filters': {
@@ -18,7 +23,6 @@ logging_config = {
         }
     },
     'formatters': {
-        # Modify log message format here or replace with your custom formatter class
         'my_formatter': {
             'format': '%(asctime)s (line %(lineno)s) | %(levelname)s %(message)s',
             'datefmt': '%H:%M:%S'
@@ -27,54 +31,49 @@ logging_config = {
     },
     'handlers': {
         'console_stderr': {
-            # Sends log messages with log level ERROR or higher to stderr
             'class': 'logging.StreamHandler',
             'level': 'ERROR',
             'formatter': 'my_formatter',
             'stream': sys.stderr
         },
         'console_stdout': {
-            # Sends log messages with log level lower than ERROR to stdout
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
             'formatter': 'my_formatter',
             'filters': ['exclude_errors'],
-            'stream': sys.stdout
+            'stream': sys.stderr
         },
-        'file': {
-            # Sends all log messages to a file
-            'class': 'logging.FileHandler',
-            'level': 'DEBUG',
-            'formatter': 'my_formatter',
-            'filename': 'my.log',
-            'encoding': 'utf8'
-        }
     },
     'root': {
-        # In general, this should be kept at 'NOTSET'.
-        # Otherwise it would interfere with the log levels set for each handler.
         'level': 'NOTSET',
         'handlers': ['console_stderr', 'console_stdout']
-        # 'handlers': ['console_stderr', 'console_stdout', 'file']
     },
 }
 
 logging.config.dictConfig(logging_config)
 
 class Filters:
-    def jtable(dataset,select=[],path="{}",format="text",vars={}):
+    def jtable(dataset,select=[],path="{}",format="text",vars={}, when=[],queryset={}):
         # logging.info(f"path: {path}")
-        return JtableCls().render_object( dataset,path=path, select=select,vars=vars)[format]
+        return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)[format]
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
     def from_json(str):
         return json.loads(str)
-    def to_json(a, *args, **kw):
-        """ Convert the value to JSON """
-        return json.dumps(a, *args, **kw)
     def from_yaml(data):
         return yaml.safe_load(data)
     def from_yaml_all(data):
         return yaml.safe_load_all(data)
+    def intersect(a, b):
+        # logging.info(b)
+        # return set(a).intersection(b)
+        return list(set(a).intersection(b))
+    def to_json(a, *args, **kw):
+        """ Convert the value to JSON """
+        return json.dumps(a, *args, **kw)
+    def to_yaml(v):
+        """ Convert the value to JSON """
+        return yaml.dump(v, allow_unicode=True)
+    
     def type_debug(o):
         return  o.__class__.__name__
 
@@ -82,6 +81,7 @@ class Filters:
         return datetime.datetime.strptime(_string, format)
     def strftime(string_format, second=None):
         """ return a date string using string.
+        timestamp  option strftime(s) Doesn't works on cygwin => old known cygwin issue
         See https://docs.python.org/2/library/time.html#time.strftime for format """
         if second is not None:
             try:
@@ -124,7 +124,6 @@ class Inspect:
         else:
             self.add_row([path] + [str(dataset)])
 
-
 class JtableCli:
     def __init__(self):
         self.path = ""
@@ -135,8 +134,6 @@ class JtableCli:
         
     def parse_args(self):
         select = []
-        format = "text"
-        views = {}
         facts = {}
         queryset = {}
         self.tabulate_var_name="stdin"
@@ -163,9 +160,15 @@ class JtableCli:
         
         if args.query_file:
             with open(args.query_file, 'r') as file:
-                query_file = yaml.safe_load(file)
+                try:
+                    query_file = yaml.safe_load(file)
+                except Exception as error:
+                    logging.error(f"Fail to load query file {args.query_file}, check Yaml format")
+                    logging.error(f"error was:\n{error}")
+                    exit(2)
+                
             if 'queryset' in query_file:
-                queryset =query_file['queryset']
+                queryset = query_file['queryset']
                 
         is_pipe = not isatty(sys.stdin.fileno())
 
@@ -178,7 +181,7 @@ class JtableCli:
 
         if not is_pipe and not args.json_file and not args.json_files and not args.query_file:
             args = parser.parse_args(['--help'])
-            exit(0)
+            exit(1)
 
         if args.json_file:
             self.tabulate_var_name = args.json_file.split(':')[0]
@@ -186,9 +189,11 @@ class JtableCli:
             with open(file_name, 'r') as input_yaml:
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
                 
+        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
+                
         def load_multiple_inputs(input,format):
             err_help = f"\n[ERROR] {format}_files must looks like this:\n\n\
-                jtable --{format}_files \"var_name_to_store:folder_1/*/*/config.yml\"\n"
+                jtable --{format}_files \"{{target_var_name}}:folder_1/*/*/config.yml\"\n"
             if input[0] != "{":
                 logging.error(err_help)
                 exit(1)
@@ -198,6 +203,7 @@ class JtableCli:
                 # print(tabulate_var_name) ; exit(0)
                 path = input[len(self.tabulate_var_name) + 3 :]
                 files_str = os.popen("ls -1 " + path).read()
+                # for windows syntax will be --> # dir /s /b data\*config.yml
                 file_list_dataset = []
                 for file_name_full_path in files_str.split('\n'):
                     if file_name_full_path != '':
@@ -213,9 +219,9 @@ class JtableCli:
                                         }
                                 file_list_dataset = file_list_dataset + [{ **file }]
                             except Exception as error:
-                                logging.error(f"fail loading file {file_name_full_path}, skipping")
+                                logging.warning(f"fail loading file {file_name_full_path}, skipping")
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: file_list_dataset } }
-                
+        
         if args.json_files:
             for file in args.json_files:
                 # print(file) ; exit(0)
@@ -226,42 +232,35 @@ class JtableCli:
             expr_end_by_braces=(re.sub('.*({).*(})$',r'\1\2',args.json_path))
             if expr_end_by_braces != "{}":
                 new_path = new_path + "{}"
-            self.path = queryset['path'] = new_path
-        
-        if 'format' in queryset:
-            format = queryset['format']
-        if args.format:
-            queryset['format'] = args.format
-                    
+            queryset['path'] = new_path
 
         if args.query_file:
             if 'context' in query_file:
-                facts = {}
+                context = {}
                 for key,value in query_file['context'].items():
                     jinja_eval = JtableCls().jinja_render_value(str(value),self.dataset)
-                    facts.update({key: jinja_eval})
-                    self.dataset = {**self.dataset,**facts}
+                    context.update({key: jinja_eval})
+                    self.dataset = {**self.dataset,**context, **{"context": context}}
 
         if 'select' in queryset:
             select = queryset['select']
 
         if not 'path' in queryset:
-            if "stdin" in self.dataset:
-                self.path = "{}"
-            else:
-                self.path = list(self.dataset)[0]
-            queryset['path'] = self.path
+            queryset['path'] = "{}"
                     
-        # print(queryset['path']) ; exit(0)
-        # out_expr = "{{ stdin | jtable(select=select) }}"
-        queryset['format'] = 'text'
+        if not "format" in queryset:
+            queryset['format'] = 'text'
+
+        if args.format:
+            queryset['format'] = args.format
+
         if args.view_query:
             queryset['format'] = "th"
             
         def out_expr_fct(select,path,format):
-            return "{{ " + self.tabulate_var_name + " | jtable(select=" + select + ",path=\"" + path + "\", format='" + format + "' ) }}"
+            return "{{ " + self.tabulate_var_name + " | jtable(select=" + select + ",path=\"" + path + "\", format=format ) }}"
             
-        out_expr = out_expr_fct(str(select), self.path, queryset['format'])
+        out_expr = out_expr_fct(str(select), queryset['path'] , queryset['format'])
         # print(out_expr) ; exit(0)
         if args.query_file:
             if 'out' in query_file:
@@ -273,7 +272,8 @@ class JtableCli:
             print(tbl)
             exit(0)
         
-        out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
+        # out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
+        out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**queryset})
         
         if args.view_query:
             query_file_out = {}
@@ -282,14 +282,16 @@ class JtableCli:
             if select == []:
                 for field in fields:
                     select = select + [ {'as': field, 'expr':field }  ]
-            query_file_out['out'] = out_expr_fct('select', self.path, 'text')
+            query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'text')
             query_set_out['select'] = select
-            query_set_out['path'] = self.path
+            query_set_out['path'] = queryset['path']
             query_file_out['queryset'] = query_set_out
             out = yaml.dump(query_file_out, allow_unicode=True)
-            
-        print(out)
         
+        if queryset['format'] == "json":
+            print(json.dumps(out))
+        else:
+            print(out)
 
 class JtableCls:
     def __init__(self, render="jinja_native"):
@@ -299,14 +301,26 @@ class JtableCls:
         self.json = []
         self.render = render
         self.splitted_path = []
+        self.when = []
+        self.select = []
+        self.vars = {}
+        self.path = "{}"
 
         if self.render == "jinja_ansible":
             global Templar,AnsibleContext,AnsibleEnvironment
             from ansible.template import Templar,AnsibleContext,AnsibleEnvironment
             from ansible.parsing.dataloader import DataLoader
             self.loader = DataLoader()
-        else:
+        elif self.render == "jinja_native":
             self.loader=BaseLoader()
+            self.tenv = Environment(loader=self.loader)
+            jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
+            for filter_name in jtable_core_filters:
+                self.tenv.filters[filter_name] = getattr(Filters, filter_name)
+        elif self.render == "jinja_ansible_extensions":
+            self.tenv = tenv = Environment(extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'])
+        # global undefined
+        # undefined = Undefined()
     
     def cross_path(self,dataset,path,context={}):
         level = len(path)
@@ -372,35 +386,60 @@ class JtableCls:
             # logging.info(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
     
-    def render_object(self,dataset,path="{}",select=[],vars={}):
-        self.dataset = dataset
-        self.select = select
-        self.vars = vars
+    def render_object(self,dataset,path="{}",select=[],vars={}, when=[],format="text",queryset={}):
+        for query_item,query_data in queryset.items():
+            if query_item == "select":
+                self.select = query_data
+            elif query_item == "path":
+                # logging.info(f"self.path query_data: {query_data}")
+                self.path = query_data
+            elif query_item == "vars":
+                self.vars = query_data
+            elif query_item == "when":
+                self.when = query_data
+            elif query_item == "format":
+                self.format = query_data
+            else:
+                error =  "the queryset argument contains a non accepted key" + query_item
+                # exit(1)
+                raise "the queryset argument contains a non accepted key" + query_item
 
-        self.splitted_path = JinjaPathSplitter().split_path(path)
+        self.path = path if path != "{}" else self.path
+        self.select = select if select != [] else self.select
+        self.vars = vars if vars != {} else self.vars
+        self.when = when if when != [] else self.when
+
+        self.dataset = dataset
+
+        # logging.info(f"self.select: {self.select}")
+        
+        for k,v in vars.items():
+            self.vars = {**self.vars, **{ k: '{{' + str(v) + '}}' } }
+            
+
+        self.splitted_path = JinjaPathSplitter().split_path(self.path)
         # logging.info(f"self.splitted_path: {self.splitted_path}")
         if self.splitted_path[0] == "['']":
             self.splitted_path[0] = "['input']"
             # logging.info(f"self.splitted_path: {self.splitted_path}")
             self.dataset = {"input": self.dataset}
             
-        self.cross_path(self.dataset, self.splitted_path )
+        self.cross_path(self.dataset, self.splitted_path, context=self.vars )
+        # self.cross_path(self.dataset, self.splitted_path )
 
         out_return = {
             "th": self.th,
             "td": self.td,
-            "text": tabulate(self.td,self.th),
-            "json": self.json_content
+            "text": tabulate(self.td,self.th,tablefmt="simple"),
+            # "json": json.dumps(self.json)
+            "json": self.json
         }
         
         return out_return
 
     def jinja_render_value(self,template,context):
 
-        # inspected_paths = Inspect().view_paths(context)
-        # tbl = tabulate(inspected_paths,['path','value'])
-        # print(tbl)
-        # exit(0)
+        # print('coucou')
         if self.render == "jinja_ansible":
             templar = Templar(loader=self.loader, variables = context)
             
@@ -416,15 +455,7 @@ class JtableCls:
                     logging.error("Failed while jinja_ansible rendering value, error was: " + str(error))
         else:
             try:
-                tenv = Environment(extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'])
-            except:
-                tenv = Environment(loader=self.loader)
-                jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
-                for filter_name in jtable_core_filters:
-                    tenv.filters[filter_name] = getattr(Filters, filter_name)
-                
-            try:
-                mplate = tenv.from_string(template)
+                mplate = self.tenv.from_string(template)
             except Exception as error:
                 logging.error("Failed while loading env template: " + str(template) )
                 logging.error("Rrror was: " + str(error))
@@ -439,7 +470,7 @@ class JtableCls:
                     out = out_str =""
                 else:
                     out = error
-                    logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
+                    # logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
                     logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
                     # exit(1)
                     raise out
@@ -460,8 +491,10 @@ class JtableCls:
         return out
     
     def render_table(self,dataset,select=[],item_name = '',context={}):
+        cell_stylings = None
         if len(select) > 0:
             expressions = [expressions['expr'] for expressions in select]
+            cell_stylings = [(cell_stylings['styling'] if 'styling' in cell_stylings else []) for cell_stylings in select]
             fields_label = [fields_label['as'] for fields_label in select]
         else:
             fields = path_auto_discover().discover_paths(dataset)
@@ -479,7 +512,7 @@ class JtableCls:
             dataset_to_cover = dataset
         else:
             # print('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
-            print(dataset)
+            # print(dataset)
             raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
 
             
@@ -487,39 +520,75 @@ class JtableCls:
             row = []
             json_dict = {}
             row_index = 0
-            for expr in expressions:
-                jinja_expr = '{{ ' + expr  + ' }}'
-                loop_context = { item_name: item } if item_name != '' else item
-                # logging.info(f"self.dataset: {self.dataset}")
-                context = { **context, **loop_context, **self.dataset}
-                # print(context)
-                # exit(0)
-                rendered_context = {}
-                for var_name,var_data in self.vars.items():
-                    # print('debug type: ' + str(type(var_data)))
-                    # if type(dataset) is dict:
-                    #     var_data = str(var_data)
-                    templated_var = self.jinja_render_value(template=str(var_data), context = context)
-                    rendered_context.update({var_name: templated_var })
-                # exit(1)
-                # print('debug rendered_context: ' + str(rendered_context))
-                
-                value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**rendered_context})
+            # logging.info(f"item: {item}")
 
-                if value_for_json != None:
-                    key = fields_label[row_index]
-                    json_value = { key: value_for_json }
-                    json_dict = {**json_dict, **json_value }
-                    del json_value
-                    del value_for_json
-                    
-                row = row + [ value ]
-                del value
-                row_index += 1
+            def when(when=[],context={}):
+                condition_test_result = "True"
+                for condition in when:
+                    jinja_expr = '{{ ' + condition  + ' }}'
+                    loop_condition_context = { item_name: item } if item_name != '' else item
+                    context = { **context, **loop_condition_context, **self.dataset}
+                    condition_context = {}
+                    for var_name,var_data in self.vars.items():
+                        templated_var = self.jinja_render_value(template=str(var_data), context = context)
+                        condition_context.update({var_name: templated_var })
+                    condition_test_result = self.jinja_render_value( template = jinja_expr, context = {**context,**condition_context})
+                    # print(condition_test_result)
+                    if condition_test_result == "False":
+                        break
+                return condition_test_result
+
+            condition_test_result = when(when = self.when, context = context)
             
-            self.json = self.json + [ json_dict ]
-            self.td = self.td + [ row ]
+            # logging.error(f"condition_test_result: {condition_test_result}")
+            # exit()
+            
                 
+            if condition_test_result == "True":
+                for expr in expressions:
+                    jinja_expr = '{{ ' + expr  + ' }}'
+                    loop_context = { item_name: item } if item_name != '' else item
+                    context = { **context,  **self.dataset}
+                    rendered_context = {}
+                    for var_name,var_data in self.vars.items():
+                        templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
+                        rendered_context.update({var_name: templated_var })
+                    value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
+                    del loop_context
+
+                    key = fields_label[row_index]
+                    if value_for_json != None:
+                        json_value = { key: value_for_json }
+                        json_dict = {**json_dict, **json_value }
+                    # else:
+                    #     json_dict = {**json_dict, **{key: None} }
+                        del json_value
+                    # value_for_json = undefined
+                        del value_for_json
+
+
+                    if cell_stylings is not None:
+                        cell_styling = cell_stylings[row_index]
+                        condition_color = "True"
+                        if cell_styling != []:
+                            for style in cell_styling:
+                                color_conditions = [color_conditions for color_conditions in  style['when'] ]
+                                # print(color_conditions)
+                                condition_color = when(when = color_conditions, context = context)
+                                if condition_color == "True":
+                                    # print(style)
+                                    stylized_value = Styling().apply(value = value,format="text", style = style['style'] )
+                                    value = stylized_value
+                        # logging.info(str(condition_color) + " / " + str(value))
+
+
+
+                    row = row + [ value ]
+                    del value
+                    row_index += 1
+                self.json = self.json + [ json_dict ]
+                self.td = self.td + [ row ]
+        
         
         if fields_label is None:
             headers = list(map(lambda item: '.'.join(item), expressions))
@@ -536,16 +605,6 @@ class JtableCls:
             print(error)
             exit(2)
 
-
-class FilterModule(object):
-  """ Ansible core jinja2 filters """
-  
-  def filters(self):
-    return {
-      'jtable': jtable_filter
-    }
-
-
 class path_auto_discover:
     def __init__(self):
         self.paths = []
@@ -559,9 +618,13 @@ class path_auto_discover:
                 self.cover_paths(value,the_path )
         elif type(dataset) is list:
             # pass
-            index=0
-            for item in dataset:
-                self.cover_paths(item,path)
+            if len(dataset) > 0:
+                index=0
+                for item in dataset:
+                    self.cover_paths(item,path)
+            else:
+                if path[1:] not in self.fields:
+                    self.fields = self.fields + [path[1:]]
         else:
             self.paths = self.paths + [ path + [dataset] ]
             if path[1:] not in self.fields:
@@ -589,7 +652,6 @@ class path_auto_discover:
             exit(1)
 
         return self.fields
-
 
 class JinjaPathSplitter:
 
@@ -666,10 +728,35 @@ class JinjaPathSplitter:
         self.cover_path(remaining_path)
         return self.path_list
 
+class Styling:
+    def __init__(self):
+        self.color_table = [{"name":"Black","ansi_code":30,"hex":"#000000"},{"name":"Red","ansi_code":31,"hex":"#FF0000"},{"name":"Green","ansi_code":32,"hex":"#008000"},{"name":"Yellow","ansi_code":33,"hex":"#FFFF00"},{"name":"Blue","ansi_code":34,"hex":"#0000FF"},{"name":"Magenta","ansi_code":35,"hex":"#FF00FF"},{"name":"Cyan","ansi_code":36,"hex":"#00FFFF"},{"name":"White","ansi_code":37,"hex":"#FFFFFF"},{"name":"Gray","ansi_code":90,"hex":"#808080"},{"name":"LightRed","ansi_code":91,"hex":"#FF8080"},{"name":"LightGreen","ansi_code":92,"hex":"#80FF80"},{"name":"LightYellow","ansi_code":93,"hex":"#FFFF80"},{"name":"LightBlue","ansi_code":94,"hex":"#8080FF"},{"name":"LightMagenta","ansi_code":95,"hex":"#FF80FF"},{"name":"LightCyan","ansi_code":96,"hex":"#80FFFF"},{"name":"LightWhite","ansi_code":97,"hex":"#F0F0F0"}]
+    
+    def get_color(self,color_name="",format=""):
+        return [color for color in self.color_table if color['name'].lower() == color_name.lower() ][0][format]
+
+    def apply(self,value="",format="",style=""):
+        if format == "text":
+            style_name = style.split(': ')[0]
+            style_value = style.split(': ')[1]
+            if "color" in style_name:
+                color_value = self.get_color(style_value,"ansi_code")
+                value_colorized = f"\x1b[1;{color_value}m{value}\x1b[0m"
+                return value_colorized
+
 def main():
     JtableCli().parse_args()
     return
 
+# class Undefined:
+#     def __repr__(self):
+#         return "undefined"
 
+#     def __str__(self):
+#         return self.__repr__()
+
+    
+
+    
 if __name__ == '__main__':
     main()

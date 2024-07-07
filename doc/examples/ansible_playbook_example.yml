@@ -1,0 +1,18 @@
+- hosts: localhost
+  gather_facts: no
+  vars:
+    host_list:
+      - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_3"}  }
+      - { hostname: host_2, os: linux1, cost: 200, state: alive }
+      - { hostname: host_3, os: windows, cost: 200, state: alive }
+      - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+      - { hostname: host_5, os: windows, cost: 5000, state: decom, ips: [] }
+  tasks:
+      
+  - debug:
+      msg: "{{ ansible_python_interpreter  }}"
+
+  - debug:
+      msg: "{{ host_list | jtable }}"
+
+

@@ -1,0 +1,96 @@
+out: '{{ stdin | jtable(select=select,path=path, format=''text'',vars=views ) }}'
+
+queryset:
+  path: "plays[0].tasks[0].hosts{host}.msg{}"
+  select:
+  - as: location
+    expr: "location[(location | list | intersect(value.group_names))[0]]"
+  - as: dc
+    expr: "(location | list | intersect(value.group_names))[0]"
+  - as: hostname
+    expr: key
+  - as: env
+    expr: value.inventory_dir.split('/')[-2]
+  - as: dept
+    expr: value.inventory_dir.split('/')[-1]
+  - as: type
+    expr: "component | intersect(value.group_names) | join(', ')"
+  views:
+    location:
+      dc1: West Coast
+      dc2: East Coast
+    component:
+      - app
+      - rmp
+
+
+
+  # - as: value.ansible_check_mode
+  #   expr: value.ansible_check_mode
+  # - as: value.ansible_config_file
+  #   expr: value.ansible_config_file
+  # - as: value.ansible_diff_mode
+  #   expr: value.ansible_diff_mode
+  # - as: value.ansible_forks
+  #   expr: value.ansible_forks
+  # - as: value.ansible_playbook_python
+  #   expr: value.ansible_playbook_python
+  # - as: value.ansible_run_tags
+  #   expr: value.ansible_run_tags
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.ansible_verbosity
+  #   expr: value.ansible_verbosity
+  # - as: value.ansible_version.full
+  #   expr: value.ansible_version.full
+  # - as: value.ansible_version.major
+  #   expr: value.ansible_version.major
+  # - as: value.ansible_version.minor
+  #   expr: value.ansible_version.minor
+  # - as: value.ansible_version.revision
+  #   expr: value.ansible_version.revision
+  # - as: value.ansible_version.string
+  #   expr: value.ansible_version.string
+  # - as: value.app
+  #   expr: value.app
+  # - as: value.groups.all
+  #   expr: value.groups.all
+  # - as: value.groups.app
+  #   expr: value.groups.app
+  # - as: value.groups.dc1
+  #   expr: value.groups.dc1
+  # - as: value.groups.dc1_app
+  #   expr: value.groups.dc1_app
+  # - as: value.groups.dc1_rmp
+  #   expr: value.groups.dc1_rmp
+  # - as: value.groups.rmp
+  #   expr: value.groups.rmp
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+  # - as: value.inventory_dir
+  #   expr: value.inventory_dir
+  # - as: value.inventory_file
+  #   expr: value.inventory_file
+  # - as: value.inventory_hostname
+  #   expr: value.inventory_hostname
+  # - as: value.inventory_hostname_short
+  #   expr: value.inventory_hostname_short
+  # - as: value.playbook_dir
+  #   expr: value.playbook_dir
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+  # - as: value.ansible_skip_tags
+  #   expr: value.ansible_skip_tags
+  # - as: value.groups.ungrouped
+  #   expr: value.groups.ungrouped
+
