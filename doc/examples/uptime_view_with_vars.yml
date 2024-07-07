@@ -1,0 +1,25 @@
+
+queryset:
+  path: hosts{host}
+  select:
+    - as: region
+      expr: dc_location[host.dc]
+    - as: dc name
+      expr: host.dc
+    - as: hostname
+      expr: host.hostname
+    - as: os type
+      expr: host.os
+    - as: uptime in days
+      expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 
+        else (uptime_in_day | string ) +  ' day'"
+    - as: sanity status
+      expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
+  views:
+    dc_location:
+      dc_1: East
+      dc_2: North
+    uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
+
+
+out: "{{ stdin | jtable(select=select,vars=views,path=path)}}"

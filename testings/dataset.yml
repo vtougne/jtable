@@ -4,8 +4,30 @@
 host_list:
   - { hostname: host_1, os: linux, cost: 5000, state: alive, env: '{ "env": "qua" }', order_date: "2016-08-14 20:00:12"  }
   - { hostname: host_2, os: windows, cost: 200, env: '{ "env": "test" }', order_date: "2016-08-14 20:00:12"}
-  - { hostname: host_3, os: linux, cost: 200, state: alive, env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
-  - { hostname: host_3, os: linux, cost: 200, state: alive, env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
+  - { hostname: host_3, os: linux, cost: 200, state: "unreachable", env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
+  - { hostname: host_4, os: aix, cost: "200", state: "alive", env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
+  - { hostname: host_5, os: linux, cost: 200, state: unreachable, env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12" }
+
+host_list_testing:
+  - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_3"}  }
+  - { hostname: host_2, os: linux1, cost: 200, state: alive }
+  - { hostname: host_3, os: windows, cost: 200, state: alive }
+  - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+  - { hostname: host_5, os: windows, cost: 5000, state: decom, ips: [] }
+
+host_list_debug:
+  - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_3"}  }
+  - { hostname: host_2, os: linux1, cost: 200, state: alive }
+  - { hostname: host_3, os: windows, cost: 200, state: alive }
+  - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+  - { hostname: host_5, os: windows, cost: 5000, state: decom }
+
+colored_host_list:
+  - { hostname: host_1, os: linux, cost: 5000, state: alive, env: '{ "env": "qua" }', order_date: "2016-08-14 20:00:12"  }
+  - { hostname: host_2, os: windows, cost: 200, env: '{ "env": "test" }', order_date: "2016-08-14 20:00:12"}
+  - { hostname: host_3, os: linux, cost: 200, state: "\e[44munreachable\e[0m", env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
+  - { hostname: host_4, os: linux, cost: "\e[38;5;205m200\e[0m", state: "\e[1;92malive\e[0m", env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
+  - { hostname: host_5, os: linux, cost: 200, state: unreachable, env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
   
 hosts:
   - { hostname: host_1, os: linux, cost: 5000, state: alive  }
