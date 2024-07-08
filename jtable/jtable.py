@@ -318,9 +318,10 @@ class JtableCls:
             for filter_name in jtable_core_filters:
                 self.tenv.filters[filter_name] = getattr(Filters, filter_name)
         elif self.render == "jinja_ansible_extensions":
-            self.tenv = tenv = Environment(extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'])
-        # global undefined
-        # undefined = Undefined()
+            self.tenv = Environment(extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'])
+        else:
+            logging.error("Unknown render option")
+            exit(1)
     
     def cross_path(self,dataset,path,context={}):
         level = len(path)
@@ -424,7 +425,12 @@ class JtableCls:
             # logging.info(f"self.splitted_path: {self.splitted_path}")
             self.dataset = {"input": self.dataset}
             
+            
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
+        
+        # self.render_table(dataset=dataset,select=self.select,item_name="item")
+        
+        
         # self.cross_path(self.dataset, self.splitted_path )
 
         out_return = {
