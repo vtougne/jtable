@@ -9,8 +9,8 @@
       - { hostname: host_5, os: windows, cost: 5000, state: decom, ips: [] }
   tasks:
       
-  - debug:
-      msg: "{{ ansible_python_interpreter  }}"
+  # - debug:
+  #     msg: "{{ ansible_python_interpreter  }}"
 
   - debug:
       msg: "{{ host_list | jtable }}"

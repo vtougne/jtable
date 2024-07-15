@@ -1,7 +1,0 @@
-select:
-  - as: host
-    expr: hostname
-  - as: os type
-    expr: os
-  - as: uptime in days
-    expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"

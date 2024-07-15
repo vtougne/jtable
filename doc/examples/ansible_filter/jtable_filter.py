@@ -8,10 +8,12 @@ from ansible.module_utils.basic import AnsibleModule
 import site
 print(site.getusersitepackages())
 
-def jtable_filter(dataset,select=[],path="stdin{}",format="text"):
+def jtable_filter(dataset,select=[],path="{}",format="text",vars={}, when=[],queryset={}):
     from jtable import jtable
-    print(jtable.__file__)
-    return jtable.JtableCls(render="jinja_ansible").render_object({"stdin": dataset},path=path, select=select)[format]
+    # print(jtable.__file__)
+    # print(dataset)
+    # return jtable.JtableCls(render="jinja_ansible").render_object({"stdin": dataset},path=path, select=select)[format]
+    return jtable.JtableCls(render="jinja_ansible").render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)
 
 class FilterModule(object):
 

@@ -22,4 +22,4 @@ queryset:
     - as: strftime 
       expr: "  (order_date|to_datetime).strftime('%S') "
 
-out: "{{ host_list | jtable(select=select) }}"
+out: "{{ host_list | jtable(queryset=queryset) }}"
