@@ -33,10 +33,10 @@ queryset:
         - when:
           - "uptime_in_day | int < 30"
           style: "font-color: green"
-  views:
+  vars:
     dc_location:
       dc_1: East
       dc_2: North 
     uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
-out: "{{ hosts | sort (attribute='dc')| jtable(select=select,vars=views,path=path)}}"
+out: "{{ hosts | sort (attribute='dc')| jtable(queryset=queryset)}}"

@@ -53,9 +53,10 @@ logging_config = {
 logging.config.dictConfig(logging_config)
 
 class Filters:
-    def jtable(dataset,select=[],path="{}",format="text",vars={}, when=[],queryset={}):
+    def jtable(dataset,select=[],path="{}",format="",vars={}, when=[],queryset={}):
         # logging.info(f"path: {path}")
-        return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)[format]
+        # return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)[format]
+        return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
     def from_json(str):
         return json.loads(str)
@@ -257,40 +258,53 @@ class JtableCli:
         if args.view_query:
             queryset['format'] = "th"
             
-        def out_expr_fct(select,path,format):
-            return "{{ " + self.tabulate_var_name + " | jtable(select=" + select + ",path=\"" + path + "\", format=format ) }}"
+        # def out_expr_fct(select,path,format):
+            # return "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
             
-        out_expr = out_expr_fct(str(select), queryset['path'] , queryset['format'])
+        # out_expr = out_expr_fct(str(select), queryset['path'] , queryset['format'])
+        out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
         # print(out_expr) ; exit(0)
         if args.query_file:
             if 'out' in query_file:
                 out_expr = query_file['out']
             
         if args.inspect:
-            inspected_paths = Inspect().view_paths(self.dataset)
+            inspected_paths = Inspect().view_paths(self.dataset[self.tabulate_var_name])
             tbl = tabulate(inspected_paths,['path','value'])
             print(tbl)
-            exit(0)
+            return
         
         # out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
-        out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**queryset})
+        # print(queryset)
+        # return
         
         if args.view_query:
+            # queryset['format'] = "json"
+            out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**{"queryset": queryset}},eval_str=True)
+            # print(out)
+            # return
             query_file_out = {}
             query_set_out = {}
             fields = out
             if select == []:
                 for field in fields:
                     select = select + [ {'as': field, 'expr':field }  ]
-            query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'text')
             query_set_out['select'] = select
             query_set_out['path'] = queryset['path']
+            # query_file_out['queryset'] = query_set_out
             query_file_out['queryset'] = query_set_out
-            out = yaml.dump(query_file_out, allow_unicode=True)
-        
-        if queryset['format'] == "json":
-            print(json.dumps(out))
+            # query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'text')
+            query_file_out['out'] = out_expr
+            yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
+            print(yaml_query_out)
         else:
+            # logging.info(f"queryset: {queryset}")
+            out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**{"queryset": queryset}},eval_str=True)
+            # out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**queryset},eval_str=False)
+            # if queryset['format'] == "json":
+            #     print(json.dumps(out))
+            # else:
+            #     print(out)
             print(out)
 
 class JtableCls:
@@ -305,6 +319,7 @@ class JtableCls:
         self.select = []
         self.vars = {}
         self.path = "{}"
+        self.format = ""
 
         if self.render == "jinja_ansible":
             global Templar,AnsibleContext,AnsibleEnvironment
@@ -387,7 +402,7 @@ class JtableCls:
             # logging.info(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
     
-    def render_object(self,dataset,path="{}",select=[],vars={}, when=[],format="text",queryset={}):
+    def render_object(self,dataset,path="{}",select=[],vars={}, when=[],format="",queryset={}):
         for query_item,query_data in queryset.items():
             if query_item == "select":
                 self.select = query_data
@@ -401,20 +416,27 @@ class JtableCls:
             elif query_item == "format":
                 self.format = query_data
             else:
-                error =  "the queryset argument contains a non accepted key" + query_item
+                raise Exception(f"the queryset argument contains a non accepted key: {query_item}")
+                # print('query_item: ' + query_item)
                 # exit(1)
-                raise "the queryset argument contains a non accepted key" + query_item
-
+                # err = f"the queryset argument contains a non accepted key: {query_item}"
+                # raise err
+                # print('coucou')
+            
+            
         self.path = path if path != "{}" else self.path
         self.select = select if select != [] else self.select
         self.vars = vars if vars != {} else self.vars
         self.when = when if when != [] else self.when
+        self.format = format if format != "" else self.format
+
+        # logging.info(f"self.vars: {self.vars}")
 
         self.dataset = dataset
 
         # logging.info(f"self.select: {self.select}")
         
-        for k,v in vars.items():
+        for k,v in self.vars.items():
             self.vars = {**self.vars, **{ k: '{{' + str(v) + '}}' } }
             
 
@@ -437,15 +459,16 @@ class JtableCls:
             "th": self.th,
             "td": self.td,
             "text": tabulate(self.td,self.th,tablefmt="simple"),
-            # "json": json.dumps(self.json)
-            "json": self.json
+            "json": json.dumps(self.json)
+            # "json": self.json
         }
         
-        return out_return
+        print(self.format)
+        
+        return out_return[self.format]
 
-    def jinja_render_value(self,template,context):
+    def jinja_render_value(self,template,context,eval_str=True):
 
-        # print('coucou')
         if self.render == "jinja_ansible":
             templar = Templar(loader=self.loader, variables = context)
             
@@ -483,16 +506,19 @@ class JtableCls:
             if out_str == "":
                 out = None
             else:
-                try:
-                    expr = ast.parse(out_str, mode='eval').body
-                    expr_type = expr.__class__.__name__
-                    if expr_type == 'List' or expr_type == 'Dict':
-                        out =  ast.literal_eval(mplate.render(**context))
-                    elif expr_type == 'Name':
+                if eval_str == True:
+                    try:
+                        expr = ast.parse(out_str, mode='eval').body
+                        expr_type = expr.__class__.__name__
+                        if expr_type == 'List' or expr_type == 'Dict':
+                            out =  ast.literal_eval(mplate.render(**context))
+                        elif expr_type == 'Name':
+                            out = out_str
+                        else:
+                            out = str(out_str)
+                    except:
                         out = out_str
-                    else:
-                        out = str(out_str)
-                except:
+                else:
                     out = out_str
         return out
     

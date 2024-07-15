@@ -18,6 +18,7 @@ curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p boo
 output:
 
 ```text
+text
 title                                  author               genre
 -------------------------------------  -------------------  -----------
 The Catcher in the Rye                 J.D. Salinger        Fiction
@@ -103,6 +104,7 @@ cat host_list_of_dict.yml  | jtable
 output:
 
 ```text
+text
 hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
 host_1      linux    5000  alive        qua
@@ -126,6 +128,7 @@ cat host_dict_of_dict.yml  | jtable
 output:
 
 ```text
+text
 key     value.os      value.cost  value.state
 ------  ----------  ------------  -------------
 host_1  linux               5000  alive
@@ -180,6 +183,7 @@ cat host_list_of_dict_in_key.yml  | jtable -p hosts
 output:
 
 ```text
+text
 hostname    os         cost  state        env
 ----------  -------  ------  -----------  -----
 host_1      linux      5000  alive        qua
@@ -204,6 +208,7 @@ cat host_list_of_dict_in_key.yml | jtable
 output:
 
 ```text
+text
 key    value.hostname    value.os    value.cost    value.state    value.env
 -----  ----------------  ----------  ------------  -------------  -----------
 hosts
@@ -229,22 +234,22 @@ cat host_list_of_dict_in_key.yml  | jtable --inspect
 output:
 
 ```text
-path                     value
------------------------  -----------
-stdin.hosts[0].hostname  host_1
-stdin.hosts[0].os        linux
-stdin.hosts[0].cost      5000
-stdin.hosts[0].state     alive
-stdin.hosts[0].env       qua
-stdin.hosts[1].hostname  host_2
-stdin.hosts[1].os        windows
-stdin.hosts[1].cost      5000
-stdin.hosts[1].state     alive
-stdin.hosts[1].env       qua
-stdin.hosts[2].hostname  host_3
-stdin.hosts[2].os        linux
-stdin.hosts[2].state     unreachable
-stdin.hosts[2].env       qua
+path               value
+-----------------  -----------
+hosts[0].hostname  host_1
+hosts[0].os        linux
+hosts[0].cost      5000
+hosts[0].state     alive
+hosts[0].env       qua
+hosts[1].hostname  host_2
+hosts[1].os        windows
+hosts[1].cost      5000
+hosts[1].state     alive
+hosts[1].env       qua
+hosts[2].hostname  host_3
+hosts[2].os        linux
+hosts[2].state     unreachable
+hosts[2].env       qua
 
 ```
 </details>
@@ -291,6 +296,7 @@ cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
 output:
 
 ```
+text
 hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
 host_1      linux    5000  alive        qua
@@ -317,10 +323,9 @@ cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
 output:
 
 ```yaml
-out: '{{ stdin | jtable(select=select,path="region.East[''Data Center''].dc_1.hosts{}",
-  format=format ) }}'
+th
+th
 queryset:
-  path: region.East['Data Center'].dc_1.hosts{}
   select:
   - as: hostname
     expr: hostname
@@ -332,6 +337,8 @@ queryset:
     expr: state
   - as: env
     expr: env
+  path: region.East['Data Center'].dc_1.hosts{}
+out: '{{ stdin | jtable(queryset=queryset) }}'
 
 
 ```
@@ -376,6 +383,7 @@ cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml
 output:
 
 ```
+text
 host    os type
 ------  ---------
 host_1  linux
@@ -449,6 +457,7 @@ cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
 output:
 
 ```
+text
 hostname    os       uptime  state        env    dc
 ----------  -----  --------  -----------  -----  ----
 host_1      linux   1879723  alive        qua    dc_1
@@ -482,18 +491,17 @@ queryset:
     - as: os type
       expr: host.os
     - as: uptime in days
-      expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 
-        else (uptime_in_day | string ) +  ' day'"
+      expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 else (uptime_in_day | string ) +  ' day'"
     - as: sanity status
       expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
-  views:
+  vars:
     dc_location:
       dc_1: East
       dc_2: North
     uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
-out: "{{ stdin | jtable(select=select,vars=views,path=path)}}"
+out: "{{ stdin | jtable(queryset=queryset)}}"
 ```
 </details>
 
@@ -509,6 +517,7 @@ cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
 output:
 
 ```
+text
 region    dc name    hostname    os type    uptime in days    sanity status
 --------  ---------  ----------  ---------  ----------------  --------------------
 East      dc_1       host_1      linux      21 days           ✅
@@ -592,6 +601,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
+text
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -643,8 +653,8 @@ The plabybook
       - { hostname: host_5, os: windows, cost: 5000, state: decom, ips: [] }
   tasks:
       
-  - debug:
-      msg: "{{ ansible_python_interpreter  }}"
+  # - debug:
+  #     msg: "{{ ansible_python_interpreter  }}"
 
   - debug:
       msg: "{{ host_list | jtable }}"
@@ -687,7 +697,8 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-14:30:52 (line 222) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+22:14:55 (line 223) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+text
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -761,7 +772,7 @@ queryset:
     - as: strftime 
       expr: "  (order_date|to_datetime).strftime('%S') "
 
-out: "{{ host_list | jtable(select=select) }}"
+out: "{{ host_list | jtable(queryset=queryset) }}"
 ```
 </details>
 
@@ -777,6 +788,7 @@ jtable -q strf_time_example.yml
 output:
 
 ```
+text
 hostname    os       cost  state      order_date    strftime
 ----------  -----  ------  -------  ------------  ----------
 host_1      linux    5000  alive     2.02032e+07          12
@@ -802,6 +814,7 @@ jtable -q uptime_view_colored.yml
 output:
 
 ```bash
+text
 region    dc name    hostname    os     state        uptime
 --------  ---------  ----------  -----  -----------  --------
 East      dc_1       host_1      linux  [1;31munreachable[0m  [1;32m6 days[0m
@@ -829,15 +842,8 @@ ansible-playbook ansible_playbook_example.yml
 output:
 
 ```bash
-[WARNING]: No inventory was parsed, only implicit localhost is available
-[WARNING]: provided hosts list is empty, only localhost is available. Note that
-the implicit localhost does not match 'all'
 
 PLAY [localhost] ***************************************************************
-
-TASK [debug] *******************************************************************
-ok: [localhost] => 
-  msg: /usr/bin/python3
 
 TASK [debug] *******************************************************************
 ok: [localhost] => 
@@ -852,7 +858,7 @@ ok: [localhost] =>
     host_5      windows    5000  decom                    []
 
 PLAY RECAP *********************************************************************
-localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 
 
 ```

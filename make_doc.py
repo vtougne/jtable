@@ -76,9 +76,8 @@ for play_doc in play_doc_book:
                 outfile.write(out)
             
         try:
-            output = subprocess.check_output(
-                cmd, stderr=subprocess.STDOUT, shell=True, timeout=3,
-                universal_newlines=True)
+            # output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True, timeout=3, universal_newlines=True)
+            output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, shell=True,universal_newlines=True)
         except subprocess.CalledProcessError as exc:
             status = exc.returncode
             err = exc.output
