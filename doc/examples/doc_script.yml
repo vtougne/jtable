@@ -7,11 +7,11 @@
 - name: "json coming from curl"
   play_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p books
   box_as: text
-  collapse: command & output
+  # collapse: command & output
 
 - eval_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json
   box_as: json
-  collapse: json returned by curl cmd
+  # collapse: json returned by curl cmd
 
 - text: |
     ### display a list of dictionnaries as a table
@@ -20,17 +20,17 @@
 - eval_cmd: cat host_list_of_dict.yml
   text: "```file: host_list_of_dict.yml```"
   box_as: yaml
-  collapse: dataset sample
+  # collapse: dataset sample
 
 - play_cmd: cat host_list_of_dict.yml  | jtable
   box_as: text
-  collapse: command & output
+  # collapse: command & output
 
 
-- name: display dictionnaries of dictionnaries as a able
+- name: display dictionnaries of dictionnaries as a table
   play_cmd: cat host_dict_of_dict.yml  | jtable
   box_as: text
-  collapse: command & output
+  # collapse: command & output
 
 - text: |
     ## Use path  
@@ -41,13 +41,13 @@
 - eval_cmd: cat host_list_of_dict_in_key.yml
   text: "```host_list_of_dict_in_key.yml```"
   box_as: yaml
-  collapse: dataset sample
+  # collapse: dataset sample
 
 
 - name: access to key in path
   play_cmd: cat host_list_of_dict_in_key.yml  | jtable -p hosts
   box_as: text
-  collapse: command & output
+  # collapse: command & output
 
 
 - text: |
@@ -56,7 +56,7 @@
 
 - play_cmd: cat host_list_of_dict_in_key.yml | jtable
   box_as: text
-  collapse: command & output
+  # collapse: command & output
 
 - text: |
     It looks to nothing... :)  
@@ -66,14 +66,14 @@
 - name: Inspect inputs command
   play_cmd: cat host_list_of_dict_in_key.yml  | jtable --inspect
   box_as: text
-  collapse: command & output
+  # collapse: command & output
 
 - eval_cmd: cat key_containing_space.yml
   box_as: yaml
-  collapse: dataset sample
+  # collapse: dataset sample
 
 - play_cmd: "cat key_containing_space.yml | jtable -p \"region.East['Data Center'].dc_1.hosts\""
-  collapse: command & output
+  # collapse: command & output
 
 - text: "## Use query file"
 - text: "if you want to hide, show a given filter you have to build a query file"
@@ -82,17 +82,17 @@
 - name: view_query option
   play_cmd: "cat key_containing_space.yml | jtable -p \"region.East['Data Center'].dc_1.hosts\" --view_query"
   box_as: yaml
-  collapse: command & output
+  # collapse: command & output
 
 - text: "### Query file sample:"
 
 
 - eval_cmd: cat host_list_of_dict_in_key.yml
   box_as: yaml
-  collapse: dataset sample
+  # collapse: dataset sample
 
 - play_cmd: "cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml"
-  collapse: command & output
+  # collapse: command & output
 
 
 - text: |
@@ -104,14 +104,14 @@
 - name: Transform uptime coming in seconds to days
   eval_cmd: cat uptime_dataset.yml
   box_as: yaml
-  collapse: the dataset
+  # collapse: the dataset
 
 - eval_cmd: cat uptime_view.yml
   box_as: yaml
-  collapse: the query
+  # collapse: the query
 
 - play_cmd: cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
-  collapse: command & output
+  # collapse: command & output
 
 - text: |
     ## Use variables in your query file
@@ -120,10 +120,10 @@
 - name: Use variables mapping table or view
   eval_cmd: cat uptime_view_with_vars.yml
   box_as: yaml
-  collapse: the query
+  # collapse: the query
 
 - play_cmd: cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
-  collapse: command & output
+  # collapse: command & output
 
 - text: |
     ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
@@ -135,23 +135,23 @@
     ```
     cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
     ```
-  collapse: The command
+  # collapse: The command
 
 - eval_cmd: cat name_incoming_attribute.yml
   box_as: yaml
-  collapse: the query
+  # collapse: the query
 
 - name: 'store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"'
   eval_cmd: cat region_dataset.yml
   box_as: yaml
-  collapse: the dataset
+  # collapse: the dataset
 
 - play_cmd: 'cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view.yml'
-  collapse: command & output
+  # collapse: command & output
 
 - eval_cmd: cat region_view.yml
   box_as: yaml
-  collapse: the query
+  # collapse: the query
 
 - text: "## Use jtable with Ansible"
 - text: "The plabybook"
@@ -160,7 +160,7 @@
   box_as: yaml
 
 # - play_cmd: 'ansible-playbook ansible_playbook_example.yml'
-#   collapse: command & output
+#   # collapse: command & output
 #   box_as: bash
 
 - text: "## Load multiple files"
@@ -173,34 +173,34 @@
 
 
 - play_cmd: 'jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_queryset.yml'
-  collapse: command & output
+  # collapse: command & output
   box_as: bash
 
 - box_as: yaml
   eval_cmd: cat load_multi_json_queryset.yml
-  collapse: The query
+  # collapse: The query
 
 - text: "# Embded filters"
 
 - name: strf_time
 - box_as: yaml
   eval_cmd: cat strf_time_example.yml
-  collapse: dataset & query
+  # collapse: dataset & query
 
 - play_cmd: jtable -q strf_time_example.yml
-  collapse: command & output
+  # collapse: command & output
 
 - text: "# Conditional styling"
 
 - name: Styling option
   play_cmd: "jtable -q uptime_view_colored.yml"
   box_as: bash
-  collapse: dataset & query
+  # collapse: dataset & query
 
 # - name: Styling view screenshot
 #   eval_cmd: "../../screenshot.py -i jack.html -o jack.png"
 #   box_as: bash
-#   collapse: dataset & query
+#   # collapse: dataset & query
 
 - name: Ansible again
   play_cmd: |
@@ -210,7 +210,7 @@
     ansible-playbook ansible_playbook_example.yml
   
   box_as: bash
-  collapse: dataset & query
+  # collapse: dataset & query
 
 
 

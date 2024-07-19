@@ -15,4 +15,6 @@ regions:
         - { hostname: host_c_1, os: linux, state: alive }
         - { hostname: host_c_2, os: linux, state: alive }
         - { hostname: host_c_3, os: linux, state: alive }
+  north:
+    truc: coucou
 

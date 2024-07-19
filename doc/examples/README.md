@@ -6,10 +6,6 @@
 
   
 #### json coming from curl
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -18,7 +14,6 @@ curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p boo
 output:
 
 ```text
-text
 title                                  author               genre
 -------------------------------------  -------------------  -----------
 The Catcher in the Rye                 J.D. Salinger        Fiction
@@ -27,12 +22,6 @@ The Great Gatsby                       F. Scott Fitzgerald  Classics
 Sapiens: A Brief History of Humankind  Yuval Noah Harari    Non-Fiction
 
 ```
-</details>
-
-<details>
-
-<summary>json returned by curl cmd..................(⬇️ Click to expand)</summary>  
-
 
 ```json
 {
@@ -61,14 +50,8 @@ Sapiens: A Brief History of Humankind  Yuval Noah Harari    Non-Fiction
   }
   
 ```
-</details>
-
 ### display a list of dictionnaries as a table
 Considering the following dataset you want to display as a table  
-
-<details>
-
-<summary>dataset sample.............................(⬇️ Click to expand)</summary>  
 
 ```file: host_list_of_dict.yml```
 
@@ -90,12 +73,6 @@ Considering the following dataset you want to display as a table
 
 
 ```
-</details>
-
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -104,7 +81,6 @@ cat host_list_of_dict.yml  | jtable
 output:
 
 ```text
-text
 hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
 host_1      linux    5000  alive        qua
@@ -112,14 +88,8 @@ host_2      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
 ```
-</details>
-
   
 #### display dictionnaries of dictionnaries as a able
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -128,7 +98,6 @@ cat host_dict_of_dict.yml  | jtable
 output:
 
 ```text
-text
 key     value.os      value.cost  value.state
 ------  ----------  ------------  -------------
 host_1  linux               5000  alive
@@ -136,15 +105,9 @@ host_2  linux                200  alive
 host_3  linux                     unreachable
 
 ```
-</details>
-
 ## Use path  
 This argument allow you accessing  your dataset when located under a key or a list  
 example when datset under a key:  
-
-<details>
-
-<summary>dataset sample.............................(⬇️ Click to expand)</summary>  
 
 ```host_list_of_dict_in_key.yml```
 
@@ -167,14 +130,8 @@ hosts:
 
 
 ```
-</details>
-
   
 #### access to key in path
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -183,7 +140,6 @@ cat host_list_of_dict_in_key.yml  | jtable -p hosts
 output:
 
 ```text
-text
 hostname    os         cost  state        env
 ----------  -------  ------  -----------  -----
 host_1      linux      5000  alive        qua
@@ -191,14 +147,8 @@ host_2      windows    5000  alive        qua
 host_3      linux            unreachable  qua
 
 ```
-</details>
-
 ### Inspect Option
 Here is what would look to if the path is omitted:  
-
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
 
 
 command: 
@@ -208,24 +158,17 @@ cat host_list_of_dict_in_key.yml | jtable
 output:
 
 ```text
-text
 key    value.hostname    value.os    value.cost    value.state    value.env
 -----  ----------------  ----------  ------------  -------------  -----------
 hosts
 
 ```
-</details>
-
 It looks to nothing... :)  
 Here is the way to inspect what is inside your dataset.  
 All paths are covered until meeting a value, the path is display on the lef and the value on the right.
 
   
 #### Inspect inputs command
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -252,12 +195,6 @@ hosts[2].state     unreachable
 hosts[2].env       qua
 
 ```
-</details>
-
-<details>
-
-<summary>dataset sample.............................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 region:
@@ -282,12 +219,6 @@ region:
 
 
 ```
-</details>
-
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -296,7 +227,6 @@ cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
 output:
 
 ```
-text
 hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
 host_1      linux    5000  alive        qua
@@ -304,17 +234,11 @@ host_2      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
 ```
-</details>
-
 ## Use query file
 if you want to hide, show a given filter you have to build a query file
 You can display the query and redirect it to a given file using the following option:
   
 #### view_query option
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -323,8 +247,6 @@ cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
 output:
 
 ```yaml
-th
-th
 queryset:
   select:
   - as: hostname
@@ -342,13 +264,7 @@ out: '{{ stdin | jtable(queryset=queryset) }}'
 
 
 ```
-</details>
-
 ### Query file sample:
-<details>
-
-<summary>dataset sample.............................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 hosts:
@@ -369,12 +285,6 @@ hosts:
 
 
 ```
-</details>
-
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -383,7 +293,6 @@ cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml
 output:
 
 ```
-text
 host    os type
 ------  ---------
 host_1  linux
@@ -391,8 +300,6 @@ host_2  windows
 host_3  linux
 
 ```
-</details>
-
 ## Transform table content using Jinja  
 Your data may not arrived exatcly how you want to represent them.  
 In fact they never arrived as you want.  
@@ -400,10 +307,6 @@ The following example transform the uptime coming in seconds to days
 
   
 #### Transform uptime coming in seconds to days
-<details>
-
-<summary>the dataset................................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 hosts:
@@ -427,12 +330,6 @@ hosts:
 
 
 ```
-</details>
-
-<details>
-
-<summary>the query..................................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 select:
@@ -443,12 +340,6 @@ select:
   - as: uptime in days
     expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
 ```
-</details>
-
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -457,7 +348,6 @@ cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
 output:
 
 ```
-text
 hostname    os       uptime  state        env    dc
 ----------  -----  --------  -----------  -----  ----
 host_1      linux   1879723  alive        qua    dc_1
@@ -465,17 +355,11 @@ host_2              6879723  alive        qua    dc_2
 host_3      linux     23455  unreachable  qua    dc_3
 
 ```
-</details>
-
 ## Use variables in your query file
 this will helps to make mapping table, or behalf like view
 
   
 #### Use variables mapping table or view
-<details>
-
-<summary>the query..................................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 
@@ -503,12 +387,6 @@ queryset:
 
 out: "{{ stdin | jtable(queryset=queryset)}}"
 ```
-</details>
-
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -517,7 +395,6 @@ cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
 output:
 
 ```
-text
 region    dc name    hostname    os type    uptime in days    sanity status
 --------  ---------  ----------  ---------  ----------------  --------------------
 East      dc_1       host_1      linux      21 days           ✅
@@ -525,27 +402,15 @@ North     dc_2       host_2                 79 days           🔥 host.uptime e
           dc_3       host_3      linux      0 day             ✅
 
 ```
-</details>
-
 ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
 This feature will help you for the suite describe after to add more context in your  
 and avoid your variable coming from your input and the ones present.
 
   
 #### Store data in a namespace using path syntaxe stdin.hosts{```item```}
-<details>
-
-<summary>The command................................(⬇️ Click to expand)</summary>  
-
 ```
 cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
 ```
-
-</details>
-
-<details>
-
-<summary>the query..................................(⬇️ Click to expand)</summary>  
 
 
 ```yaml
@@ -557,14 +422,8 @@ queryset:
     - as: os
       expr: host.os
 ```
-</details>
-
   
 #### store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"
-<details>
-
-<summary>the dataset................................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 regions:
@@ -587,12 +446,6 @@ regions:
 
 
 ```
-</details>
-
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -601,7 +454,6 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
-text
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -615,12 +467,6 @@ dc_c       east        host_c_2    linux  alive
 dc_c       east        host_c_3    linux  alive
 
 ```
-</details>
-
-<details>
-
-<summary>the query..................................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 queryset:
@@ -636,8 +482,6 @@ queryset:
   - as: state
     expr: host.state
 ```
-</details>
-
 ## Use jtable with Ansible
 The plabybook
 
@@ -685,10 +529,6 @@ dirty line
 - { hostname: host_dev_its_3, os: win, cost: 200  }
 
 ```
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -697,8 +537,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-22:14:55 (line 223) | WARNING fail loading file data/dev/it_services/config.yml, skipping
-text
+17:06:40 (line 228) | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -715,12 +554,6 @@ qua    pay          host_qua_pay_444  linux     200
 qua    pay          host_qua_pay_3R3  win       200
 
 ```
-</details>
-
-<details>
-
-<summary>The query..................................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 
@@ -737,15 +570,9 @@ queryset:
     - as: cost
       expr: cost
 ```
-</details>
-
 # Embded filters
   
 #### strf_time
-<details>
-
-<summary>dataset & query............................(⬇️ Click to expand)</summary>  
-
 
 ```yaml
 context:
@@ -774,12 +601,6 @@ queryset:
 
 out: "{{ host_list | jtable(queryset=queryset) }}"
 ```
-</details>
-
-<details>
-
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -788,7 +609,6 @@ jtable -q strf_time_example.yml
 output:
 
 ```
-text
 hostname    os       cost  state      order_date    strftime
 ----------  -----  ------  -------  ------------  ----------
 host_1      linux    5000  alive     2.02032e+07          12
@@ -797,15 +617,9 @@ host_3      linux     200  alive     2.02032e+07          12
 host_3      linux     200  alive     2.02032e+07          12
 
 ```
-</details>
-
 # Conditional styling
   
 #### Styling option
-<details>
-
-<summary>dataset & query............................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -814,7 +628,6 @@ jtable -q uptime_view_colored.yml
 output:
 
 ```bash
-text
 region    dc name    hostname    os     state        uptime
 --------  ---------  ----------  -----  -----------  --------
 East      dc_1       host_1      linux  [1;31munreachable[0m  [1;32m6 days[0m
@@ -822,14 +635,8 @@ North     dc_2       host_1      linux  [1;32malive[0m        [1;32m21 days[
 North     dc_2       host_2      linux  [1;32malive[0m        [1;31m79 days[0m
 
 ```
-</details>
-
   
 #### Ansible again
-<details>
-
-<summary>dataset & query............................(⬇️ Click to expand)</summary>  
-
 
 command: 
 ```bash
@@ -862,6 +669,4 @@ localhost                  : ok=1    changed=0    unreachable=0    failed=0    s
 
 
 ```
-</details>
-
 ![uptime_view_colored](./jack.png)

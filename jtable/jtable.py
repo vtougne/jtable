@@ -181,7 +181,12 @@ class JtableCli:
             # self.dataset = yaml.safe_load(stdin)
 
         if not is_pipe and not args.json_file and not args.json_files and not args.query_file:
-            args = parser.parse_args(['--help'])
+            # args = parser.parse_args(['--help'])
+            parser.print_help(sys.stdout)
+            jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
+            logging.info("\njtable core filters:")
+            filters = [filter for filter in jtable_core_filters]
+            logging.info('  ' +', '.join(filters) + '\n')
             exit(1)
 
         if args.json_file:
@@ -275,13 +280,13 @@ class JtableCli:
             return
         
         # out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
-        # print(queryset)
+        # logging.info(queryset)
         # return
         
         if args.view_query:
             # queryset['format'] = "json"
             out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**{"queryset": queryset}},eval_str=True)
-            # print(out)
+            # logging.info(out)
             # return
             query_file_out = {}
             query_set_out = {}
@@ -299,7 +304,7 @@ class JtableCli:
             print(yaml_query_out)
         else:
             # logging.info(f"queryset: {queryset}")
-            out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**{"queryset": queryset}},eval_str=True)
+            out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**{"queryset": queryset}},eval_str=False)
             # out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**queryset},eval_str=False)
             # if queryset['format'] == "json":
             #     print(json.dumps(out))
@@ -354,15 +359,15 @@ class JtableCls:
                     logging.error('keys dataset were:')
                     logging.error(list(dataset))
                     logging.error("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
-                    exit(1)
+                    # exit(1)
             elif current_path[0] == ".":
                 current_path_value = current_path[1:]
                 if current_path_value in list(dataset):
                     self.cross_path(dataset[current_path_value],next_path, context = context)
                 else:
-                    print(list(dataset))
+                    logging.info(list(dataset))
                     logging.error(current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
-                    exit(1)
+                    # exit(1)
                     
             elif current_path[0] == "[":
                 current_path_value = current_path[1:-1]
@@ -370,7 +375,7 @@ class JtableCls:
                     self.cross_path(dataset[int(current_path_value)],next_path, context = context)
                     
                 else:
-                    print("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
+                    logging.info("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
                     exit(1)
             
             elif current_path[0] == "{":
@@ -395,7 +400,7 @@ class JtableCls:
                     logging.info(f"item_name: {item_name}")
                     self.render_table(dataset=dataset,select=self.select, item_name = item_name, context = context)
             else:
-                print("[ERROR] was looking for path...")
+                logging.info("[ERROR] was looking for path...")
                 exit(1)
         else:
             item_name = path[0][1:-1]
@@ -417,11 +422,11 @@ class JtableCls:
                 self.format = query_data
             else:
                 raise Exception(f"the queryset argument contains a non accepted key: {query_item}")
-                # print('query_item: ' + query_item)
+                # logging.info('query_item: ' + query_item)
                 # exit(1)
                 # err = f"the queryset argument contains a non accepted key: {query_item}"
                 # raise err
-                # print('coucou')
+                # logging.info('coucou')
             
             
         self.path = path if path != "{}" else self.path
@@ -462,8 +467,6 @@ class JtableCls:
             "json": json.dumps(self.json)
             # "json": self.json
         }
-        
-        print(self.format)
         
         return out_return[self.format]
 
@@ -530,7 +533,7 @@ class JtableCls:
             fields_label = [fields_label['as'] for fields_label in select]
         else:
             fields = path_auto_discover().discover_paths(dataset)
-            # print(fields) ; exit(0)
+            # logging.info(fields) ; exit(0)
             fields_label = list(map(lambda item: '.'.join(item), fields))
             # expressions = list(map(lambda item:  'item[\'' + '\'][\''.join(item) + '\']' , fields))
             item_name = 'item' if item_name == '' else item_name
@@ -543,8 +546,8 @@ class JtableCls:
         elif type(dataset) is list:
             dataset_to_cover = dataset
         else:
-            # print('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
-            # print(dataset)
+            # logging.info('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
+            # logging.info(dataset)
             raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
 
             
@@ -565,7 +568,7 @@ class JtableCls:
                         templated_var = self.jinja_render_value(template=str(var_data), context = context)
                         condition_context.update({var_name: templated_var })
                     condition_test_result = self.jinja_render_value( template = jinja_expr, context = {**context,**condition_context})
-                    # print(condition_test_result)
+                    # logging.info(condition_test_result)
                     if condition_test_result == "False":
                         break
                 return condition_test_result
@@ -605,10 +608,10 @@ class JtableCls:
                         if cell_styling != []:
                             for style in cell_styling:
                                 color_conditions = [color_conditions for color_conditions in  style['when'] ]
-                                # print(color_conditions)
+                                # logging.info(color_conditions)
                                 condition_color = when(when = color_conditions, context = context)
                                 if condition_color == "True":
-                                    # print(style)
+                                    # logging.info(style)
                                     stylized_value = Styling().apply(value = value,format="text", style = style['style'] )
                                     value = stylized_value
                         # logging.info(str(condition_color) + " / " + str(value))
@@ -632,9 +635,9 @@ class JtableCls:
             self.json_content = json.dumps(self.json)
         except Exception as error:
 
-            print(tabulate(self.td,self.th))
-            print("\nERROR!!  something wrong with json rendering, tabme maight contains the error \nErrors was:")
-            print(error)
+            logging.info(tabulate(self.td,self.th))
+            logging.info("\nERROR!!  something wrong with json rendering, tabme maight contains the error \nErrors was:")
+            logging.info(error)
             exit(2)
 
 class path_auto_discover:
@@ -680,7 +683,7 @@ class path_auto_discover:
                     index+=1
                 self.raw_rows = self.raw_rows + [ item ]
         except (AttributeError, TypeError):
-            print("ERROR Something wrong with your dataset")
+            logging.info("ERROR Something wrong with your dataset")
             exit(1)
 
         return self.fields
@@ -694,7 +697,7 @@ class JinjaPathSplitter:
                 if "']" in path:
                     left_part = path[2:].split("']")[0]
                     if left_part == "":
-                        print("Error dict expression empty, starting at " + str("".join(self.path_list)) )
+                        logging.info("Error dict expression empty, starting at " + str("".join(self.path_list)) )
                         exit(1)
                     else:
                         left_part = "['" + left_part + "']"
@@ -705,7 +708,7 @@ class JinjaPathSplitter:
                         reference_found = "yes"
                         
                 else:
-                    print('error expect "\']" was not found')
+                    logging.info('error expect "\']" was not found')
                     exit(1)
                 
             if path[0] == ".":
@@ -723,7 +726,7 @@ class JinjaPathSplitter:
                     if remaining_path != "":
                         self.cover_path(remaining_path)
                 else:
-                    print('error expect "}" was not found')
+                    logging.info('error expect "}" was not found')
                     exit(1)
                     
             elif path[0] == "[":
@@ -735,16 +738,16 @@ class JinjaPathSplitter:
                         if remaining_path != "":
                             self.cover_path(remaining_path)
                     else:
-                        print('error expect "}" was not found')
+                        logging.info('error expect "}" was not found')
                         exit(1)
                     
             else:
                 if path == "" or path[0:2] == "['" or path[0] == "{" or path[0] == ".":
                     pass
                 else:
-                    print(path[0:2])
-                    print('Error what know to do with ' + path)
-                    print('Error hapenned there ' + ''.join(self.path_list))
+                    logging.info(path[0:2])
+                    logging.info('Error what know to do with ' + path)
+                    logging.info('Error hapenned there ' + ''.join(self.path_list))
                     exit(1)
                 
     def extract_var_from_path(self,path):
@@ -756,7 +759,7 @@ class JinjaPathSplitter:
     
     def split_path(self,path=""):
         remaining_path = self.extract_var_from_path(path)
-        # print('debug remaining_path: ' + remaining_path)
+        # logging.info('debug remaining_path: ' + remaining_path)
         self.cover_path(remaining_path)
         return self.path_list
 
