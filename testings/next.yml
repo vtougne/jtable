@@ -1,0 +1,44 @@
+inputs:
+  entities:
+    type: json_files
+    path: "data/*/*/entity.json"
+  ref_data:
+    type: yaml_files
+    path: "data/*/*/entity.yaml"
+
+context:
+  dataset: "{{ stdin }}"
+  host_list:
+    - { hostname: host_1, os: linux, cost: 5000, state: alive, env: qua, orga_id: 53  }
+    - { hostname: host_2, os: linux, cost: 200, env: test, orga_id: 32 }
+    - { hostname: host_3, os: linux, cost: 200, state: alive, env: qua, orga_id: 88  }
+  env_corresp:
+    qua: qualification
+  dyn_ref_data: "{{ lookup('json_files','data/*/*/entity.json') }}"
+
+
+queryset:
+  path: "host_list{host}"
+  select:
+    - as: env
+      expr: "lookup('url','https://the_site/orga?name=' + host.orga_id )"
+    - as: my hostname
+      expr: host.hostname
+    - as: os
+      expr: host.os
+    - as: states
+      expr: host.state
+    - as: env
+      expr: "env_corresp[host.env] | default('unknown env, was: ' + host.env)"
+    - as: is_list
+      expr: "[host.os] | is_list"
+  views:
+    uptime_in_days: "{{ host.uptime_seconds / 60 / 60 / 24 }}"
+
+
+out: "{{ host_list | jtable(select=select, path=path, views=views) }}"
+
+
+
+
+# out: "{{ host_list | jtable(select=select) }}"

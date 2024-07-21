@@ -1,0 +1,7 @@
+**/__pycache__
+jtable.egg-info/
+/_gitignore
+lab/
+build/
+/jtable.spec
+dist/
