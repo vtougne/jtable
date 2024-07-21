@@ -10,8 +10,8 @@ build_my_image:
       DOCKER_TLS_CERTDIR: ""
     script:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
-    - docker build -t $CI_REGISTRY_IMAGE/jtable .
-    - docker push $CI_REGISTRY_IMAGE/jtable
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE
     - "echo debug CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE"
     - docker ps
     # - docker rm jtable_container || true
