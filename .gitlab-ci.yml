@@ -32,6 +32,7 @@ test:
 artifacts:
   paths:
     - doc/examples/README.md
+    - doc/examples/uptime_view_colored.html
   expire_in: 1 week
 
 # test:
