@@ -1,7 +1,7 @@
 default:
   tags:
     - docker
-build image:
+build_my_image:
     image: docker
     services:
     - docker:dind
@@ -21,7 +21,7 @@ build image:
     # - docker push $CI_REGISTRY_IMAGE/jtable_with_project
 
 test:
-    image: $CI_REGISTRY_IMAGE:latest
+    image: $CI_REGISTRY_IMAGE
     script:
       - echo $HOSTNAME
       - pip install .
