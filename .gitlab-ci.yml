@@ -2,47 +2,30 @@ default:
   tags:
     - docker
 build_my_image:
-    image: docker
-    services:
+  image: docker
+  services:
     - docker:dind
-    variables:
-      DOCKER_DRIVER: overlay2
-      DOCKER_TLS_CERTDIR: ""
-    script:
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  script:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE
     - "echo debug CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE"
     - docker ps
-    # - docker rm jtable_container || true
-    # - docker run -d --name jtable_container $CI_REGISTRY_IMAGE/jtable
-    # - docker cp . jtable_container:/project/jtable
-    # - docker commit jtable_container $CI_REGISTRY_IMAGE/jtable_with_project
-    # - docker push $CI_REGISTRY_IMAGE/jtable_with_project
 
 test:
-    image: $CI_REGISTRY_IMAGE:latest
-    script:
-      - echo $HOSTNAME
-      - pip install .
-      - jtable -h
-      - cd doc/examples
-      - ./make_doc.sh --halt
+  image: $CI_REGISTRY_IMAGE:latest
+  script:
+    - echo $HOSTNAME
+    - pip install .
+    - jtable -h
+    - cd doc/examples
+    - ./make_doc.sh --halt
 
-artifacts:
-  paths:
-    - doc/examples/README.md
-    - doc/examples/uptime_view_colored.html
-  expire_in: 1 week
-
-# test:
-#     image: registry.msi-gitlab/root/jtable/jtable:latest
-#     script:
-
-#     - jtable/jtable -h
-      # - echo "toto"
-      # - echo $HOSTNAME
-      # - cd jtable 
-      # - ls -l
-      # - ./jtable -h
-      # - cd /project/jtable && ./jtable -h
+  artifacts:
+    paths:
+      - doc/examples/README.md
+      - doc/examples/uptime_view_colored.html
+    expire_in: 1 week
