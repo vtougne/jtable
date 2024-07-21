@@ -29,6 +29,10 @@ test:
       - cd doc/examples
       - ./make_doc.sh --halt
 
+artifacts:
+  paths:
+    - doc/examples/README.md
+  expire_in: 1 week
 
 # test:
 #     image: registry.msi-gitlab/root/jtable/jtable:latest
