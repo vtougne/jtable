@@ -1,0 +1,15 @@
+queryset:
+  select:
+  - as: hostname
+    expr: hostname
+  - as: os
+    expr: os
+  - as: cost
+    expr: cost
+  - as: state
+    expr: state
+  - as: jack
+    expr: order_date.split(' ')[1]
+  path: host_list{}
+out: '{{ stdin | jtable(queryset=queryset) }}'
+
