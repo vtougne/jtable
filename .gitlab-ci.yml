@@ -12,18 +12,18 @@ build image:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
     - docker build -t $CI_REGISTRY_IMAGE/jtable .
     - docker push $CI_REGISTRY_IMAGE/jtable
+    - "echo debug CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE"
+    - docker ps
     # - docker rm jtable_container || true
     # - docker run -d --name jtable_container $CI_REGISTRY_IMAGE/jtable
     # - docker cp . jtable_container:/project/jtable
     # - docker commit jtable_container $CI_REGISTRY_IMAGE/jtable_with_project
     # - docker push $CI_REGISTRY_IMAGE/jtable_with_project
-    # rules:
-    # - if: '$CI_COMMIT_MESSAGE =~ /build/'
-    #   when: always
 
 test:
-    image: registry.msi-gitlab/root/jtable/jtable:latest
+    image: $CI_REGISTRY_IMAGE:latest
     script:
+      - echo $HOSTNAME
       - pip install .
       - jtable -h
       - cd doc/examples
