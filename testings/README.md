@@ -34,7 +34,7 @@ $`\textcolor{teal}{\text{your text}}`$
   &nbsp;&nbsp;&nbsp;tasks:  
 &nbsp;&nbsp;&nbsp;- name: Install packages  
     apt:  
-      name:  
+      $`\textcolor{red}{\text{name}}`$ :  
         - package1  
         - package2  
         - package3  
