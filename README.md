@@ -40,3 +40,8 @@ host_3      linux          unreachable  qua
 
 - [Setup](./doc/setup/README.md)
 - [Examples](./doc/examples/README.md)
+
+
+## Todo
+
+- [ ] manage multijson string [stakoverflow](https://stackoverflow.com/questions/27907633/how-to-extract-multiple-json-objects-from-one-file)
