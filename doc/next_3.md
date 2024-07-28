@@ -4,7 +4,7 @@
 1. [Introduction](#introduction)
 <details>
 
-<summary>command & output...........................(⬇️ Click to expand)</summary>  
+<!-- <summary>command & output...........................(⬇️ Click to expand)</summary>   -->
 
 
 command: 
