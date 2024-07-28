@@ -9,7 +9,7 @@ context:
 
 queryset:
   path: "{host}"
-  format: json
+  format: text
   select:
     - as: hostname
       expr: host.hostname
@@ -26,9 +26,9 @@ queryset:
           style: "font-color: red"
     - as: order_date
       expr: host.order_date
-  when:
-    - "host.os == 'linux'"
-out: "{{ host_list | jtable(select=select,path=path, format='text', when=when ) }}"
+  # when:
+  #   - "host.os == 'linux'"
+out: "{{ host_list | jtable(queryset = queryset) }}"
 # out: |
 #   Hell every body
 #   How it going on ?

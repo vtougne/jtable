@@ -1,4 +1,4 @@
-out: '{{ stdin | jtable(select=select,path=path, format=''text'',vars=views ) }}'
+out: '{{ stdin | jtable(queryset=queryset ) }}'
 
 queryset:
   path: "plays[0].tasks[0].hosts{host}.msg{}"
@@ -15,7 +15,7 @@ queryset:
     expr: value.inventory_dir.split('/')[-1]
   - as: type
     expr: "component | intersect(value.group_names) | join(', ')"
-  views:
+  vars:
     location:
       dc1: West Coast
       dc2: East Coast
