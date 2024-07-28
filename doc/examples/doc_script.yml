@@ -208,9 +208,9 @@
     export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
     export ANSIBLE_ACTION_WARNINGS=False && \
     export ANSIBLE_STDOUT_CALLBACK=yaml && \
+    echo $ANSIBLE_CONFIG && \
+    ls -l $ANSIBLE_CONFIG && \
     ansible-playbook ansible_playbook_example.yml
-    echo $ANSIBLE_CONFIG
-    ls -l $ANSIBLE_CONFIG
   
   box_as: bash
   # collapse: dataset & query
