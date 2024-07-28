@@ -434,6 +434,7 @@ class JtableCls:
 
         # logging.info(f"self.vars: {self.vars}")
 
+        self.dataset = dataset
 
         # logging.info(f"self.select: {self.select}")
         
@@ -447,9 +448,6 @@ class JtableCls:
             self.splitted_path[0] = "['input']"
             # logging.info(f"self.splitted_path: {self.splitted_path}")
             self.dataset = {"input": self.dataset}
-        else:
-            self.dataset = dataset
-
             
             
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
