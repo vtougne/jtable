@@ -1,19 +1,12 @@
-[[_TOC_]]
 ## Overview  
 - jtable helps you to render table from key / lists / values sources like json, yaml, and Python objects.  
 - It works as a cli in a shell and as a Jinja filter that may be integrated in a Python framework like Ansible, Django, Flask and others  
 ## Simple usage
 
-  
-#### json coming from curl
+json coming from curl
 
-command: 
-```bash
+cmd was: 
 curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p books
-```
-output:
-
-```text
 title                                  author               genre
 -------------------------------------  -------------------  -----------
 The Catcher in the Rye                 J.D. Salinger        Fiction
@@ -21,9 +14,9 @@ To Kill a Mockingbird                  Harper Lee           Classics
 The Great Gatsby                       F. Scott Fitzgerald  Classics
 Sapiens: A Brief History of Humankind  Yuval Noah Harari    Non-Fiction
 
-```
 
-```json
+cmd was: 
+curl -s https://samples-files.com/samples/Code/json/sample3.json
 {
     "books": [
       {
@@ -49,13 +42,13 @@ Sapiens: A Brief History of Humankind  Yuval Noah Harari    Non-Fiction
     ]
   }
   
-```
 ### display a list of dictionnaries as a table
 Considering the following dataset you want to display as a table  
 
 ```file: host_list_of_dict.yml```
 
-```yaml
+cmd was: 
+cat host_list_of_dict.yml
 - hostname: host_1
   os: linux
   cost: 5000
@@ -72,46 +65,33 @@ Considering the following dataset you want to display as a table
   env: qua
 
 
-```
 
-command: 
-```bash
+cmd was: 
 cat host_list_of_dict.yml  | jtable
-```
-output:
-
-```text
 hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
 host_1      linux    5000  alive        qua
 host_2      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
-```
-  
-#### display dictionnaries of dictionnaries as a table
+display dictionnaries of dictionnaries as a table
 
-command: 
-```bash
+cmd was: 
 cat host_dict_of_dict.yml  | jtable
-```
-output:
-
-```text
 key     value.os      value.cost  value.state
 ------  ----------  ------------  -------------
 host_1  linux               5000  alive
 host_2  linux                200  alive
 host_3  linux                     unreachable
 
-```
 ## Use path  
 This argument allow you accessing  your dataset when located under a key or a list  
 example when datset under a key:  
 
 ```host_list_of_dict_in_key.yml```
 
-```yaml
+cmd was: 
+cat host_list_of_dict_in_key.yml
 hosts:
   - hostname: host_1
     os: linux
@@ -129,54 +109,34 @@ hosts:
     env: qua
 
 
-```
-  
-#### access to key in path
+access to key in path
 
-command: 
-```bash
+cmd was: 
 cat host_list_of_dict_in_key.yml  | jtable -p hosts
-```
-output:
-
-```text
 hostname    os         cost  state        env
 ----------  -------  ------  -----------  -----
 host_1      linux      5000  alive        qua
 host_2      windows    5000  alive        qua
 host_3      linux            unreachable  qua
 
-```
 ### Inspect Option
 Here is what would look to if the path is omitted:  
 
 
-command: 
-```bash
+cmd was: 
 cat host_list_of_dict_in_key.yml | jtable
-```
-output:
-
-```text
 key    value.hostname    value.os    value.cost    value.state    value.env
 -----  ----------------  ----------  ------------  -------------  -----------
 hosts
 
-```
 It looks to nothing... :)  
 Here is the way to inspect what is inside your dataset.  
 All paths are covered until meeting a value, the path is display on the lef and the value on the right.
 
-  
-#### Inspect inputs command
+Inspect inputs command
 
-command: 
-```bash
+cmd was: 
 cat host_list_of_dict_in_key.yml  | jtable --inspect
-```
-output:
-
-```text
 path               value
 -----------------  -----------
 hosts[0].hostname  host_1
@@ -194,9 +154,9 @@ hosts[2].os        linux
 hosts[2].state     unreachable
 hosts[2].env       qua
 
-```
 
-```yaml
+cmd was: 
+cat key_containing_space.yml
 region:
   East:
     "Data Center":
@@ -218,35 +178,22 @@ region:
             env: qua
 
 
-```
 
-command: 
-```bash
+cmd was: 
 cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
-```
-output:
-
-```
 hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
 host_1      linux    5000  alive        qua
 host_2      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
-```
 ## Use query file
 if you want to hide, show a given filter you have to build a query file
 You can display the query and redirect it to a given file using the following option:
-  
-#### view_query option
+view_query option
 
-command: 
-```bash
+cmd was: 
 cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts" --view_query
-```
-output:
-
-```yaml
 queryset:
   path: region.East['Data Center'].dc_1.hosts{}
   select:
@@ -263,10 +210,10 @@ queryset:
 out: '{{ stdin | jtable(queryset=queryset) }}'
 
 
-```
 ### Query file sample:
 
-```yaml
+cmd was: 
+cat host_list_of_dict_in_key.yml
 hosts:
   - hostname: host_1
     os: linux
@@ -284,31 +231,24 @@ hosts:
     env: qua
 
 
-```
 
-command: 
-```bash
+cmd was: 
 cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml
-```
-output:
-
-```
 host    os type
 ------  ---------
 host_1  linux
 host_2  windows
 host_3  linux
 
-```
 ## Transform table content using Jinja  
 Your data may not arrived exatcly how you want to represent them.  
 In fact they never arrived as you want.  
 The following example transform the uptime coming in seconds to days
 
-  
-#### Transform uptime coming in seconds to days
+Transform uptime coming in seconds to days
 
-```yaml
+cmd was: 
+cat uptime_dataset.yml
 hosts:
   - hostname: host_1
     os: linux
@@ -329,9 +269,9 @@ hosts:
     dc: dc_3
 
 
-```
 
-```yaml
+cmd was: 
+cat uptime_view.yml
 select:
   - as: host
     expr: hostname
@@ -339,29 +279,22 @@ select:
     expr: os
   - as: uptime in days
     expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
-```
 
-command: 
-```bash
+cmd was: 
 cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
-```
-output:
-
-```
 hostname    os       uptime  state        env    dc
 ----------  -----  --------  -----------  -----  ----
 host_1      linux   1879723  alive        qua    dc_1
 host_2              6879723  alive        qua    dc_2
 host_3      linux     23455  unreachable  qua    dc_3
 
-```
 ## Use variables in your query file
 this will helps to make mapping table, or behalf like view
 
-  
-#### Use variables mapping table or view
+Use variables mapping table or view
 
-```yaml
+cmd was: 
+cat uptime_view_with_vars.yml
 
 queryset:
   path: hosts{host}
@@ -386,34 +319,27 @@ queryset:
 
 
 out: "{{ stdin | jtable(queryset=queryset)}}"
-```
 
-command: 
-```bash
+cmd was: 
 cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
-```
-output:
-
-```
 region    dc name    hostname    os type    uptime in days    sanity status
 --------  ---------  ----------  ---------  ----------------  --------------------
 East      dc_1       host_1      linux      21 days           ✅
 North     dc_2       host_2                 79 days           🔥 host.uptime exceed
           dc_3       host_3      linux      0 day             ✅
 
-```
 ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
 This feature will help you for the suite describe after to add more context in your  
 and avoid your variable coming from your input and the ones present.
 
-  
-#### Store data in a namespace using path syntaxe stdin.hosts{```item```}
+Store data in a namespace using path syntaxe stdin.hosts{```item```}
 ```
 cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
 ```
 
 
-```yaml
+cmd was: 
+cat name_incoming_attribute.yml
 
 queryset:
   select:
@@ -421,11 +347,10 @@ queryset:
       expr: host.hostname
     - as: os
       expr: host.os
-```
-  
-#### store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"
+store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"
 
-```yaml
+cmd was: 
+cat region_dataset.yml
 regions:
   west coast:
     dc:
@@ -447,17 +372,11 @@ regions:
     truc: coucou
 
 
-```
 
-command: 
-```bash
+cmd was: 
 cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view.yml
-```
-output:
-
-```
-11:13:00 (line 365) | INFO ['truc']
-11:13:00 (line 366) | ERROR .dc was not found in dataset level: 2
+13:56:29 (line 365) | INFO ['truc']
+13:56:29 (line 366) | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -470,9 +389,9 @@ dc_c       east        host_c_1    linux  alive
 dc_c       east        host_c_2    linux  alive
 dc_c       east        host_c_3    linux  alive
 
-```
 
-```yaml
+cmd was: 
+cat region_view.yml
 queryset:
   select:
   - as: dc name
@@ -485,11 +404,11 @@ queryset:
     expr: host.os
   - as: state
     expr: host.state
-```
 ## Use jtable with Ansible
 The plabybook
 
-```yaml
+cmd was: 
+cat ansible_playbook_example.yml
 - hosts: localhost
   gather_facts: no
   vars:
@@ -509,21 +428,21 @@ The plabybook
 
 
 
-```
 ## Load multiple files
 Considering the files below returned by ```ls -1 data/*/*/config.yml```
 
-```
+cmd was: 
+ls -1 data/*/*/config.yml
 data/dev/it_services/config.yml
 data/dev/pay/config.yml
 data/prod/it_services/config.yml
 data/prod/pay/config.yml
 data/qua/pay/config.yml
 
-```
 cat data/dev/it_services/config.yml
 
-```
+cmd was: 
+cat data/dev/it_services/config.yml
 
 
 
@@ -532,16 +451,10 @@ cat data/dev/it_services/config.yml
 dirty line
 - { hostname: host_dev_its_3, os: win, cost: 200  }
 
-```
 
-command: 
-```bash
+cmd was: 
 jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_queryset.yml
-```
-output:
-
-```bash
-11:13:00 (line 225) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+13:56:29 (line 225) | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -557,9 +470,9 @@ qua    pay          host_qua_pay_22   linux    5000
 qua    pay          host_qua_pay_444  linux     200
 qua    pay          host_qua_pay_3R3  win       200
 
-```
 
-```yaml
+cmd was: 
+cat load_multi_json_queryset.yml
 
 queryset:
   select:
@@ -573,12 +486,11 @@ queryset:
       expr: os
     - as: cost
       expr: cost
-```
 # Embded filters
-  
-#### strf_time
+strf_time
 
-```yaml
+cmd was: 
+cat strf_time_example.yml
 context:
   host_list:
     - { hostname: host_1, os: linux, cost: 5000, state: alive, env: '{ "env": "qua" }', order_date: "2016-08-14 20:00:12"  }
@@ -604,15 +516,9 @@ queryset:
       expr: "  (order_date|to_datetime).strftime('%S') "
 
 out: "{{ host_list | jtable(queryset=queryset) }}"
-```
 
-command: 
-```bash
+cmd was: 
 jtable -q strf_time_example.yml
-```
-output:
-
-```
 hostname    os       cost  state      order_date    strftime
 ----------  -----  ------  -------  ------------  ----------
 host_1      linux    5000  alive     2.02032e+07          12
@@ -620,39 +526,26 @@ host_2      linux     200            2.02032e+07          12
 host_3      linux     200  alive     2.02032e+07          12
 host_3      linux     200  alive     2.02032e+07          12
 
-```
 # Conditional styling
-  
-#### Styling option
+Styling option
 
-command: 
-```bash
+cmd was: 
 jtable -q uptime_view_colored.yml
-```
-output:
-
-```bash
 region    dc name    hostname    os     state        uptime
 --------  ---------  ----------  -----  -----------  --------
 East      dc_1       host_1      linux  [1;31munreachable[0m  [1;32m6 days[0m
 North     dc_2       host_1      linux  [1;32malive[0m        [1;32m21 days[0m
 North     dc_2       host_2      linux  [1;32malive[0m        [1;31m79 days[0m
 
-```
-  
-#### Ansible again
+Ansible again
 
-command: 
-```bash
+cmd was: 
+export ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg && \
 export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
 export ANSIBLE_ACTION_WARNINGS=False && \
 export ANSIBLE_STDOUT_CALLBACK=yaml && \
 ansible-playbook ansible_playbook_example.yml
 
-```
-output:
-
-```bash
 
 PLAY [localhost] ***************************************************************
 
@@ -672,5 +565,4 @@ PLAY RECAP *********************************************************************
 localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 
 
-```
 ![uptime_view_colored](./jack.png)

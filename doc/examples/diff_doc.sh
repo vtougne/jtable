@@ -20,4 +20,13 @@ fi
 
 echo cmd: $cmd
 
-eval "$cmd"
+return=$(eval "$cmd")
+if [ -z "$return" ]; then
+    echo "Success No differences found"
+else
+    echo "               =================== Differences ==================="
+    echo "$return"
+    echo "               ===================================================="
+    echo "Error Differences found"
+    exit 1
+fi

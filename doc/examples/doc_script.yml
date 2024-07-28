@@ -204,6 +204,7 @@
 
 - name: Ansible again
   play_cmd: |
+    export ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg && \
     export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
     export ANSIBLE_ACTION_WARNINGS=False && \
     export ANSIBLE_STDOUT_CALLBACK=yaml && \
