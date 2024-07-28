@@ -456,8 +456,8 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
-13:57:47 (line 365) | INFO ['truc']
-13:57:47 (line 366) | ERROR .dc was not found in dataset level: 2
+14:33:46 (line 365) | INFO ['truc']
+14:33:46 (line 366) | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -541,7 +541,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-13:57:47 (line 225) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+14:33:46 (line 225) | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -644,7 +644,7 @@ North     dc_2       host_2      linux  [1;32malive[0m        [1;31m79 days[
 
 command: 
 ```bash
-export ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg && \
+export export ANSIBLE_CONFIG="$PWD/ansible.cfg" && \
 export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
 export ANSIBLE_ACTION_WARNINGS=False && \
 export ANSIBLE_STDOUT_CALLBACK=yaml && \
