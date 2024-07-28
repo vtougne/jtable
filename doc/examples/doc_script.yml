@@ -209,6 +209,8 @@
     export ANSIBLE_ACTION_WARNINGS=False && \
     export ANSIBLE_STDOUT_CALLBACK=yaml && \
     ansible-playbook ansible_playbook_example.yml
+    echo $ANSIBLE_CONFIG
+    ls -l $ANSIBLE_CONFIG
   
   box_as: bash
   # collapse: dataset & query
