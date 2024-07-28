@@ -1,10 +1,10 @@
 # jtable
 
-## Table of Contents
-1. [Introduction](#introduction)
+<!-- ## Table of Contents
+1. [Introduction](#introduction) -->
 <details>
 
-<summary>⬇️ Click to expand</summary>  
+<summary>1. [Introduction](#introduction)</summary>  
 <!-- <summary>command & output...........................(⬇️ Click to expand)</summary>   -->
 
 
