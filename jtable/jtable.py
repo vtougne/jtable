@@ -2,9 +2,6 @@
 import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config
 from os import isatty
 from tabulate import tabulate
-# tabulate.PRESERVE_WHITESPACE = True
-# import tabulate
-
 from typing import Any, Dict, Optional
 
 class _ExcludeErrorsFilter(logging.Filter):
@@ -184,9 +181,9 @@ class JtableCli:
             # args = parser.parse_args(['--help'])
             parser.print_help(sys.stdout)
             jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
-            logging.info("\njtable core filters:")
+            print("\njtable core filters:")
             filters = [filter for filter in jtable_core_filters]
-            logging.info('  ' +', '.join(filters) + '\n')
+            print('  ' +', '.join(filters) + '\n')
             exit(1)
 
         if args.json_file:
@@ -286,7 +283,7 @@ class JtableCli:
         if args.view_query:
             # queryset['format'] = "json"
             out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**{"queryset": queryset}},eval_str=True)
-            # logging.info(out)
+            # logging.info(f"queryset['path']: {queryset['path']}")
             # return
             query_file_out = {}
             query_set_out = {}
@@ -294,8 +291,8 @@ class JtableCli:
             if select == []:
                 for field in fields:
                     select = select + [ {'as': field, 'expr':field }  ]
-            query_set_out['select'] = select
             query_set_out['path'] = queryset['path']
+            query_set_out['select'] = select
             # query_file_out['queryset'] = query_set_out
             query_file_out['queryset'] = query_set_out
             # query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'text')
@@ -437,7 +434,6 @@ class JtableCls:
 
         # logging.info(f"self.vars: {self.vars}")
 
-        self.dataset = dataset
 
         # logging.info(f"self.select: {self.select}")
         
@@ -451,6 +447,9 @@ class JtableCls:
             self.splitted_path[0] = "['input']"
             # logging.info(f"self.splitted_path: {self.splitted_path}")
             self.dataset = {"input": self.dataset}
+        else:
+            self.dataset = dataset
+
             
             
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
@@ -490,7 +489,7 @@ class JtableCls:
                 mplate = self.tenv.from_string(template)
             except Exception as error:
                 logging.error("Failed while loading env template: " + str(template) )
-                logging.error("Rrror was: " + str(error))
+                logging.error("Error was: " + str(error))
                 exit(1)
                 
             try:
@@ -573,7 +572,10 @@ class JtableCls:
                         break
                 return condition_test_result
 
-            condition_test_result = when(when = self.when, context = context)
+            if self.when != []:
+                condition_test_result = when(when = self.when, context = context)
+            else:
+                condition_test_result = "True"
             
             # logging.error(f"condition_test_result: {condition_test_result}")
             # exit()
@@ -783,15 +785,5 @@ def main():
     JtableCli().parse_args()
     return
 
-# class Undefined:
-#     def __repr__(self):
-#         return "undefined"
-
-#     def __str__(self):
-#         return self.__repr__()
-
-    
-
-    
 if __name__ == '__main__':
     main()

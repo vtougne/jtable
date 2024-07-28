@@ -42,6 +42,9 @@ host_3      linux          unreachable  qua
 - [Examples](./doc/examples/README.md)
 
 
-## Todo
+---
+
+### Todo
 
 - [ ] manage multijson string [stakoverflow](https://stackoverflow.com/questions/27907633/how-to-extract-multiple-json-objects-from-one-file)
+- [ ] select as argument in cli

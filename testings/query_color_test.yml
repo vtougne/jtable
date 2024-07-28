@@ -23,11 +23,11 @@ queryset:
           style: "font-color: red"
     - as: "       cost"
       expr: cost
-  sort_by: "cost:desc,os,state"
+  # sort_by: "cost:desc,os,state"
   # when:
   #   - "(os == 'linux') or (os == 'windows')"
   #   - "state == 'alive'"
-out: "{{ host_list | jtable(select=select,path=path, format='text', when=when ) }}"
+out: "{{ host_list | jtable(queryset=queryset ) }}"
 # out: |
 #   Hell every body
 #   How it going on ?
