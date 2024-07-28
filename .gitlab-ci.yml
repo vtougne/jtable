@@ -23,7 +23,7 @@ test:
     - jtable -h
     - cd doc/examples
     - ./make_doc.sh --halt
-    - ./diff_doc.sh ref_README.md README.md "line 365|line 366|line 225"
+    - ./diff_doc.sh ref_README.md README.md "line 365|line 366|line 225s"
 
   artifacts:
     paths:
