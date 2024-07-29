@@ -1,5 +1,7 @@
+out: '{{ stdin.plays[0].tasks[0].hosts | jtable(queryset=queryset) }}'
+
 queryset:
-  path: plays[0].tasks[0].hosts{}
+  # path: plays[0].tasks[0].hosts{}
   select:
   - as: alias
     expr: key
@@ -1441,5 +1443,4 @@ queryset:
 #     expr: value.msg
 #   - as: value.unreachable
 #     expr: value.unreachable
-# out: '{{ stdin | jtable(queryset=queryset) }}'
 
