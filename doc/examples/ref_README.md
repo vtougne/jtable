@@ -247,7 +247,6 @@ cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
 output:
 
 ```yaml
-16:48:14 (line 516) | INFO second render expr: <ast.List object at 0x7f71b032ba00>
 queryset:
   path: region.East['Data Center'].dc_1.hosts{}
   select:
@@ -396,24 +395,6 @@ cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
 output:
 
 ```
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bf160>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bfa30>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874be3e0>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bdf90>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bf5e0>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874beb30>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874be560>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bea40>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b8751bb80>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bda50>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b8751b460>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bf430>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bec80>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bf310>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bdd80>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b874bf490>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b87519d80>
-16:48:14 (line 516) | INFO second render expr: <ast.Dict object at 0x7f4b8751b520>
 region    dc name    hostname    os type    uptime in days    sanity status
 --------  ---------  ----------  ---------  ----------------  --------------------
 East      dc_1       host_1      linux      21 days           ✅
@@ -475,8 +456,8 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
-16:48:14 (line 365) | INFO ['truc']
-16:48:14 (line 366) | ERROR .dc was not found in dataset level: 2
+14:56:08 (line 365) | INFO ['truc']
+14:56:08 (line 366) | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -560,7 +541,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-16:48:15 (line 225) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+14:56:08 (line 225) | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -632,7 +613,6 @@ jtable -q strf_time_example.yml
 output:
 
 ```
-16:48:15 (line 516) | INFO second render expr: <ast.List object at 0x7f30aaad6680>
 hostname    os       cost  state      order_date    strftime
 ----------  -----  ------  -------  ------------  ----------
 host_1      linux    5000  alive     2.02032e+07          12
@@ -652,37 +632,6 @@ jtable -q uptime_view_colored.yml
 output:
 
 ```bash
-16:48:15 (line 516) | INFO second render expr: <ast.List object at 0x7fa28032dba0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032f6d0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032f550>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032e740>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032ed40>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032f6a0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032f1c0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032f0a0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032e1a0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa280368fd0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28036bca0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28036bb50>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28036a560>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28036a9e0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28036a470>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28036a080>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa280369330>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa280369210>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032e1a0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa280368fd0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28036b850>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa280368a60>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28036ae00>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032ef80>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032e680>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032f460>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032d4e0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032dcc0>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa280368760>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032fd90>
-16:48:15 (line 516) | INFO second render expr: <ast.Dict object at 0x7fa28032db40>
 region    dc name    hostname    os     state        uptime
 --------  ---------  ----------  -----  -----------  --------
 East      dc_1       host_1      linux  [1;31munreachable[0m  [1;32m6 days[0m
@@ -704,13 +653,25 @@ ansible-playbook ansible_playbook_example.yml
 ```
 output:
 
-```
-bash💥 Something was wrong with this report
- cmd was  ->  export export ANSIBLE_CONFIG="$PWD/ansible.cfg" && \
-export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
-export ANSIBLE_ACTION_WARNINGS=False && \
-export ANSIBLE_STDOUT_CALLBACK=yaml && \
-ansible-playbook ansible_playbook_example.yml
+```bash
+
+PLAY [localhost] ***************************************************************
+
+TASK [debug] *******************************************************************
+ok: [localhost] => 
+  msg: |-
+    hostname    os         cost  state    service.name    ips
+    ----------  -------  ------  -------  --------------  ------------------------------
+    host_1      linux      5000  alive    service1
+                                          service_3
+    host_2      linux1      200  alive
+    host_3      windows     200  alive
+    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
+    host_5      windows    5000  decom                    []
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
 
 ```
 ![uptime_view_colored](./jack.png)

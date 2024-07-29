@@ -241,7 +241,7 @@ class JtableCli:
             if 'context' in query_file:
                 context = {}
                 for key,value in query_file['context'].items():
-                    jinja_eval = JtableCls().jinja_render_value(str(value),self.dataset)
+                    jinja_eval = JtableCls().jinja_render_value(template=str(value),context=self.dataset)
                     context.update({key: jinja_eval})
                     self.dataset = {**self.dataset,**context, **{"context": context}}
 
@@ -282,7 +282,7 @@ class JtableCli:
         
         if args.view_query:
             # queryset['format'] = "json"
-            out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**{"queryset": queryset}},eval_str=True)
+            out = JtableCls().jinja_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=True)
             # logging.info(f"queryset['path']: {queryset['path']}")
             # return
             query_file_out = {}
@@ -301,7 +301,7 @@ class JtableCli:
             print(yaml_query_out)
         else:
             # logging.info(f"queryset: {queryset}")
-            out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**{"queryset": queryset}},eval_str=False)
+            out = JtableCls().jinja_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=False)
             # out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**queryset},eval_str=False)
             # if queryset['format'] == "json":
             #     print(json.dumps(out))
@@ -381,16 +381,16 @@ class JtableCls:
                     if type(dataset) is dict:
                         for key,value in dataset.items():
                             next_path = path[1:]
-                            new_context = {item_name: {"key": key, "value": value}}
-                            context = { **context, **new_context}
+                            # new_context = {item_name: {"key": key, "value": value}}
+                            context = { **context, **{item_name: {"key": key, "value": value}}}
                             self.cross_path(dataset[key],next_path,context=context)
                             
                     elif type(dataset) is list:
                         index = 0
                         for item in dataset:
                             next_path = path[1:]
-                            new_context = { item_name: item }
-                            context = { **context, **new_context}
+                            # new_context = { item_name: item }
+                            context = { **context, **{ item_name: item }}
                             self.cross_path(dataset[index],next_path,context=context)
                             index += 1
                 else:
@@ -435,6 +435,8 @@ class JtableCls:
         # logging.info(f"self.vars: {self.vars}")
 
         self.dataset = dataset
+        # self.tenv = Environment(loader=self.loader)
+        
 
         # logging.info(f"self.select: {self.select}")
         
@@ -511,7 +513,9 @@ class JtableCls:
                         expr = ast.parse(out_str, mode='eval').body
                         expr_type = expr.__class__.__name__
                         if expr_type == 'List' or expr_type == 'Dict':
-                            out =  ast.literal_eval(mplate.render(**context))
+                            # logging.info(f"second render expr: {expr}")
+                            # out =  ast.literal_eval(mplate.render(**context))
+                            out =  ast.literal_eval(out_str)
                         elif expr_type == 'Name':
                             out = out_str
                         else:
