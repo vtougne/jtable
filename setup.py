@@ -2,15 +2,19 @@
 
 from setuptools import setup, find_packages
 
+from jtable.version import __version__
+
+
 setup(
     name="jtable",
-    version="0.9.8",
+    version=__version__,
     packages=find_packages(),
     install_requires=[
         'tabulate',
         'PyYAML',
         'Jinja2'
     ],
+    # include_package_data=True,
     entry_points={
             'console_scripts': [
                 'jtable=jtable.jtable:main',

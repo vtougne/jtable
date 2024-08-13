@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
-import jtable.jtable
+import jtable.main
 
-jtable.jtable.main()
+jtable.main.main()

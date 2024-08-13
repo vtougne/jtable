@@ -1,7 +1,19 @@
 default:
   tags:
     - docker
-build_my_image:
+stages:
+  - build
+  - test
+  - make_release
+  - deploy
+
+workflow:
+  rules: 
+    - if: '$CI_COMMIT_BRANCH != "main" &&  $CI_COMMIT_TAG != "null" && $CI_COMMIT_MESSAGE !~ /adding version/'
+      when: always
+
+build:
+  stage: build
   image: docker
   services:
     - docker:dind
@@ -12,22 +24,76 @@ build_my_image:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE
-    - "echo debug CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE"
-    - docker ps
+  rules: 
+    - if: '$CI_COMMIT_MESSAGE =~ /build_image/'
+
 
 test:
+  stage: test
   image: $CI_REGISTRY_IMAGE:latest
   script:
-    - echo $HOSTNAME
     - pip install .
     - jtable -h
     - cd doc/examples
     - ./make_doc.sh --halt
-    - ./diff_doc.sh ref_README.md README.md "line 365|line 366|line 225"
+    - ./diff_doc.sh ref_README.md README.md "line 374|line 375|line 234"
+  rules:
+    - if: '$CI_COMMIT_MESSAGE !~ /make_release/ && $CI_COMMIT_BRANCH != "main"'
 
 
-  artifacts:
-    paths:
-      - doc/examples/README.md
-      - doc/examples/uptime_view_colored.html
-    expire_in: 1 week
+make_release:
+  stage: make_release
+  image: $CI_REGISTRY_IMAGE:latest
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: '.ssh'
+  script:
+    - mkdir ../release || true
+    - cd ../release
+    - rm -rf *
+    - git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git
+    - git config --global user.email "vincebot@vince.com"
+    - git config --global user.name "Vince bot"
+    - cd $CI_PROJECT_NAME
+    - cat version.txt || echo "0.0.0" > version.txt
+    - git switch ${CI_COMMIT_BRANCH}
+    - current_tag=$(git for-each-ref --sort=creatordate --format '%(refname)' refs/tags | tail -1 | cut -d"/" -f3)
+    - current_minor_version=$(echo $current_tag | cut -d"." -f3)
+    - current_base_version=$(echo $current_tag | cut -d"." -f1,2)
+    - new_minor_version=$((current_minor_version + 1))
+    - new_version="${current_base_version}.${new_minor_version}"
+    - echo $new_version > version.txt
+    - git add .
+    - git commit -m "${CI_COMMIT_MESSAGE} adding version ${new_version}"
+    - git push -f origin ${CI_COMMIT_BRANCH}
+    - git switch main
+    - git pull origin main
+    - git merge ${CI_COMMIT_BRANCH}
+    - git push origin main
+    - git tag -f $new_version
+    - git push origin $new_version
+
+
+
+deploy:
+  stage: deploy
+  image: $CI_REGISTRY_IMAGE:latest
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: '.ssh'
+  script:
+    - cd $HOME
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    - cd $HOME/.ssh
+    - mv vince_bot_ssh.pub id_rsa.pub
+    - mv vince_bot_ssh.priv id_rsa
+    - chmod -R 600 $HOME/.ssh
+    - ssh-keyscan github.com >> /root/.ssh/known_hosts
+    - cd $CI_BUILDS_DIR/root/release/$CI_PROJECT_NAME
+    - new_version=$(cat version.txt)
+    - echo $new_version
+    - git push -d origin ${CI_COMMIT_BRANCH}
+    - git remote set-url origin git@github.com:vtougne/${CI_PROJECT_NAME}.git
+    # - sleep 2000
+    - git push origin $new_version
+    - git push -f origin main
+  rules:
+  - when: manual

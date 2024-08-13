@@ -456,8 +456,8 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
-14:56:08 (line 365) | INFO ['truc']
-14:56:08 (line 366) | ERROR .dc was not found in dataset level: 2
+20:05:56 (line 374) | INFO ['truc']
+20:05:56 (line 375) | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -541,7 +541,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-14:56:08 (line 225) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+20:05:56 (line 234) | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -674,4 +674,4 @@ localhost                  : ok=1    changed=0    unreachable=0    failed=0    s
 
 
 ```
-![uptime_view_colored](./jack.png)
+![uptime_view_colored](./uptime_view_colored.png)

@@ -3,6 +3,14 @@ import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.c
 from os import isatty
 from tabulate import tabulate
 from typing import Any, Dict, Optional
+try:
+    from . import version
+except:
+    import version
+
+
+
+
 
 class _ExcludeErrorsFilter(logging.Filter):
     def filter(self, record):
@@ -152,6 +160,7 @@ class JtableCli:
         parser.add_argument("-jfs", "--json_files",action='append', help = "load multiple Json's")
         parser.add_argument("-yfs", "--yaml_files", help = "load multiple Yaml's")
         parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
+        parser.add_argument('--version', action='version', version=version.__version__)
 
 
         args = parser.parse_args()
@@ -419,12 +428,6 @@ class JtableCls:
                 self.format = query_data
             else:
                 raise Exception(f"the queryset argument contains a non accepted key: {query_item}")
-                # logging.info('query_item: ' + query_item)
-                # exit(1)
-                # err = f"the queryset argument contains a non accepted key: {query_item}"
-                # raise err
-                # logging.info('coucou')
-            
             
         self.path = path if path != "{}" else self.path
         self.select = select if select != [] else self.select
@@ -432,32 +435,17 @@ class JtableCls:
         self.when = when if when != [] else self.when
         self.format = format if format != "" else self.format
 
-        # logging.info(f"self.vars: {self.vars}")
-
         self.dataset = dataset
-        # self.tenv = Environment(loader=self.loader)
-        
-
-        # logging.info(f"self.select: {self.select}")
         
         for k,v in self.vars.items():
             self.vars = {**self.vars, **{ k: '{{' + str(v) + '}}' } }
-            
 
         self.splitted_path = JinjaPathSplitter().split_path(self.path)
-        # logging.info(f"self.splitted_path: {self.splitted_path}")
         if self.splitted_path[0] == "['']":
             self.splitted_path[0] = "['input']"
-            # logging.info(f"self.splitted_path: {self.splitted_path}")
             self.dataset = {"input": self.dataset}
             
-            
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
-        
-        # self.render_table(dataset=dataset,select=self.select,item_name="item")
-        
-        
-        # self.cross_path(self.dataset, self.splitted_path )
 
         out_return = {
             "th": self.th,
@@ -500,9 +488,10 @@ class JtableCls:
                 elif str(error)[0:30] == "'list object' has no attribute":
                     out = out_str =""
                 else:
-                    out = error
+                    out = out_str = error
                     # logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
-                    logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
+                    # logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
+                    logging.error(f"Failed while rendering context:\n  {str(error)}")
                     # exit(1)
                     raise out
             if out_str == "":
@@ -534,9 +523,7 @@ class JtableCls:
             fields_label = [fields_label['as'] for fields_label in select]
         else:
             fields = path_auto_discover().discover_paths(dataset)
-            # logging.info(fields) ; exit(0)
             fields_label = list(map(lambda item: '.'.join(item), fields))
-            # expressions = list(map(lambda item:  'item[\'' + '\'][\''.join(item) + '\']' , fields))
             item_name = 'item' if item_name == '' else item_name
             expressions = list(map(lambda item:  item_name + '[\'' + '\'][\''.join(item) + '\']' , fields))
             
@@ -547,8 +534,6 @@ class JtableCls:
         elif type(dataset) is list:
             dataset_to_cover = dataset
         else:
-            # logging.info('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
-            # logging.info(dataset)
             raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
 
             
@@ -556,7 +541,6 @@ class JtableCls:
             row = []
             json_dict = {}
             row_index = 0
-            # logging.info(f"item: {item}")
 
             def when(when=[],context={}):
                 condition_test_result = "True"
@@ -579,32 +563,29 @@ class JtableCls:
             else:
                 condition_test_result = "True"
             
-            # logging.error(f"condition_test_result: {condition_test_result}")
-            # exit()
-            
                 
             if condition_test_result == "True":
                 for expr in expressions:
                     jinja_expr = '{{ ' + expr  + ' }}'
                     loop_context = { item_name: item } if item_name != '' else item
-                    context = { **context,  **self.dataset}
+                    # context = { **context,  **self.dataset}
                     rendered_context = {}
                     for var_name,var_data in self.vars.items():
                         templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
                         rendered_context.update({var_name: templated_var })
-                    value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
+                    
+                    try:
+                        value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
+                    except:
+                        break
                     del loop_context
 
                     key = fields_label[row_index]
                     if value_for_json != None:
                         json_value = { key: value_for_json }
                         json_dict = {**json_dict, **json_value }
-                    # else:
-                    #     json_dict = {**json_dict, **{key: None} }
                         del json_value
-                    # value_for_json = undefined
                         del value_for_json
-
 
                     if cell_stylings is not None:
                         cell_styling = cell_stylings[row_index]
@@ -618,9 +599,6 @@ class JtableCls:
                                     # logging.info(style)
                                     stylized_value = Styling().apply(value = value,format="text", style = style['style'] )
                                     value = stylized_value
-                        # logging.info(str(condition_color) + " / " + str(value))
-
-
 
                     row = row + [ value ]
                     del value
@@ -640,8 +618,7 @@ class JtableCls:
         except Exception as error:
 
             logging.info(tabulate(self.td,self.th))
-            logging.info("\nERROR!!  something wrong with json rendering, tabme maight contains the error \nErrors was:")
-            logging.info(error)
+            logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
             exit(2)
 
 class path_auto_discover:

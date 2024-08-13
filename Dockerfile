@@ -10,4 +10,5 @@ RUN ansible-galaxy collection install community.general ansible.posix
 RUN echo localhost > /tmp/ansible_inventory.txt
 RUN pip install tabulate
 WORKDIR /project/jtable
+RUN apt-get install -y git
 # RUN ln -s /usr/bin/python3 /usr/bin/python
