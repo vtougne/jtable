@@ -41,21 +41,14 @@ logging_config = {
             'formatter': 'my_formatter',
             'stream': sys.stderr
         },
-        'console_stdout': {
-            'class': 'logging.StreamHandler',
-            'level': 'DEBUG',
-            'formatter': 'my_formatter',
-            'filters': ['exclude_errors'],
-            'stream': sys.stderr
-        },
     },
     'root': {
         'level': 'NOTSET',
-        'handlers': ['console_stderr', 'console_stdout']
+        'handlers': ['console_stderr']
     },
 }
 
-logging.config.dictConfig(logging_config)
+# logging.config.dictConfig(logging_config)
 
 class Filters:
     def jtable(dataset,select=[],path="{}",format="",vars={}, when=[],queryset={}):
@@ -161,9 +154,17 @@ class JtableCli:
         parser.add_argument("-yfs", "--yaml_files", help = "load multiple Yaml's")
         parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
         parser.add_argument('--version', action='version', version=version.__version__)
-
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
 
         args = parser.parse_args()
+
+        if args.verbose == 0:
+            logging_config['handlers']['console_stderr']['level'] = 'WARNING'
+        if args.verbose == 1:
+            logging_config['handlers']['console_stderr']['level'] = 'INFO'
+        elif args.verbose == 2:
+            logging_config['handlers']['console_stderr']['level'] = 'DEBUG'
+        logging.config.dictConfig(logging_config)
         
         if args.query_file:
             with open(args.query_file, 'r') as file:
@@ -311,11 +312,6 @@ class JtableCli:
         else:
             # logging.info(f"queryset: {queryset}")
             out = JtableCls().jinja_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=False)
-            # out = JtableCls().jinja_render_value(out_expr,{**self.dataset,**queryset},eval_str=False)
-            # if queryset['format'] == "json":
-            #     print(json.dumps(out))
-            # else:
-            #     print(out)
             print(out)
 
 class JtableCls:
