@@ -3,7 +3,7 @@
   gather_facts: no
   vars:
     min_host_per_group: 1
-    max_host_per_group: 300
+    max_host_per_group: 10
     dc:
       dc_1: West Coast
       dc_2: East Coast
