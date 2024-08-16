@@ -88,7 +88,7 @@ deploy:
     - chmod -R 600 $HOME/.ssh
     - ssh-keyscan github.com >> /root/.ssh/known_hosts
     - cd $CI_BUILDS_DIR/root/release/$CI_PROJECT_NAME
-    - new_version=$(cat version.txt)
+    - new_version=$(cat jtable/version.py  | awk '{print $3'} | xargs echo)
     - echo $new_version
     - git push -d origin ${CI_COMMIT_BRANCH}
     - git remote set-url origin git@github.com:vtougne/${CI_PROJECT_NAME}.git
