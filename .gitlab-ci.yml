@@ -61,7 +61,7 @@ make_release:
     - current_base_version=$(echo $current_tag | cut -d"." -f1,2)
     - new_minor_version=$((current_minor_version + 1))
     - new_version="${current_base_version}.${new_minor_version}"
-    - echo "__version__ = $new_version" > jtable/version.py
+    - echo "__version__ = '$new_version'" > jtable/version.py
     - git add .
     - git commit -m "${CI_COMMIT_MESSAGE} adding version ${new_version}"
     - git push -f origin ${CI_COMMIT_BRANCH}
