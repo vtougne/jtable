@@ -332,13 +332,29 @@ hosts:
 ```
 
 ```yaml
-select:
-  - as: host
-    expr: hostname
-  - as: os type
-    expr: os
-  - as: uptime in days
-    expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
+# select:
+#   - as: host
+#     expr: hostname
+#   - as: os type
+#     expr: os
+#   - as: uptime in days
+#     expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
+
+
+queryset:
+  path: hosts{}
+  select:
+    - as: host
+      expr: hostname
+    - as: os type
+      expr: os
+    - as: uptime in days
+      expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
+
+out: "{{ stdin | jtable(queryset=queryset) }}"
+
+
+
 ```
 
 command: 
@@ -348,11 +364,11 @@ cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
 output:
 
 ```
-hostname    os       uptime  state        env    dc
-----------  -----  --------  -----------  -----  ----
-host_1      linux   1879723  alive        qua    dc_1
-host_2              6879723  alive        qua    dc_2
-host_3      linux     23455  unreachable  qua    dc_3
+host    os type    uptime in days
+------  ---------  ----------------
+host_1  linux      21 days
+host_2             79 days
+host_3  linux      0 days
 
 ```
 ## Use variables in your query file
@@ -456,7 +472,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
-09:11:40 (line 371) | ERROR .dc was not found in dataset level: 2
+16:47:00 (line 371) | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -540,7 +556,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-09:11:40 (line 235) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+16:47:00 (line 235) | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -647,18 +663,31 @@ export export ANSIBLE_CONFIG="$PWD/ansible.cfg" && \
 export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
 export ANSIBLE_ACTION_WARNINGS=False && \
 export ANSIBLE_STDOUT_CALLBACK=yaml && \
+export ANSIBLE_INVENTORY=./local_inv && \
 ansible-playbook ansible_playbook_example.yml
 
 ```
 output:
 
-```
-bash💥 Something was wrong with this report
- cmd was  ->  export export ANSIBLE_CONFIG="$PWD/ansible.cfg" && \
-export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
-export ANSIBLE_ACTION_WARNINGS=False && \
-export ANSIBLE_STDOUT_CALLBACK=yaml && \
-ansible-playbook ansible_playbook_example.yml
+```bash
+
+PLAY [localhost] ***************************************************************
+
+TASK [debug] *******************************************************************
+ok: [localhost] => 
+  msg: |-
+    hostname    os         cost  state    service.name    ips
+    ----------  -------  ------  -------  --------------  ------------------------------
+    host_1      linux      5000  alive    service1
+                                          service_3
+    host_2      linux1      200  alive
+    host_3      windows     200  alive
+    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
+    host_5      windows    5000  decom                    []
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
 
 ```
 ![uptime_view_colored](./uptime_view_colored.png)

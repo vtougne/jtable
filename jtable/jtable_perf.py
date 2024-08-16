@@ -31,7 +31,7 @@ class Cache:
                 row = row + [self.columns[column_id][row_id]]
             # row  = row + rows
             td = td + [row]
-        # logging.info(row)
+        # logging.debug(row)
 
         return td
 
@@ -76,7 +76,7 @@ logging_config = {
 
 class Filters:
     def jtable(dataset,select=[],path="{}",format="",vars={}, when=[],queryset={}):
-        # logging.info(f"path: {path}")
+        # logging.debug(f"path: {path}")
         # return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)[format]
         return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
@@ -87,7 +87,7 @@ class Filters:
     def from_yaml_all(data):
         return yaml.safe_load_all(data)
     def intersect(a, b):
-        # logging.info(b)
+        # logging.debug(b)
         # return set(a).intersection(b)
         return list(set(a).intersection(b))
     def to_json(a, *args, **kw):
@@ -137,7 +137,7 @@ class Filters:
         # current_td.append
         if not out:
             out = None
-        logging.info(f"out ({expr_index}): {out}")
+        logging.debug(f"out ({expr_index}): {out}")
         shared_cache.set(expr_index, out)
         return expr_index
 
@@ -245,7 +245,7 @@ class JtableCli:
             with open(file_name, 'r') as input_yaml:
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
                 
-        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
+        # logging.debug(f"queryset['path']: {queryset['path']}") ; exit(0)
                 
         def load_multiple_inputs(input,format):
             err_help = f"\n[ERROR] {format}_files must looks like this:\n\n\
@@ -330,13 +330,13 @@ class JtableCli:
             return
         
         # out = JtableCls().jinja_old_render_value(str(out_expr),{**self.dataset,**queryset})
-        # logging.info(queryset)
+        # logging.debug(queryset)
         # return
         
         if args.view_query:
             # queryset['format'] = "json"
             out = JtableCls().jinja_old_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=True)
-            # logging.info(f"queryset['path']: {queryset['path']}")
+            # logging.debug(f"queryset['path']: {queryset['path']}")
             # return
             query_file_out = {}
             query_set_out = {}
@@ -353,7 +353,7 @@ class JtableCli:
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
             print(yaml_query_out)
         else:
-            # logging.info(f"queryset: {queryset}")
+            # logging.debug(f"queryset: {queryset}")
             out = JtableCls().jinja_old_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=False)
             print(out)
 
@@ -391,7 +391,7 @@ class JtableCls:
     def cross_path(self,dataset,path,context={}):
         level = len(path)
         if level > 1:
-            # logging.info(f"path: {path}")
+            # logging.debug(f"path: {path}")
             next_path = path[1:]
             current_path = str(path[0])
             current_path_value = "unknown"
@@ -410,7 +410,7 @@ class JtableCls:
                 if current_path_value in list(dataset):
                     self.cross_path(dataset[current_path_value],next_path, context = context)
                 else:
-                    logging.info(list(dataset))
+                    logging.debug(list(dataset))
                     logging.error(current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
                     # exit(1)
                     
@@ -420,7 +420,7 @@ class JtableCls:
                     self.cross_path(dataset[int(current_path_value)],next_path, context = context)
                     
                 else:
-                    logging.info("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
+                    logging.debug("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
                     exit(1)
             
             elif current_path[0] == "{":
@@ -442,14 +442,14 @@ class JtableCls:
                             self.cross_path(dataset[index],next_path,context=context)
                             index += 1
                 else:
-                    logging.info(f"item_name: {item_name}")
+                    logging.debug(f"item_name: {item_name}")
                     self.render_table(dataset=dataset,select=self.select, item_name = item_name, context = context)
             else:
-                logging.info("[ERROR] was looking for path...")
+                logging.debug("[ERROR] was looking for path...")
                 exit(1)
         else:
             item_name = path[0][1:-1]
-            # logging.info(f"item_name: {item_name}")
+            # logging.debug(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
     
     def render_object(self,dataset,path="{}",select=[],vars={}, when=[],format="",queryset={}):
@@ -457,7 +457,7 @@ class JtableCls:
             if query_item == "select":
                 self.select = query_data
             elif query_item == "path":
-                # logging.info(f"self.path query_data: {query_data}")
+                # logging.debug(f"self.path query_data: {query_data}")
                 self.path = query_data
             elif query_item == "vars":
                 self.vars = query_data
@@ -541,7 +541,7 @@ class JtableCls:
                         expr = ast.parse(out_str, mode='eval').body
                         expr_type = expr.__class__.__name__
                         if expr_type == 'List' or expr_type == 'Dict':
-                            # logging.info(f"second render expr: {expr}")
+                            # logging.debug(f"second render expr: {expr}")
                             # out =  ast.literal_eval(mplate.render(**context))
                             out =  ast.literal_eval(out_str)
                         elif expr_type == 'Name':
@@ -586,7 +586,7 @@ class JtableCls:
         for expr in expressions:
             row_jinja_expr = row_jinja_expr + ['{{ ' + expr  + ' | _td_loader(' + str(expr_index) + ') }}']
             expr_index += 1
-        logging.info(f"row_jinja_expr: {row_jinja_expr}")
+        logging.debug(f"row_jinja_expr: {row_jinja_expr}")
         loader=BaseLoader()
         tenv = Environment(loader=loader)
         jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
@@ -594,7 +594,7 @@ class JtableCls:
             tenv.filters[filter_name] = getattr(Filters, filter_name)
         template = tenv.from_string( "',".join(row_jinja_expr), globals={'context': dataset})
         # out_str =  template.render({ 'item': {'hostname': 'test'}})
-        # logging.info(f"out_str: {out_str}")
+        # logging.debug(f"out_str: {out_str}")
 
 
         for item in dataset_to_cover:
@@ -613,7 +613,7 @@ class JtableCls:
                         templated_var = self.jinja_old_render_value(template=str(var_data), context = context)
                         condition_context.update({var_name: templated_var })
                     condition_test_result = self.jinja_old_render_value( template = jinja_expr, context = {**context,**condition_context})
-                    # logging.info(condition_test_result)
+                    # logging.debug(condition_test_result)
                     if condition_test_result == "False":
                         break
                 return condition_test_result
@@ -654,10 +654,10 @@ class JtableCls:
                         if cell_styling != []:
                             for style in cell_styling:
                                 color_conditions = [color_conditions for color_conditions in  style['when'] ]
-                                # logging.info(color_conditions)
+                                # logging.debug(color_conditions)
                                 condition_color = when(when = color_conditions, context = context)
                                 if condition_color == "True":
-                                    # logging.info(style)
+                                    # logging.debug(style)
                                     stylized_value = Styling().apply(value = value,format="text", style = style['style'] )
                                     value = stylized_value
 
@@ -666,27 +666,27 @@ class JtableCls:
                     row_index += 1
 
                 self.json = self.json + [ json_dict ]
-                logging.info(f"row: {row}")
+                logging.debug(f"row: {row}")
                 self.td = self.td + [ row ]
 
                 template.render({item_name: item})
                 logging.info(f"row: {row}")
-                # logging.info(f"new_out: {new_out}")
-                # logging.info(f"new_out type: {type(new_out)}")
-                # logging.info(f"current_td: {current_td}")
-                # logging.info(f"shared_cache: {shared_cache.get(2)}")
+                # logging.debug(f"new_out: {new_out}")
+                # logging.debug(f"new_out type: {type(new_out)}")
+                # logging.debug(f"current_td: {current_td}")
+                # logging.debug(f"shared_cache: {shared_cache.get(2)}")
                 # expr_eval = ast.parse(new_out, mode='eval').body
                 # logging.info(f"expr_eval: {expr_eval}")
                 # self.td = self.td +  [new_out]
                 # new_out = ast.literal_eval(new_out)
-        # logging.info(f"shared_cache: {shared_cache.columns}")
-        print("")
-        logging.info(f"get_td:")
-        print(shared_cache.get_td())
-        logging.info(f"ori_td:")
-        print("")
-        print(self.td)
-        print("")
+        # logging.debug(f"shared_cache: {shared_cache.columns}")
+        # print("")
+        # logging.debug(f"get_td:")
+        # print(shared_cache.get_td())
+        # logging.debug(f"ori_td:")
+        # print("")
+        # print(self.td)
+        # print("")
         self.td = shared_cache.get_td()
         if fields_label is None:
             headers = list(map(lambda item: '.'.join(item), expressions))
@@ -698,7 +698,7 @@ class JtableCls:
             self.json_content = json.dumps(self.json)
         except Exception as error:
 
-            logging.info(tabulate(self.td,self.th))
+            logging.debug(tabulate(self.td,self.th))
             logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
             exit(2)
 
@@ -745,7 +745,7 @@ class path_auto_discover:
                     index+=1
                 self.raw_rows = self.raw_rows + [ item ]
         except (AttributeError, TypeError):
-            logging.info("ERROR Something wrong with your dataset")
+            logging.debug("ERROR Something wrong with your dataset")
             exit(1)
 
         return self.fields
@@ -759,7 +759,7 @@ class JinjaPathSplitter:
                 if "']" in path:
                     left_part = path[2:].split("']")[0]
                     if left_part == "":
-                        logging.info("Error dict expression empty, starting at " + str("".join(self.path_list)) )
+                        logging.debug("Error dict expression empty, starting at " + str("".join(self.path_list)) )
                         exit(1)
                     else:
                         left_part = "['" + left_part + "']"
@@ -770,7 +770,7 @@ class JinjaPathSplitter:
                         reference_found = "yes"
                         
                 else:
-                    logging.info('error expect "\']" was not found')
+                    logging.debug('error expect "\']" was not found')
                     exit(1)
                 
             if path[0] == ".":
@@ -788,7 +788,7 @@ class JinjaPathSplitter:
                     if remaining_path != "":
                         self.cover_path(remaining_path)
                 else:
-                    logging.info('error expect "}" was not found')
+                    logging.debug('error expect "}" was not found')
                     exit(1)
                     
             elif path[0] == "[":
@@ -800,16 +800,16 @@ class JinjaPathSplitter:
                         if remaining_path != "":
                             self.cover_path(remaining_path)
                     else:
-                        logging.info('error expect "}" was not found')
+                        logging.debug('error expect "}" was not found')
                         exit(1)
                     
             else:
                 if path == "" or path[0:2] == "['" or path[0] == "{" or path[0] == ".":
                     pass
                 else:
-                    logging.info(path[0:2])
-                    logging.info('Error what know to do with ' + path)
-                    logging.info('Error hapenned there ' + ''.join(self.path_list))
+                    logging.debug(path[0:2])
+                    logging.debug('Error what know to do with ' + path)
+                    logging.debug('Error hapenned there ' + ''.join(self.path_list))
                     exit(1)
                 
     def extract_var_from_path(self,path):
@@ -821,7 +821,7 @@ class JinjaPathSplitter:
     
     def split_path(self,path=""):
         remaining_path = self.extract_var_from_path(path)
-        # logging.info('debug remaining_path: ' + remaining_path)
+        # logging.debug('debug remaining_path: ' + remaining_path)
         self.cover_path(remaining_path)
         return self.path_list
 
@@ -895,7 +895,7 @@ class JinjaRender:
                         expr = ast.parse(out_str, mode='eval').body
                         expr_type = expr.__class__.__name__
                         if expr_type == 'List' or expr_type == 'Dict':
-                            # logging.info(f"second render expr: {expr}")
+                            # logging.debug(f"second render expr: {expr}")
                             # out =  ast.literal_eval(mplate.render(**context))
                             out =  ast.literal_eval(out_str)
                         elif expr_type == 'Name':

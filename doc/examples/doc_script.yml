@@ -208,6 +208,7 @@
     export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
     export ANSIBLE_ACTION_WARNINGS=False && \
     export ANSIBLE_STDOUT_CALLBACK=yaml && \
+    export ANSIBLE_INVENTORY=./local_inv && \
     ansible-playbook ansible_playbook_example.yml
   
   box_as: bash
