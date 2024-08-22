@@ -9,15 +9,13 @@ except:
     import version
 
 
-# global current_td
-# current_td = []
-
 class Cache:
     def __init__(self):
         self.columns = {}
     def get(self,key):
         return self.columns[key]
     def set(self,key,value):
+        logging.info(f"key: {key}, value: {value}")
         if key in self.columns:
             self.columns[key] = self.columns[key] + [value]
         else:
@@ -29,10 +27,7 @@ class Cache:
             row = []
             for column_id in self.columns:
                 row = row + [self.columns[column_id][row_id]]
-            # row  = row + rows
             td = td + [row]
-        # logging.debug(row)
-
         return td
 
 
@@ -76,7 +71,7 @@ logging_config = {
 
 class Filters:
     def jtable(dataset,select=[],path="{}",format="",vars={}, when=[],queryset={}):
-        # logging.debug(f"path: {path}")
+        logging.debug(f"queryset: {queryset}")
         # return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)[format]
         return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
@@ -96,10 +91,8 @@ class Filters:
     def to_yaml(v):
         """ Convert the value to JSON """
         return yaml.dump(v, allow_unicode=True)
-    
     def type_debug(o):
         return  o.__class__.__name__
-
     def to_datetime(_string, format="%Y-%m-%d %H:%M:%S"):
         return datetime.datetime.strptime(_string, format)
     def strftime(string_format, second=None):
@@ -112,7 +105,6 @@ class Filters:
             except Exception:
                 raise "Invalid value for epoch value (%s)" % second
         return time.strftime(string_format, time.localtime(second))
-    
     def regex_replace(value="", pattern="", replacement="", ignorecase=False):
         """ Perform a `re.sub` returning a string """
         if ignorecase:
@@ -137,7 +129,8 @@ class Filters:
         # current_td.append
         if not out:
             out = None
-        logging.debug(f"out ({expr_index}): {out}")
+        logging.debug(f"origin value string_to_eval ({expr_index}): {string_to_eval}")
+        logging.debug(f"from filter out ({expr_index}): {out}")
         shared_cache.set(expr_index, out)
         return expr_index
 
@@ -315,7 +308,6 @@ class JtableCli:
             
         # def out_expr_fct(select,path,format):
             # return "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
-            
         # out_expr = out_expr_fct(str(select), queryset['path'] , queryset['format'])
         out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
         # print(out_expr) ; exit(0)
@@ -353,7 +345,7 @@ class JtableCli:
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
             print(yaml_query_out)
         else:
-            # logging.debug(f"queryset: {queryset}")
+            logging.info(f"queryset: {queryset}")
             out = JtableCls().jinja_old_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=False)
             print(out)
 
@@ -449,7 +441,7 @@ class JtableCls:
                 exit(1)
         else:
             item_name = path[0][1:-1]
-            # logging.debug(f"item_name: {item_name}")
+            logging.debug(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
     
     def render_object(self,dataset,path="{}",select=[],vars={}, when=[],format="",queryset={}):
@@ -483,7 +475,6 @@ class JtableCls:
         if self.splitted_path[0] == "['']":
             self.splitted_path[0] = "['input']"
             self.dataset = {"input": self.dataset}
-            
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
 
         out_return = {
@@ -497,7 +488,7 @@ class JtableCls:
         return out_return[self.format]
 
     def jinja_old_render_value(self,template,context,eval_str=True):
-        logging.debug(f"jinja_old_render_value template: {template}")
+        logging.info(f"jinja_old_render_value template: {template}")
         if self.render == "jinja_ansible":
             templar = Templar(loader=self.loader, variables = context)
             
@@ -521,6 +512,7 @@ class JtableCls:
                 
             try:
                 out_str =  mplate.render(**context)
+                logging.info(f"out_str: {out_str}")
             except Exception as error:
                 if str(error)[0:30] == "'dict object' has no attribute":
                     out = out_str =""
@@ -556,6 +548,8 @@ class JtableCls:
     
     def render_table(self,dataset,select=[],item_name = '',context={}):
         cell_stylings = None
+        logging.debug(f"item_name: {item_name}")
+        # exit(0)
         if len(select) > 0:
             expressions = [expressions['expr'] for expressions in select]
             cell_stylings = [(cell_stylings['styling'] if 'styling' in cell_stylings else []) for cell_stylings in select]
@@ -582,11 +576,12 @@ class JtableCls:
         expr_index = 0
         global shared_cache
         shared_cache = Cache()
-
+        logging.debug(f"expressions: {expressions}")
         for expr in expressions:
             row_jinja_expr = row_jinja_expr + ['{{ ' + expr  + ' | _td_loader(' + str(expr_index) + ') }}']
             expr_index += 1
-        logging.debug(f"row_jinja_expr: {row_jinja_expr}")
+        logging.info(f"row_jinja_expr: {row_jinja_expr}")
+        # exit(1)
         loader=BaseLoader()
         tenv = Environment(loader=loader)
         jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
@@ -669,25 +664,18 @@ class JtableCls:
                 logging.debug(f"row: {row}")
                 self.td = self.td + [ row ]
 
-                template.render({item_name: item})
-                logging.info(f"row: {row}")
-                # logging.debug(f"new_out: {new_out}")
-                # logging.debug(f"new_out type: {type(new_out)}")
-                # logging.debug(f"current_td: {current_td}")
-                # logging.debug(f"shared_cache: {shared_cache.get(2)}")
-                # expr_eval = ast.parse(new_out, mode='eval').body
-                # logging.info(f"expr_eval: {expr_eval}")
-                # self.td = self.td +  [new_out]
-                # new_out = ast.literal_eval(new_out)
+                logging.debug(f"item: {item}")
+                logging.debug(f"item_name: {item_name}")
+                if item_name != '':
+                    template.render({item_name: item})
+                else:
+                    template.render(item)
+        
         # logging.debug(f"shared_cache: {shared_cache.columns}")
-        # print("")
-        # logging.debug(f"get_td:")
-        # print(shared_cache.get_td())
-        # logging.debug(f"ori_td:")
-        # print("")
-        # print(self.td)
-        # print("")
+
         self.td = shared_cache.get_td()
+        
+        logging.debug(f"self.td: {self.td}")
         if fields_label is None:
             headers = list(map(lambda item: '.'.join(item), expressions))
             fields_label = headers
