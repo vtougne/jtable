@@ -165,7 +165,10 @@ class JtableCli:
         self.dataset = {}
         
         global BaseLoader,Environment
+        global New_Environment,New_BaseLoader
         from jinja2 import Environment, BaseLoader
+        from jinja2 import Environment as New_Environment
+        from jinja2 import BaseLoader as New_BaseLoader
         
     def parse_args(self):
         select = []
@@ -512,19 +515,20 @@ class JtableCls:
                 
             try:
                 out_str =  mplate.render(**context)
-                logging.info(f"out_str: {out_str}")
+                # logging.info(f"out_str: {out_str}")
             except Exception as error:
                 if str(error)[0:30] == "'dict object' has no attribute":
                     out = out_str =""
                 elif str(error)[0:30] == "'list object' has no attribute":
                     out = out_str =""
                 else:
-                    out = out_str = error
                     # logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
-                    # logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
+                    logging.info(f"ERROR: Failed while rendering context, template was:\n  {str(template)}")
                     logging.error(f"Failed while rendering context:\n  {str(error)}")
                     # exit(1)
-                    raise out
+                    out = out_str = error
+                    # raise out
+                    return "err"
             if out_str == "":
                 out = None
             else:
@@ -578,16 +582,16 @@ class JtableCls:
         shared_cache = Cache()
         logging.debug(f"expressions: {expressions}")
         for expr in expressions:
-            row_jinja_expr = row_jinja_expr + ['{{ ' + expr  + ' | _td_loader(' + str(expr_index) + ') }}']
+            row_jinja_expr = row_jinja_expr + ['{{ (' + expr  + ') | _td_loader(' + str(expr_index) + ') }}']
             expr_index += 1
         logging.info(f"row_jinja_expr: {row_jinja_expr}")
         # exit(1)
-        loader=BaseLoader()
-        tenv = Environment(loader=loader)
+        new_loader=New_BaseLoader()
+        new_tenv = New_Environment(loader=new_loader)
         jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
-            tenv.filters[filter_name] = getattr(Filters, filter_name)
-        template = tenv.from_string( "',".join(row_jinja_expr), globals={'context': dataset})
+            new_tenv.filters[filter_name] = getattr(Filters, filter_name)
+        new_template = new_tenv.from_string( "',".join(row_jinja_expr), globals={'context': dataset})
         # out_str =  template.render({ 'item': {'hostname': 'test'}})
         # logging.debug(f"out_str: {out_str}")
 
@@ -667,9 +671,9 @@ class JtableCls:
                 logging.debug(f"item: {item}")
                 logging.debug(f"item_name: {item_name}")
                 if item_name != '':
-                    template.render({item_name: item})
+                    new_template.render({item_name: item})
                 else:
-                    template.render(item)
+                    new_template.render(item)
         
         # logging.debug(f"shared_cache: {shared_cache.columns}")
 
@@ -682,13 +686,13 @@ class JtableCls:
         
         self.th = fields_label
             
-        try:
-            self.json_content = json.dumps(self.json)
-        except Exception as error:
+        # try:
+        #     self.json_content = json.dumps(self.json)
+        # except Exception as error:
 
-            logging.debug(tabulate(self.td,self.th))
-            logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
-            exit(2)
+        #     logging.debug(tabulate(self.td,self.th))
+        #     logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
+        #     exit(2)
 
 class path_auto_discover:
     def __init__(self):
