@@ -2,7 +2,7 @@
 import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config
 from os import isatty
 from tabulate import tabulate
-from typing import Any, Dict, Optional
+# from typing import Any, Dict, Optional
 try:
     from . import version
 except:
@@ -591,7 +591,7 @@ class JtableCls:
         jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
             new_tenv.filters[filter_name] = getattr(Filters, filter_name)
-        new_template = new_tenv.from_string( "',".join(row_jinja_expr), globals={'context': dataset})
+        new_template = new_tenv.from_string( "',".join(row_jinja_expr), globals={'context': dataset,**context})
         # out_str =  template.render({ 'item': {'hostname': 'test'}})
         # logging.debug(f"out_str: {out_str}")
 
@@ -671,9 +671,9 @@ class JtableCls:
                 logging.debug(f"item: {item}")
                 logging.debug(f"item_name: {item_name}")
                 if item_name != '':
-                    new_template.render({item_name: item})
+                    new_template.render({item_name: item,**rendered_context})
                 else:
-                    new_template.render(item)
+                    new_template.render(item,**rendered_context)
         
         # logging.debug(f"shared_cache: {shared_cache.columns}")
 
@@ -686,13 +686,13 @@ class JtableCls:
         
         self.th = fields_label
             
-        # try:
-        #     self.json_content = json.dumps(self.json)
-        # except Exception as error:
+        try:
+            self.json_content = json.dumps(self.json)
+        except Exception as error:
 
-        #     logging.debug(tabulate(self.td,self.th))
-        #     logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
-        #     exit(2)
+            logging.debug(tabulate(self.td,self.th))
+            logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
+            exit(2)
 
 class path_auto_discover:
     def __init__(self):
