@@ -2,11 +2,45 @@
 import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config
 from os import isatty
 from tabulate import tabulate
-from typing import Any, Dict, Optional
+# from typing import Any, Dict, Optional
 try:
     from . import version
 except:
     import version
+
+
+class Cache:
+    def __init__(self,field_labels=[]):
+        self.columns = {}
+        self.field_labels = field_labels
+        self.json = []
+    def get(self,key):
+        return self.columns[key]
+    def set(self,key,value):
+        logging.info(f"key: {key}, value: {value}")
+        if key in self.columns:
+            self.columns[key] = self.columns[key] + [value]
+        else:
+            self.columns[key] = [value]
+    def get_td(self):
+        raw_count =  len(self.columns[0])
+        td = []
+        for row_id in range(0,raw_count):
+            row = []
+            for column_id in self.columns:
+                row = row + [self.columns[column_id][row_id]]
+            td = td + [row]
+        return td
+    def get_json(self):
+        raw_count =  len(self.columns[0])
+        out_json = []
+        for row_id in range(0,raw_count):
+            row_json = {}
+            for column_id in self.columns:
+                row_json = {**row_json , **{self.field_labels[column_id]:  self.columns[column_id][row_id]}}
+            out_json = out_json + [row_json]
+        return out_json
+
 
 class _ExcludeErrorsFilter(logging.Filter):
     def filter(self, record):
@@ -48,7 +82,7 @@ logging_config = {
 
 class Filters:
     def jtable(dataset,select=[],path="{}",format="",vars={}, when=[],queryset={}):
-        # logging.info(f"path: {path}")
+        logging.debug(f"queryset: {queryset}")
         # return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)[format]
         return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
@@ -59,7 +93,7 @@ class Filters:
     def from_yaml_all(data):
         return yaml.safe_load_all(data)
     def intersect(a, b):
-        # logging.info(b)
+        # logging.debug(b)
         # return set(a).intersection(b)
         return list(set(a).intersection(b))
     def to_json(a, *args, **kw):
@@ -68,10 +102,8 @@ class Filters:
     def to_yaml(v):
         """ Convert the value to JSON """
         return yaml.dump(v, allow_unicode=True)
-    
     def type_debug(o):
         return  o.__class__.__name__
-
     def to_datetime(_string, format="%Y-%m-%d %H:%M:%S"):
         return datetime.datetime.strptime(_string, format)
     def strftime(string_format, second=None):
@@ -84,7 +116,6 @@ class Filters:
             except Exception:
                 raise "Invalid value for epoch value (%s)" % second
         return time.strftime(string_format, time.localtime(second))
-    
     def regex_replace(value="", pattern="", replacement="", ignorecase=False):
         """ Perform a `re.sub` returning a string """
         if ignorecase:
@@ -93,6 +124,26 @@ class Filters:
             flags = 0
         _re = re.compile(pattern, flags=flags)
         return _re.sub(replacement, value)
+    
+    def _td_loader(string_to_eval,expr_index):
+        try:
+            expr = ast.parse(string_to_eval, mode='eval').body
+            expr_type = expr.__class__.__name__
+            if expr_type == 'List' or expr_type == 'Dict':
+                out =  ast.literal_eval(string_to_eval)
+            elif expr_type == 'Name':
+                out = string_to_eval
+            else:
+                out = str(string_to_eval)
+        except:
+            out = string_to_eval
+        # current_td.append
+        if not out:
+            out = None
+        logging.debug(f"origin value string_to_eval ({expr_index}): {string_to_eval}")
+        logging.debug(f"from filter out ({expr_index}): {out}")
+        shared_cache.set(expr_index, out)
+        return expr_index
 
 class Inspect:
     def __init__(self):
@@ -125,7 +176,10 @@ class JtableCli:
         self.dataset = {}
         
         global BaseLoader,Environment
+        global New_Environment,New_BaseLoader
         from jinja2 import Environment, BaseLoader
+        from jinja2 import Environment as New_Environment
+        from jinja2 import BaseLoader as New_BaseLoader
         
     def parse_args(self):
         select = []
@@ -198,7 +252,7 @@ class JtableCli:
             with open(file_name, 'r') as input_yaml:
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
                 
-        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
+        # logging.debug(f"queryset['path']: {queryset['path']}") ; exit(0)
                 
         def load_multiple_inputs(input,format):
             err_help = f"\n[ERROR] {format}_files must looks like this:\n\n\
@@ -247,7 +301,7 @@ class JtableCli:
             if 'context' in query_file:
                 context = {}
                 for key,value in query_file['context'].items():
-                    jinja_eval = JtableCls().jinja_render_value(template=str(value),context=self.dataset)
+                    jinja_eval = JtableCls().jinja_old_render_value(template=str(value),context=self.dataset)
                     context.update({key: jinja_eval})
                     self.dataset = {**self.dataset,**context, **{"context": context}}
 
@@ -268,7 +322,6 @@ class JtableCli:
             
         # def out_expr_fct(select,path,format):
             # return "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
-            
         # out_expr = out_expr_fct(str(select), queryset['path'] , queryset['format'])
         out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
         # print(out_expr) ; exit(0)
@@ -282,14 +335,14 @@ class JtableCli:
             print(tbl)
             return
         
-        # out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
-        # logging.info(queryset)
+        # out = JtableCls().jinja_old_render_value(str(out_expr),{**self.dataset,**queryset})
+        # logging.debug(queryset)
         # return
         
         if args.view_query:
             # queryset['format'] = "json"
-            out = JtableCls().jinja_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=True)
-            # logging.info(f"queryset['path']: {queryset['path']}")
+            out = JtableCls().jinja_old_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=True)
+            # logging.debug(f"queryset['path']: {queryset['path']}")
             # return
             query_file_out = {}
             query_set_out = {}
@@ -306,8 +359,8 @@ class JtableCli:
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
             print(yaml_query_out)
         else:
-            # logging.info(f"queryset: {queryset}")
-            out = JtableCls().jinja_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=False)
+            logging.info(f"queryset: {queryset}")
+            out = JtableCls().jinja_old_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=False)
             print(out)
 
 class JtableCls:
@@ -344,7 +397,7 @@ class JtableCls:
     def cross_path(self,dataset,path,context={}):
         level = len(path)
         if level > 1:
-            # logging.info(f"path: {path}")
+            # logging.debug(f"path: {path}")
             next_path = path[1:]
             current_path = str(path[0])
             current_path_value = "unknown"
@@ -363,7 +416,7 @@ class JtableCls:
                 if current_path_value in list(dataset):
                     self.cross_path(dataset[current_path_value],next_path, context = context)
                 else:
-                    logging.info(list(dataset))
+                    logging.debug(list(dataset))
                     logging.error(current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
                     # exit(1)
                     
@@ -373,7 +426,7 @@ class JtableCls:
                     self.cross_path(dataset[int(current_path_value)],next_path, context = context)
                     
                 else:
-                    logging.info("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
+                    logging.debug("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
                     exit(1)
             
             elif current_path[0] == "{":
@@ -395,14 +448,14 @@ class JtableCls:
                             self.cross_path(dataset[index],next_path,context=context)
                             index += 1
                 else:
-                    logging.info(f"item_name: {item_name}")
+                    logging.debug(f"item_name: {item_name}")
                     self.render_table(dataset=dataset,select=self.select, item_name = item_name, context = context)
             else:
-                logging.info("[ERROR] was looking for path...")
+                logging.debug("[ERROR] was looking for path...")
                 exit(1)
         else:
             item_name = path[0][1:-1]
-            # logging.info(f"item_name: {item_name}")
+            logging.debug(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
     
     def render_object(self,dataset,path="{}",select=[],vars={}, when=[],format="",queryset={}):
@@ -410,7 +463,7 @@ class JtableCls:
             if query_item == "select":
                 self.select = query_data
             elif query_item == "path":
-                # logging.info(f"self.path query_data: {query_data}")
+                # logging.debug(f"self.path query_data: {query_data}")
                 self.path = query_data
             elif query_item == "vars":
                 self.vars = query_data
@@ -436,7 +489,6 @@ class JtableCls:
         if self.splitted_path[0] == "['']":
             self.splitted_path[0] = "['input']"
             self.dataset = {"input": self.dataset}
-            
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
 
         out_return = {
@@ -449,8 +501,8 @@ class JtableCls:
         
         return out_return[self.format]
 
-    def jinja_render_value(self,template,context,eval_str=True):
-
+    def jinja_old_render_value(self,template,context,eval_str=True):
+        logging.info(f"jinja_old_render_value template: {template}")
         if self.render == "jinja_ansible":
             templar = Templar(loader=self.loader, variables = context)
             
@@ -474,18 +526,20 @@ class JtableCls:
                 
             try:
                 out_str =  mplate.render(**context)
+                # logging.info(f"out_str: {out_str}")
             except Exception as error:
                 if str(error)[0:30] == "'dict object' has no attribute":
                     out = out_str =""
                 elif str(error)[0:30] == "'list object' has no attribute":
                     out = out_str =""
                 else:
-                    out = out_str = error
                     # logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
-                    # logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
+                    logging.info(f"ERROR: Failed while rendering context, template was:\n  {str(template)}")
                     logging.error(f"Failed while rendering context:\n  {str(error)}")
                     # exit(1)
-                    raise out
+                    out = out_str = error
+                    # raise out
+                    return "err"
             if out_str == "":
                 out = None
             else:
@@ -494,7 +548,7 @@ class JtableCls:
                         expr = ast.parse(out_str, mode='eval').body
                         expr_type = expr.__class__.__name__
                         if expr_type == 'List' or expr_type == 'Dict':
-                            # logging.info(f"second render expr: {expr}")
+                            # logging.debug(f"second render expr: {expr}")
                             # out =  ast.literal_eval(mplate.render(**context))
                             out =  ast.literal_eval(out_str)
                         elif expr_type == 'Name':
@@ -509,15 +563,19 @@ class JtableCls:
     
     def render_table(self,dataset,select=[],item_name = '',context={}):
         cell_stylings = None
+        logging.debug(f"item_name: {item_name}")
+        # exit(0)
         if len(select) > 0:
             expressions = [expressions['expr'] for expressions in select]
             cell_stylings = [(cell_stylings['styling'] if 'styling' in cell_stylings else []) for cell_stylings in select]
-            fields_label = [fields_label['as'] for fields_label in select]
+            field_labels = [field_labels['as'] for field_labels in select]
         else:
             fields = path_auto_discover().discover_paths(dataset)
-            fields_label = list(map(lambda item: '.'.join(item), fields))
+            field_labels = list(map(lambda item: '.'.join(item), fields))
             item_name = 'item' if item_name == '' else item_name
             expressions = list(map(lambda item:  item_name + '[\'' + '\'][\''.join(item) + '\']' , fields))
+        print(f"expressions: {expressions}")
+        # exit(0)
             
         if type(dataset) is dict:
             dataset_to_cover = []
@@ -528,15 +586,41 @@ class JtableCls:
         else:
             raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
 
-        static_context = {"dataset": dataset, **context}
-        templates = []
+        row_templte = []
+        # self.new_td = []
+        # global current_td
+        # current_td = []
+        expr_index = 0
+        global shared_cache
+        shared_cache = Cache(field_labels = field_labels)
         for expr in expressions:
-            jinja_expr = '{{ ' + expr  + ' }}'
-            templates = templates + [Templater(template_string=jinja_expr, static_context=static_context)]
-            
+            # field_label = field_labels[expr_index]
+            row_templte = row_templte + ['{{ (' + expr  + ') | _td_loader(' + str(expr_index) + ') }}']
+            expr_index += 1
+
+        logging.info(f"row_templte: {row_templte}")
+        # exit(1)
+        new_loader=New_BaseLoader()
+        new_tenv = New_Environment(loader=new_loader)
+        jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
+        for filter_name in jtable_core_filters:
+            new_tenv.filters[filter_name] = getattr(Filters, filter_name)
+        try:
+            new_template = new_tenv.from_string( "',".join(row_templte), globals={'context': dataset,**context})
+        except Exception as error:
+            logging.error(f"Failed while loading env template: {row_templte}" )
+            logging.error(f"Error was: {error}")
+            return error
+
+        # out_str =  template.render({ 'item': {'hostname': 'test'}})
+        # logging.debug(f"out_str: {out_str}")
+
+
+
         for item in dataset_to_cover:
             row = []
             json_dict = {}
+            row_index = 0
 
             def when(when=[],context={}):
                 condition_test_result = "True"
@@ -546,10 +630,10 @@ class JtableCls:
                     context = { **context, **loop_condition_context, **self.dataset}
                     condition_context = {}
                     for var_name,var_data in self.vars.items():
-                        templated_var = self.jinja_render_value(template=str(var_data), context = context)
+                        templated_var = self.jinja_old_render_value(template=str(var_data), context = context)
                         condition_context.update({var_name: templated_var })
-                    condition_test_result = self.jinja_render_value( template = jinja_expr, context = {**context,**condition_context})
-                    # logging.info(condition_test_result)
+                    condition_test_result = self.jinja_old_render_value( template = jinja_expr, context = {**context,**condition_context})
+                    # logging.debug(condition_test_result)
                     if condition_test_result == "False":
                         break
                 return condition_test_result
@@ -561,61 +645,85 @@ class JtableCls:
             
                 
             if condition_test_result == "True":
-                column_index = 0
                 for expr in expressions:
                     jinja_expr = '{{ ' + expr  + ' }}'
                     loop_context = { item_name: item } if item_name != '' else item
                     # context = { **context,  **self.dataset}
                     rendered_context = {}
                     for var_name,var_data in self.vars.items():
-                        templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
+                        templated_var = self.jinja_old_render_value(template=str(var_data), context = {**context,**loop_context})
                         rendered_context.update({var_name: templated_var })
                     
+                #     try:
+                #         value_for_json = value = self.jinja_old_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
+                #     except:
+                #         break
+                #     del loop_context
+
+                #     key = field_labels[row_index]
+                #     if value_for_json != None:
+                #         json_value = { key: value_for_json }
+                #         json_dict = {**json_dict, **json_value }
+                #         del json_value
+                #         del value_for_json
+
+                #     if cell_stylings is not None:
+                #         cell_styling = cell_stylings[row_index]
+                #         condition_color = "True"
+                #         if cell_styling != []:
+                #             for style in cell_styling:
+                #                 color_conditions = [color_conditions for color_conditions in  style['when'] ]
+                #                 # logging.debug(color_conditions)
+                #                 condition_color = when(when = color_conditions, context = context)
+                #                 if condition_color == "True":
+                #                     # logging.debug(style)
+                #                     stylized_value = Styling().apply(value = value,format="text", style = style['style'] )
+                #                     value = stylized_value
+
+                #     row = row + [ value ]
+                #     del value
+                #     row_index += 1
+
+                # self.json = self.json + [ json_dict ]
+                # logging.debug(f"row: {row}")
+                # self.td = self.td + [ row ]
+
+                logging.debug(f"item: {item}")
+                logging.debug(f"item_name: {item_name}")
+                if item_name != '':
                     try:
-                        # value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
-                        value_for_json = value = templates[column_index].render({**loop_context,**rendered_context})
-                    except:
-                        break
-                    del loop_context
-
-                    key = fields_label[column_index]
-                    if value_for_json != None:
-                        json_value = { key: value_for_json }
-                        json_dict = {**json_dict, **json_value }
-                        del json_value
-                        del value_for_json
-
-                    if cell_stylings is not None:
-                        cell_styling = cell_stylings[column_index]
-                        condition_color = "True"
-                        if cell_styling != []:
-                            for style in cell_styling:
-                                color_conditions = [color_conditions for color_conditions in  style['when'] ]
-                                # logging.info(color_conditions)
-                                condition_color = when(when = color_conditions, context = context)
-                                if condition_color == "True":
-                                    # logging.info(style)
-                                    stylized_value = Styling().apply(value = value,format="text", style = style['style'] )
-                                    value = stylized_value
-
-                    row = row + [ value ]
-                    del value
-                    column_index += 1
-                self.json = self.json + [ json_dict ]
-                self.td = self.td + [ row ]
+                        new_template.render({item_name: item,**rendered_context})
+                    except Exception as error:
+                        logging.error(f"Failed while rendering item: {item}" )
+                        logging.error(f"Error was: {error}")
+                        exit(2)
+                else:
+                    try:
+                        new_template.render(item,**rendered_context)
+                    except Exception as error:
+                        logging.error(f"Failed while rendering item: {item}" )
+                        logging.error(f"Error was: {error}")
+                        # return error
         
+        # logging.debug(f"shared_cache: {shared_cache.columns}")
+
+        self.td = shared_cache.get_td()
+        self.json = shared_cache.get_json()
+        logging.debug(f"self.json: {self.json}")
+        # logging.debug(f"self.json: {self.json}")
         
-        if fields_label is None:
+        logging.debug(f"self.td: {self.td}")
+        if field_labels is None:
             headers = list(map(lambda item: '.'.join(item), expressions))
-            fields_label = headers
+            field_labels = headers
         
-        self.th = fields_label
+        self.th = field_labels
             
         try:
             self.json_content = json.dumps(self.json)
         except Exception as error:
 
-            logging.info(tabulate(self.td,self.th))
+            logging.debug(tabulate(self.td,self.th))
             logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
             exit(2)
 
@@ -662,7 +770,7 @@ class path_auto_discover:
                     index+=1
                 self.raw_rows = self.raw_rows + [ item ]
         except (AttributeError, TypeError):
-            logging.info("ERROR Something wrong with your dataset")
+            logging.debug("ERROR Something wrong with your dataset")
             exit(1)
 
         return self.fields
@@ -676,7 +784,7 @@ class JinjaPathSplitter:
                 if "']" in path:
                     left_part = path[2:].split("']")[0]
                     if left_part == "":
-                        logging.info("Error dict expression empty, starting at " + str("".join(self.path_list)) )
+                        logging.debug("Error dict expression empty, starting at " + str("".join(self.path_list)) )
                         exit(1)
                     else:
                         left_part = "['" + left_part + "']"
@@ -687,7 +795,7 @@ class JinjaPathSplitter:
                         reference_found = "yes"
                         
                 else:
-                    logging.info('error expect "\']" was not found')
+                    logging.debug('error expect "\']" was not found')
                     exit(1)
                 
             if path[0] == ".":
@@ -705,7 +813,7 @@ class JinjaPathSplitter:
                     if remaining_path != "":
                         self.cover_path(remaining_path)
                 else:
-                    logging.info('error expect "}" was not found')
+                    logging.debug('error expect "}" was not found')
                     exit(1)
                     
             elif path[0] == "[":
@@ -717,16 +825,16 @@ class JinjaPathSplitter:
                         if remaining_path != "":
                             self.cover_path(remaining_path)
                     else:
-                        logging.info('error expect "}" was not found')
+                        logging.debug('error expect "}" was not found')
                         exit(1)
                     
             else:
                 if path == "" or path[0:2] == "['" or path[0] == "{" or path[0] == ".":
                     pass
                 else:
-                    logging.info(path[0:2])
-                    logging.info('Error what know to do with ' + path)
-                    logging.info('Error hapenned there ' + ''.join(self.path_list))
+                    logging.debug(path[0:2])
+                    logging.debug('Error what know to do with ' + path)
+                    logging.debug('Error hapenned there ' + ''.join(self.path_list))
                     exit(1)
                 
     def extract_var_from_path(self,path):
@@ -738,9 +846,92 @@ class JinjaPathSplitter:
     
     def split_path(self,path=""):
         remaining_path = self.extract_var_from_path(path)
-        # logging.info('debug remaining_path: ' + remaining_path)
+        # logging.debug('debug remaining_path: ' + remaining_path)
         self.cover_path(remaining_path)
         return self.path_list
+
+class JinjaRender:
+    def __init__(self,render="jinja_native",template="", static_context={}):
+        self.jinja_render = render
+        if self.jinja_render == "jinja_ansible":
+            global Templar,AnsibleContext,AnsibleEnvironment
+            from ansible.template import Templar,AnsibleContext,AnsibleEnvironment
+            from ansible.parsing.dataloader import DataLoader
+            self.loader = DataLoader()
+        elif self.jinja_render == "jinja_native":
+            self.loader=BaseLoader()
+            self.tenv = Environment(loader=self.loader)
+            jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
+            for filter_name in jtable_core_filters:
+                self.tenv.filters[filter_name] = getattr(Filters, filter_name)
+            self.template = self.tenv.from_string(template, globals=static_context)
+        elif self.jinja_render == "jinja_ansible_extensions":
+            self.tenv = Environment(extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'])
+        else:
+            logging.error("Unknown render option")
+            exit(1)
+
+
+    def render(self,context,eval_str=True):
+        # logging.debug(f"self.jinja_render: {self.jinja_render}")
+        if self.jinja_render == "jinja_ansible":
+            pass
+            # templar = Templar(loader=self.loader, variables = context)
+            
+            # try:
+            #     out = templar.template(template)
+            # except Exception as error:
+            #     if str(error)[0:30] == "'dict object' has no attribute":
+            #         out = None
+            #     elif str(error)[0:30] == "'list object' has no attribute":
+            #         out = None
+            #     else:
+            #         out = error
+            #         logging.error("Failed while jinja_ansible rendering value, error was: " + str(error))
+        else:
+            # try:
+                # logging.debug(f"templating: {template}")
+                
+            #     mplate = self.tenv.from_string(template)
+            # except Exception as error:
+            #     logging.error("Failed while loading env template: " + str(template) )
+            #     logging.error("Error was: " + str(error))
+            #     exit(1)
+                
+            try:
+                out_str =  self.template.render(**context)
+            except Exception as error:
+                if str(error)[0:30] == "'dict object' has no attribute":
+                    out = out_str =""
+                elif str(error)[0:30] == "'list object' has no attribute":
+                    out = out_str =""
+                else:
+                    out = out_str = error
+                    # logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
+                    # logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
+                    logging.error(f"Failed while rendering context:\n  {str(error)}")
+                    # exit(1)
+                    raise out
+            if out_str == "":
+                out = None
+            else:
+                if eval_str == True:
+                    try:
+                        expr = ast.parse(out_str, mode='eval').body
+                        expr_type = expr.__class__.__name__
+                        if expr_type == 'List' or expr_type == 'Dict':
+                            # logging.debug(f"second render expr: {expr}")
+                            # out =  ast.literal_eval(mplate.render(**context))
+                            out =  ast.literal_eval(out_str)
+                        elif expr_type == 'Name':
+                            out = out_str
+                        else:
+                            out = str(out_str)
+                    except:
+                        out = out_str
+                else:
+                    out = out_str
+        return out
 
 class Styling:
     def __init__(self):
@@ -757,20 +948,6 @@ class Styling:
                 color_value = self.get_color(style_value,"ansi_code")
                 value_colorized = f"\x1b[1;{color_value}m{value}\x1b[0m"
                 return value_colorized
-
-class Templater():
-    def __init__(self, template_string ="", static_context={}):
-        from jinja2 import Environment
-        env = Environment()
-        self.template_string = template_string
-        self.template = env.from_string(template_string, globals=static_context)
-    
-    def render(self, vars):
-        try:
-            return self.template.render(vars)
-        except Exception as error:
-            logging.error(error)
-            exit(1)
 
 def main():
     JtableCli().parse_args()

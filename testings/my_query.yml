@@ -6,6 +6,6 @@ queryset:
   - as: os
     expr: os
   - as: cost
-    expr: cost
+    expr: "cost bob"
 out: '{{ stdin | jtable(queryset=queryset) }}'
 
