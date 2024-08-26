@@ -81,10 +81,10 @@ cat host_list_of_dict.yml  | jtable
 output:
 
 ```text
-hostname    os       cost  state        env
+hostname    os     cost    state        env
 ----------  -----  ------  -----------  -----
-host_1      linux    5000  alive        qua
-host_2      linux    5000  alive        qua
+host_1      linux  5000    alive        qua
+host_2      linux  5000    alive        qua
 host_3      linux          unreachable  qua
 
 ```
@@ -98,10 +98,10 @@ cat host_dict_of_dict.yml  | jtable
 output:
 
 ```text
-key     value.os      value.cost  value.state
+key     value.os    value.cost    value.state
 ------  ----------  ------------  -------------
-host_1  linux               5000  alive
-host_2  linux                200  alive
+host_1  linux       5000          alive
+host_2  linux       200           alive
 host_3  linux                     unreachable
 
 ```
@@ -140,10 +140,10 @@ cat host_list_of_dict_in_key.yml  | jtable -p hosts
 output:
 
 ```text
-hostname    os         cost  state        env
+hostname    os       cost    state        env
 ----------  -------  ------  -----------  -----
-host_1      linux      5000  alive        qua
-host_2      windows    5000  alive        qua
+host_1      linux    5000    alive        qua
+host_2      windows  5000    alive        qua
 host_3      linux            unreachable  qua
 
 ```
@@ -227,10 +227,10 @@ cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
 output:
 
 ```
-hostname    os       cost  state        env
+hostname    os     cost    state        env
 ----------  -----  ------  -----------  -----
-host_1      linux    5000  alive        qua
-host_2      linux    5000  alive        qua
+host_1      linux  5000    alive        qua
+host_2      linux  5000    alive        qua
 host_3      linux          unreachable  qua
 
 ```
@@ -472,7 +472,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
-16:47:00 (line 371) | ERROR .dc was not found in dataset level: 2
+09:56:13 (line 367) | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -556,7 +556,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-16:47:00 (line 235) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+09:56:13 (line 231) | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000

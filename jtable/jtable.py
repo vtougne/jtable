@@ -8,10 +8,6 @@ try:
 except:
     import version
 
-
-
-
-
 class _ExcludeErrorsFilter(logging.Filter):
     def filter(self, record):
         """Only lets through log messages with log level below ERROR ."""
@@ -532,11 +528,15 @@ class JtableCls:
         else:
             raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
 
+        static_context = {"dataset": dataset, **context}
+        templates = []
+        for expr in expressions:
+            jinja_expr = '{{ ' + expr  + ' }}'
+            templates = templates + [Templater(template_string=jinja_expr, static_context=static_context)]
             
         for item in dataset_to_cover:
             row = []
             json_dict = {}
-            row_index = 0
 
             def when(when=[],context={}):
                 condition_test_result = "True"
@@ -561,6 +561,7 @@ class JtableCls:
             
                 
             if condition_test_result == "True":
+                column_index = 0
                 for expr in expressions:
                     jinja_expr = '{{ ' + expr  + ' }}'
                     loop_context = { item_name: item } if item_name != '' else item
@@ -571,12 +572,13 @@ class JtableCls:
                         rendered_context.update({var_name: templated_var })
                     
                     try:
-                        value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
+                        # value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
+                        value_for_json = value = templates[column_index].render({**loop_context,**rendered_context})
                     except:
                         break
                     del loop_context
 
-                    key = fields_label[row_index]
+                    key = fields_label[column_index]
                     if value_for_json != None:
                         json_value = { key: value_for_json }
                         json_dict = {**json_dict, **json_value }
@@ -584,7 +586,7 @@ class JtableCls:
                         del value_for_json
 
                     if cell_stylings is not None:
-                        cell_styling = cell_stylings[row_index]
+                        cell_styling = cell_stylings[column_index]
                         condition_color = "True"
                         if cell_styling != []:
                             for style in cell_styling:
@@ -598,7 +600,7 @@ class JtableCls:
 
                     row = row + [ value ]
                     del value
-                    row_index += 1
+                    column_index += 1
                 self.json = self.json + [ json_dict ]
                 self.td = self.td + [ row ]
         
@@ -755,6 +757,31 @@ class Styling:
                 color_value = self.get_color(style_value,"ansi_code")
                 value_colorized = f"\x1b[1;{color_value}m{value}\x1b[0m"
                 return value_colorized
+
+class Templater():
+    def __init__(self, template_string ="", static_context={}):
+        from jinja2 import Environment
+        env = Environment()
+        jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
+        for filter_name in jtable_core_filters:
+            env.filters[filter_name] = getattr(Filters, filter_name)
+
+        # self.template_string = template_string
+        self.template = env.from_string(template_string, globals=static_context)
+    
+    def render(self, vars):
+        try:
+            out_str = self.template.render(vars)
+            return out_str
+        except Exception as error:
+            if str(error)[0:30] == "'dict object' has no attribute":
+                out = out_str =""
+            elif str(error)[0:30] == "'list object' has no attribute":
+                out = out_str =""
+            else:
+                out = out_str = error
+                logging.error(f"Failed while rendering context:\n  {str(error)}")
+                raise out
 
 def main():
     JtableCli().parse_args()

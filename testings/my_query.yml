@@ -1,11 +1,17 @@
 queryset:
-  path: simple{}
+  path: host_list_debug{}
   select:
   - as: hostname
     expr: hostname
   - as: os
     expr: os
   - as: cost
-    expr: "cost bob"
+    expr: cost
+  - as: state
+    expr: state
+  - as: service.name
+    expr: service.name
+  - as: ips
+    expr: ips
 out: '{{ stdin | jtable(queryset=queryset) }}'
 
