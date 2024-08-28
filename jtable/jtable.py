@@ -529,11 +529,18 @@ class JtableCls:
             raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
 
         static_context = {"dataset": dataset, **context}
-        templates = []
+        column_templates = []
+        view_templates = []
         for expr in expressions:
             jinja_expr = '{{ ' + expr  + ' }}'
-            templates = templates + [Templater(template_string=jinja_expr, static_context=static_context)]
-            
+            column_templates = column_templates + [Templater(template_string=jinja_expr, static_context=static_context)]
+
+        rendered_context = {} 
+        for var_name,var_data in self.vars.items():
+            view_templates = view_templates + [Templater(template_string=str(var_data), static_context=static_context)]
+            # templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
+            # rendered_context.update({var_name: templated_var })
+
         for item in dataset_to_cover:
             row = []
             json_dict = {}
@@ -567,13 +574,16 @@ class JtableCls:
                     loop_context = { item_name: item } if item_name != '' else item
                     # context = { **context,  **self.dataset}
                     rendered_context = {}
+                    view_index = 0
                     for var_name,var_data in self.vars.items():
-                        templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
+                        # templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
+                        templated_var = view_templates[view_index].render({**loop_context},eval_str=True)
                         rendered_context.update({var_name: templated_var })
+                        view_index += 1
                     
                     try:
                         # value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
-                        value_for_json = value = templates[column_index].render({**loop_context,**rendered_context})
+                        value_for_json = value = column_templates[column_index].render({**loop_context,**rendered_context})
                     except:
                         break
                     del loop_context
@@ -758,8 +768,8 @@ class Styling:
                 value_colorized = f"\x1b[1;{color_value}m{value}\x1b[0m"
                 return value_colorized
 
-class Templater():
-    def __init__(self, template_string ="", static_context={}):
+class Templater:
+    def __init__(self, template_string = "", static_context = {}):
         from jinja2 import Environment
         env = Environment()
         jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
@@ -769,10 +779,9 @@ class Templater():
         # self.template_string = template_string
         self.template = env.from_string(template_string, globals=static_context)
     
-    def render(self, vars):
+    def render(self, vars, eval_str = False):
         try:
             out_str = self.template.render(vars)
-            return out_str
         except Exception as error:
             if str(error)[0:30] == "'dict object' has no attribute":
                 out = out_str =""
@@ -782,6 +791,23 @@ class Templater():
                 out = out_str = error
                 logging.error(f"Failed while rendering context:\n  {str(error)}")
                 raise out
+            
+        if eval_str == True:
+            try:
+                expr = ast.parse(out_str, mode='eval').body
+                expr_type = expr.__class__.__name__
+                if expr_type == 'List' or expr_type == 'Dict':
+                    out =  ast.literal_eval(out_str)
+                elif expr_type == 'Name':
+                    out = out_str
+                else:
+                    out = str(out_str)
+            except:
+                out = out_str
+        else:
+            out = out_str
+                    
+        return out
 
 def main():
     JtableCli().parse_args()
