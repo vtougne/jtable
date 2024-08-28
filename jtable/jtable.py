@@ -247,7 +247,7 @@ class JtableCli:
             if 'context' in query_file:
                 context = {}
                 for key,value in query_file['context'].items():
-                    jinja_eval = JtableCls().jinja_render_value(template=str(value),context=self.dataset)
+                    jinja_eval = Templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
                     context.update({key: jinja_eval})
                     self.dataset = {**self.dataset,**context, **{"context": context}}
 
@@ -282,15 +282,8 @@ class JtableCli:
             print(tbl)
             return
         
-        # out = JtableCls().jinja_render_value(str(out_expr),{**self.dataset,**queryset})
-        # logging.info(queryset)
-        # return
-        
         if args.view_query:
-            # queryset['format'] = "json"
-            out = JtableCls().jinja_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=True)
-            # logging.info(f"queryset['path']: {queryset['path']}")
-            # return
+            out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
             query_file_out = {}
             query_set_out = {}
             fields = out
@@ -307,7 +300,7 @@ class JtableCli:
             print(yaml_query_out)
         else:
             # logging.info(f"queryset: {queryset}")
-            out = JtableCls().jinja_render_value(template=out_expr,context={**self.dataset,**{"queryset": queryset}},eval_str=False)
+            out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
 
 class JtableCls:
@@ -448,64 +441,6 @@ class JtableCls:
         }
         
         return out_return[self.format]
-
-    def jinja_render_value(self,template,context,eval_str=True):
-
-        if self.render == "jinja_ansible":
-            templar = Templar(loader=self.loader, variables = context)
-            
-            try:
-                out = templar.template(template)
-            except Exception as error:
-                if str(error)[0:30] == "'dict object' has no attribute":
-                    out = None
-                elif str(error)[0:30] == "'list object' has no attribute":
-                    out = None
-                else:
-                    out = error
-                    logging.error("Failed while jinja_ansible rendering value, error was: " + str(error))
-        else:
-            try:
-                mplate = self.tenv.from_string(template)
-            except Exception as error:
-                logging.error("Failed while loading env template: " + str(template) )
-                logging.error("Error was: " + str(error))
-                exit(1)
-                
-            try:
-                out_str =  mplate.render(**context)
-            except Exception as error:
-                if str(error)[0:30] == "'dict object' has no attribute":
-                    out = out_str =""
-                elif str(error)[0:30] == "'list object' has no attribute":
-                    out = out_str =""
-                else:
-                    out = out_str = error
-                    # logging.error("Failed while jinja_native rendering value, context was:\n" + str(context) + "\n" )
-                    # logging.error("Failed while rendering context: \nb" + str(error) + "\n" )
-                    logging.error(f"Failed while rendering context:\n  {str(error)}")
-                    # exit(1)
-                    raise out
-            if out_str == "":
-                out = None
-            else:
-                if eval_str == True:
-                    try:
-                        expr = ast.parse(out_str, mode='eval').body
-                        expr_type = expr.__class__.__name__
-                        if expr_type == 'List' or expr_type == 'Dict':
-                            # logging.info(f"second render expr: {expr}")
-                            # out =  ast.literal_eval(mplate.render(**context))
-                            out =  ast.literal_eval(out_str)
-                        elif expr_type == 'Name':
-                            out = out_str
-                        else:
-                            out = str(out_str)
-                    except:
-                        out = out_str
-                else:
-                    out = out_str
-        return out
     
     def render_table(self,dataset,select=[],item_name = '',context={}):
         cell_stylings = None
@@ -559,15 +494,12 @@ class JtableCls:
                     view_index = 0
 
                     for var_name,var_data in self.vars.items():
-                        # templated_var = self.jinja_render_value(template=str(var_data), context = context)
-                        # condition_context.update({var_name: templated_var })
                         view_template = Templater(template_string=str(var_data), static_context= {**context})
                         templated_var = view_template.render({},eval_str=True)
                         view_context.update({var_name: templated_var })
                         view_index += 1
                     condition_template = Templater(template_string=jinja_expr, static_context= {**context,**view_context,**condition_context})
                     condition_test_result = condition_template.render({},eval_str=True)
-                    # condition_test_result = self.jinja_render_value( template = jinja_expr, context = {**context,**condition_context})
                     logging.info(condition_test_result)
                     if condition_test_result == "False":
                         break
@@ -586,13 +518,11 @@ class JtableCls:
                     view_context = {}
                     view_index = 0
                     for var_name,var_data in self.vars.items():
-                        # templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
                         templated_var = view_templates[view_index].render({**loop_context},eval_str=True)
                         view_context.update({var_name: templated_var })
                         view_index += 1
                     
                     try:
-                        # value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**view_context})
                         value_for_json = value = column_templates[column_index].render({**loop_context,**view_context})
                     except:
                         break
