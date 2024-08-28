@@ -765,7 +765,7 @@ class Styling:
             style_value = style.split(': ')[1]
             if "color" in style_name:
                 color_value = self.get_color(style_value,"ansi_code")
-                value_colorized = f"\x1b[1;{color_value}m{value}\x1b[0m"
+                value_colorized = f"\x1b[0;{color_value}m{value}\x1b[0m"
                 return value_colorized
 
 class Templater:
