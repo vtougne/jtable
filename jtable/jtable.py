@@ -530,16 +530,20 @@ class JtableCls:
 
         static_context = {"dataset": dataset, **context}
         column_templates = []
-        view_templates = []
         for expr in expressions:
             jinja_expr = '{{ ' + expr  + ' }}'
             column_templates = column_templates + [Templater(template_string=jinja_expr, static_context=static_context)]
 
-        rendered_context = {} 
+        view_templates = []
+        view_context = {}
         for var_name,var_data in self.vars.items():
             view_templates = view_templates + [Templater(template_string=str(var_data), static_context=static_context)]
-            # templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
-            # rendered_context.update({var_name: templated_var })
+
+        when_templates = []
+        for condition in self.when:
+            when_templates = when_templates + [Templater(template_string=condition, static_context=static_context)]
+
+
 
         for item in dataset_to_cover:
             row = []
@@ -552,11 +556,19 @@ class JtableCls:
                     loop_condition_context = { item_name: item } if item_name != '' else item
                     context = { **context, **loop_condition_context, **self.dataset}
                     condition_context = {}
+                    view_index = 0
+
                     for var_name,var_data in self.vars.items():
-                        templated_var = self.jinja_render_value(template=str(var_data), context = context)
-                        condition_context.update({var_name: templated_var })
-                    condition_test_result = self.jinja_render_value( template = jinja_expr, context = {**context,**condition_context})
-                    # logging.info(condition_test_result)
+                        # templated_var = self.jinja_render_value(template=str(var_data), context = context)
+                        # condition_context.update({var_name: templated_var })
+                        view_template = Templater(template_string=str(var_data), static_context= {**context})
+                        templated_var = view_template.render({},eval_str=True)
+                        view_context.update({var_name: templated_var })
+                        view_index += 1
+                    condition_template = Templater(template_string=jinja_expr, static_context= {**context,**view_context,**condition_context})
+                    condition_test_result = condition_template.render({},eval_str=True)
+                    # condition_test_result = self.jinja_render_value( template = jinja_expr, context = {**context,**condition_context})
+                    logging.info(condition_test_result)
                     if condition_test_result == "False":
                         break
                 return condition_test_result
@@ -570,20 +582,18 @@ class JtableCls:
             if condition_test_result == "True":
                 column_index = 0
                 for expr in expressions:
-                    jinja_expr = '{{ ' + expr  + ' }}'
                     loop_context = { item_name: item } if item_name != '' else item
-                    # context = { **context,  **self.dataset}
-                    rendered_context = {}
+                    view_context = {}
                     view_index = 0
                     for var_name,var_data in self.vars.items():
                         # templated_var = self.jinja_render_value(template=str(var_data), context = {**context,**loop_context})
                         templated_var = view_templates[view_index].render({**loop_context},eval_str=True)
-                        rendered_context.update({var_name: templated_var })
+                        view_context.update({var_name: templated_var })
                         view_index += 1
                     
                     try:
-                        # value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**rendered_context})
-                        value_for_json = value = column_templates[column_index].render({**loop_context,**rendered_context})
+                        # value_for_json = value = self.jinja_render_value( template = jinja_expr, context = {**context,**loop_context,**view_context})
+                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context})
                     except:
                         break
                     del loop_context

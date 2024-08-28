@@ -1,5 +1,5 @@
 queryset:
-  path: host_list_debug{}
+  path: host_list{}
   select:
   - as: hostname
     expr: hostname
@@ -9,9 +9,11 @@ queryset:
     expr: cost
   - as: state
     expr: state
-  - as: service.name
-    expr: service.name
-  - as: ips
-    expr: ips
+  - as: env
+    expr: env
+  - as: order_date
+    expr: order_date
+  when:
+    - os == 'linux'
 out: '{{ stdin | jtable(queryset=queryset) }}'
 
