@@ -143,7 +143,7 @@ class JtableCli:
 
         parser.add_argument("-q", "--query_file", help = "Show Output")
         parser.add_argument("-p", "--json_path", help = "json path")
-        parser.add_argument("-f", "--format", help = "text,json,th,td")
+        parser.add_argument("-f", "--format", help = "simple,json,th,td")
         parser.add_argument("--inspect", action="store_true", help="inspect stdin")
         parser.add_argument("-jf", "--json_file", help = "load json")
         parser.add_argument("-jfs", "--json_files",action='append', help = "load multiple Json's")
@@ -258,7 +258,7 @@ class JtableCli:
             queryset['path'] = "{}"
                     
         if not "format" in queryset:
-            queryset['format'] = 'text'
+            queryset['format'] = 'simple'
 
         if args.format:
             queryset['format'] = args.format
@@ -294,7 +294,7 @@ class JtableCli:
             query_set_out['select'] = select
             # query_file_out['queryset'] = query_set_out
             query_file_out['queryset'] = query_set_out
-            # query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'text')
+            # query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'simple')
             query_file_out['out'] = out_expr
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
             print(yaml_query_out)
@@ -435,7 +435,7 @@ class JtableCls:
         # out_return = {
         #     "th": self.th,
         #     "td": self.td,
-        #     "text": tabulate(self.td,self.th,tablefmt="simple"),
+        #     "simple": tabulate(self.td,self.th,tablefmt="simple"),
         #     "json": json.dumps(self.json)
         #     # "json": self.json
         # }
@@ -561,7 +561,7 @@ class JtableCls:
                                     logging.info(f"formating: {formating}")
                                 if "style" in style_attribute:
                                     style = style_attribute['style'] 
-                                stylized_value = Styling().apply(value = value,format="text", style = style, formating = formating)
+                                stylized_value = Styling().apply(value = value,format="simple", style = style, formating = formating)
                                 value = stylized_value
 
                     row = row + [ value ]
@@ -716,7 +716,7 @@ class Styling:
         return [color for color in self.color_table if color['name'].lower() == color_name.lower() ][0][format]
 
     def apply(self,value="",format="",style="", formating=""):
-        if format == "text":
+        if format == "simple":
             logging.info(f"style: {style}")
             style_name = ""
             if style != "":
