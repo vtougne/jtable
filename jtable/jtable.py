@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config
 from os import isatty
-from tabulate import tabulate
+# from tabulate import tabulate
+import tabulate
 from typing import Any, Dict, Optional
 try:
     from . import version
@@ -184,12 +185,13 @@ class JtableCli:
             # self.dataset = yaml.safe_load(stdin)
 
         if not is_pipe and not args.json_file and not args.json_files and not args.query_file:
-            # args = parser.parse_args(['--help'])
+
             parser.print_help(sys.stdout)
             jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
-            print("\njtable core filters:")
-            filters = [filter for filter in jtable_core_filters]
-            print('  ' +', '.join(filters) + '\n')
+
+            print(f"\njtable core filters:\n   {', '.join(jtable_core_filters)}\n")
+            tablulate_formats = next((value for name, value in inspect.getmembers(tabulate) if name == 'tabulate_formats'), None)
+            print(f"tabulate_formats:\n   {', '.join(tablulate_formats)}\n")
             exit(1)
 
         if args.json_file:
@@ -278,7 +280,7 @@ class JtableCli:
             
         if args.inspect:
             inspected_paths = Inspect().view_paths(self.dataset[self.tabulate_var_name])
-            tbl = tabulate(inspected_paths,['path','value'])
+            tbl = tabulate.tabulate(inspected_paths,['path','value'])
             print(tbl)
             return
         
@@ -432,14 +434,6 @@ class JtableCls:
             
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
 
-        # out_return = {
-        #     "th": self.th,
-        #     "td": self.td,
-        #     "simple": tabulate(self.td,self.th,tablefmt="simple"),
-        #     "json": json.dumps(self.json)
-        #     # "json": self.json
-        # }
-        # logging.warning(f"tabulate formlats: {dir(tabulate)}")
         if self.format == "json":
             return json.dumps(self.json)
         elif self.format == "th":
@@ -447,8 +441,8 @@ class JtableCls:
         elif self.format == "td":
             return self.td
         else:
-            # print(f"format: {self.format}")
-            return tabulate(self.td,self.th,tablefmt=self.format)
+            print(f"tablefmt: {dir(inspect.getmembers(tabulate).__dir__)}")
+            return tabulate.tabulate(self.td,self.th,tablefmt=self.format)
         
         # return out_return[self.format]
     
@@ -553,7 +547,6 @@ class JtableCls:
                             # logging.info(color_conditions)
                             condition_color = when(when = color_conditions, context = context)
                             if condition_color == "True":
-                                logging.info(f"coucou")
                                 formating = ""
                                 style = ""
                                 if "formating" in style_attribute:
