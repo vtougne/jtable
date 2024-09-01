@@ -432,15 +432,25 @@ class JtableCls:
             
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
 
-        out_return = {
-            "th": self.th,
-            "td": self.td,
-            "text": tabulate(self.td,self.th,tablefmt="simple"),
-            "json": json.dumps(self.json)
-            # "json": self.json
-        }
+        # out_return = {
+        #     "th": self.th,
+        #     "td": self.td,
+        #     "text": tabulate(self.td,self.th,tablefmt="simple"),
+        #     "json": json.dumps(self.json)
+        #     # "json": self.json
+        # }
+        # logging.warning(f"tabulate formlats: {dir(tabulate)}")
+        if self.format == "json":
+            return json.dumps(self.json)
+        elif self.format == "th":
+            return self.th
+        elif self.format == "td":
+            return self.td
+        else:
+            # print(f"format: {self.format}")
+            return tabulate(self.td,self.th,tablefmt=self.format)
         
-        return out_return[self.format]
+        # return out_return[self.format]
     
     def render_table(self,dataset,select=[],item_name = '',context={}):
         stylings = []
