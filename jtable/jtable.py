@@ -140,8 +140,9 @@ class JtableCli:
 
         import argparse
 
-        parser = argparse.ArgumentParser(description='Tabulate your JSON/Yaml data and transform it using Jinja')
+        parser = argparse.ArgumentParser(description='Tabulate your JSON/Yaml data and transform it using Jinja',add_help=False)
 
+        parser.add_argument("-h", "--help",action="store_true", help = "Show dis help")
         parser.add_argument("-q", "--query_file", help = "Show Output")
         parser.add_argument("-p", "--json_path", help = "json path")
         parser.add_argument("-f", "--format", help = "simple,json,th,td")
