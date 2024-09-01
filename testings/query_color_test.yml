@@ -21,7 +21,8 @@ queryset:
           style: "font-color: green"
         - when: ["state == 'unreachable'"]
           style: "font-color: red"
-    - as: "       cost"
+          formating: "underlined"
+    - as: "cost"
       expr: cost
   # sort_by: "cost:desc,os,state"
   # when:

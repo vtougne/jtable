@@ -443,10 +443,10 @@ class JtableCls:
         return out_return[self.format]
     
     def render_table(self,dataset,select=[],item_name = '',context={}):
-        cell_stylings = None
+        stylings = []
         if len(select) > 0:
             expressions = [expressions['expr'] for expressions in select]
-            cell_stylings = [(cell_stylings['styling'] if 'styling' in cell_stylings else []) for cell_stylings in select]
+            stylings = [(stylings['styling'] if 'styling' in stylings else []) for stylings in select]
             fields_label = [fields_label['as'] for fields_label in select]
         else:
             fields = path_auto_discover().discover_paths(dataset)
@@ -500,7 +500,7 @@ class JtableCls:
                         view_index += 1
                     condition_template = Templater(template_string=jinja_expr, static_context= {**context,**view_context,**condition_context})
                     condition_test_result = condition_template.render({},eval_str=True)
-                    logging.info(condition_test_result)
+                    # logging.info(condition_test_result)
                     if condition_test_result == "False":
                         break
                 return condition_test_result
@@ -534,19 +534,25 @@ class JtableCls:
                         json_dict = {**json_dict, **json_value }
                         del json_value
                         del value_for_json
-
-                    if cell_stylings is not None:
-                        cell_styling = cell_stylings[column_index]
+                    if stylings != []:
+                        styling = stylings[column_index]
                         condition_color = "True"
-                        if cell_styling != []:
-                            for style in cell_styling:
-                                color_conditions = [color_conditions for color_conditions in  style['when'] ]
-                                # logging.info(color_conditions)
-                                condition_color = when(when = color_conditions, context = context)
-                                if condition_color == "True":
-                                    # logging.info(style)
-                                    stylized_value = Styling().apply(value = value,format="text", style = style['style'] )
-                                    value = stylized_value
+                        # if styling != []:
+                        for style_attribute in styling:
+                            color_conditions = [color_conditions for color_conditions in  style_attribute['when'] ]
+                            # logging.info(color_conditions)
+                            condition_color = when(when = color_conditions, context = context)
+                            if condition_color == "True":
+                                logging.info(f"coucou")
+                                formating = ""
+                                style = ""
+                                if "formating" in style_attribute:
+                                    formating = style_attribute['formating'].format(value)
+                                    logging.info(f"formating: {formating}")
+                                if "style" in style_attribute:
+                                    style = style_attribute['style'] 
+                                stylized_value = Styling().apply(value = value,format="text", style = style, formating = formating)
+                                value = stylized_value
 
                     row = row + [ value ]
                     del value
@@ -699,14 +705,34 @@ class Styling:
     def get_color(self,color_name="",format=""):
         return [color for color in self.color_table if color['name'].lower() == color_name.lower() ][0][format]
 
-    def apply(self,value="",format="",style=""):
+    def apply(self,value="",format="",style="", formating=""):
         if format == "text":
-            style_name = style.split(': ')[0]
-            style_value = style.split(': ')[1]
-            if "color" in style_name:
-                color_value = self.get_color(style_value,"ansi_code")
-                value_colorized = f"\x1b[0;{color_value}m{value}\x1b[0m"
-                return value_colorized
+            logging.info(f"style: {style}")
+            style_name = ""
+            if style != "":
+                style_name = style.split(': ')[0]
+                style_value = style.split(': ')[1]
+            else:
+                style_value = "white"
+            text_formating = 0
+            if formating == "normal" or formating == "":
+                text_formating = 0
+            elif formating == "bold":
+                text_formating = 1
+            elif formating == "dim":
+                text_formating = 2
+            elif formating == "italic":
+                text_formating = 3
+            elif formating == "underlined":
+                text_formating = 4
+            else:
+                logging.error(f"Unknown formating: {formating}")
+                exit(1)
+            # if "color" in style_name:
+            color_value = self.get_color(style_value,"ansi_code")
+            value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
+            logging.info(f"value_colorized: {value_colorized}")
+            return value_colorized
 
 class Templater:
     def __init__(self, template_string = "", static_context = {}):
