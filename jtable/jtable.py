@@ -441,7 +441,6 @@ class JtableCls:
         elif self.format == "td":
             return self.td
         else:
-            print(f"tablefmt: {dir(inspect.getmembers(tabulate).__dir__)}")
             return tabulate.tabulate(self.td,self.th,tablefmt=self.format)
         
         # return out_return[self.format]
