@@ -542,20 +542,21 @@ class JtableCls:
                         styling = stylings[column_index]
                         condition_color = "True"
                         # if styling != []:
-                        for style_attribute in styling:
-                            color_conditions = [color_conditions for color_conditions in  style_attribute['when'] ]
+                        for styling_attributes in styling:
+                            color_conditions = [color_conditions for color_conditions in  styling_attributes['when'] ]
                             # logging.info(color_conditions)
                             condition_color = when(when = color_conditions, context = context)
                             if condition_color == "True":
-                                formating = ""
-                                style = ""
-                                if "formating" in style_attribute:
-                                    formating = style_attribute['formating'].format(value)
-                                    logging.info(f"formating: {formating}")
-                                if "style" in style_attribute:
-                                    style = style_attribute['style'] 
-                                stylized_value = Styling().apply(value = value,format="simple", style = style, formating = formating)
-                                value = stylized_value
+                                # formating = ""
+                                # style = ""
+                                # if "formating" in styling_attributes:
+                                #     formating = styling_attributes['formating'].format(value)
+                                #     logging.info(f"formating: {formating}")
+                                # if "style" in styling_attributes:
+                                #     style = styling_attributes['style'] 
+                                # stylized_value = Styling().apply(value = value,format="simple", style = style, formating = formating)
+                                # value = stylized_value
+                                value = Styling().apply(value = value,format="simple", styling_attributes = styling_attributes)
 
                     row = row + [ value ]
                     del value
@@ -708,16 +709,17 @@ class Styling:
     def get_color(self,color_name="",format=""):
         return [color for color in self.color_table if color['name'].lower() == color_name.lower() ][0][format]
 
-    def apply(self,value="",format="",style="", formating=""):
+    def apply(self,value="",format="",styling_attributes={}):
         if format == "simple":
-            logging.info(f"style: {style}")
-            style_name = ""
-            if style != "":
-                style_name = style.split(': ')[0]
-                style_value = style.split(': ')[1]
+            logging.info(f"style: {styling_attributes['style']}")
+            if "style" in styling_attributes:
+                style_value = styling_attributes['style'].split(": ")[1]
             else:
                 style_value = "white"
             text_formating = 0
+            formating = ""
+            if "formating" in styling_attributes:
+                formating = styling_attributes['formating']
             if formating == "normal" or formating == "":
                 text_formating = 0
             elif formating == "bold":
@@ -731,7 +733,7 @@ class Styling:
             else:
                 logging.error(f"Unknown formating: {formating}")
                 exit(1)
-            # if "color" in style_name:
+            logging.info(f"style_value: {style_value}")
             color_value = self.get_color(style_value,"ansi_code")
             value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
             logging.info(f"value_colorized: {value_colorized}")
