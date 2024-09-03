@@ -547,16 +547,7 @@ class JtableCls:
                             # logging.info(color_conditions)
                             condition_color = when(when = color_conditions, context = context)
                             if condition_color == "True":
-                                # formating = ""
-                                # style = ""
-                                # if "formating" in styling_attributes:
-                                #     formating = styling_attributes['formating'].format(value)
-                                #     logging.info(f"formating: {formating}")
-                                # if "style" in styling_attributes:
-                                #     style = styling_attributes['style'] 
-                                # stylized_value = Styling().apply(value = value,format="simple", style = style, formating = formating)
-                                # value = stylized_value
-                                value = Styling().apply(value = value,format="simple", styling_attributes = styling_attributes)
+                                value = Styling().apply(value = value,format=self.format, styling_attributes = styling_attributes)
 
                     row = row + [ value ]
                     del value
@@ -710,7 +701,7 @@ class Styling:
         return [color for color in self.color_table if color['name'].lower() == color_name.lower() ][0][format]
 
     def apply(self,value="",format="",styling_attributes={}):
-        if format == "simple":
+        # if format == "simple":
             logging.info(f"style: {styling_attributes['style']}")
             if "style" in styling_attributes:
                 style_value = styling_attributes['style'].split(": ")[1]
@@ -735,8 +726,18 @@ class Styling:
                 exit(1)
             logging.info(f"style_value: {style_value}")
             color_value = self.get_color(style_value,"ansi_code")
-            value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
-            logging.info(f"value_colorized: {value_colorized}")
+            if format == "simple":
+                value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
+            elif format == "github":
+                # value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
+                # value_colorized = f"$`\textcolor{{red}}{{\text{{Smith}}`$"
+                value_colorized = r"$`\textcolor{"+ style_value + r"}{\text{" + value + "}}`$"
+            elif format == "html":
+                value_colorized = r"<span style='color: {" + styling_attributes['style'] + r"['style']};'>" + value + r"</span>"
+            else:
+                value_colorized = "\x1b[{" + text_formating + "};{color_value}m{value}\x1b[0m"
+
+            logging.info(f"format: {format}")
             return value_colorized
 
 class Templater:
