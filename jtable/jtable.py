@@ -441,6 +441,10 @@ class JtableCls:
             return self.th
         elif self.format == "td":
             return self.td
+        elif self.format == "github_latex":
+            return tabulate.tabulate(self.td,self.th,tablefmt="github")
+        elif self.format == "html":
+            return tabulate.tabulate(self.td,self.th,tablefmt="unsafehtml")
         else:
             return tabulate.tabulate(self.td,self.th,tablefmt=self.format)
         
@@ -728,16 +732,16 @@ class Styling:
             color_value = self.get_color(style_value,"ansi_code")
             if format == "simple":
                 value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
-            elif format == "github":
+            elif format == "github_latex":
                 # value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
                 # value_colorized = f"$`\textcolor{{red}}{{\text{{Smith}}`$"
                 value_colorized = r"$`\textcolor{"+ style_value + r"}{\text{" + value + "}}`$"
             elif format == "html":
-                value_colorized = r"<span style='color: {" + styling_attributes['style'] + r"['style']};'>" + value + r"</span>"
+                value_colorized = r'<span style="' + styling_attributes['style'] + r';">' + value + r"</span>"
             else:
-                value_colorized = "\x1b[{" + text_formating + "};{color_value}m{value}\x1b[0m"
+                value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
 
-            logging.info(f"format: {format}")
+            logging.info(f"format: {format}")   
             return value_colorized
 
 class Templater:

@@ -18,9 +18,9 @@ queryset:
       expr: state
       styling:
         - when: ["state == 'alive'"]
-          style: "font-color: green"
+          style: "color: green"
         - when: ["state == 'unreachable'"]
-          style: "font-color: red"
+          style: "color: red"
           formating: "underlined"
     - as: "cost"
       expr: cost
