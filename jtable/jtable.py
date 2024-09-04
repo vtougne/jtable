@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config
+import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html
 from os import isatty
 # from tabulate import tabulate
 import tabulate
@@ -535,7 +535,8 @@ class JtableCls:
                     except:
                         break
                     del loop_context
-
+                    if self.format == "html":
+                        value = html.escape(value)
                     key = fields_label[column_index]
                     if value_for_json != None:
                         json_value = { key: value_for_json }
