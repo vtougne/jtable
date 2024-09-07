@@ -1,0 +1,20 @@
+context:
+  ds: "{{ stdin }}"
+
+queryset:
+  path: "{parent}.vhosts{}"
+  select:
+  - as: name
+    expr: name
+  - as: target
+    expr: target
+  - as: port
+    expr: port
+  - as: venv
+    expr: venv
+  - as: exposed
+    expr: parent.value.zone | selectattr('name', '==', venv) | map(attribute='exposed') | first
+  - as: parent
+    expr: parent.key
+out: '{{ context | jtable(queryset=queryset) }}'
+

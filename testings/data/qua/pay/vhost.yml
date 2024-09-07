@@ -1,0 +1,12 @@
+
+zone:
+  - { name: pay_qual_internet, exposed: true }
+  - { name: pay_qua_1, exposed: false }
+
+vhosts:
+- { name: prez_api, target: host_14, port: 443, venv: pay_qual_internet }
+- { name: prez_url, target: host_22, port: 80, venv: pay_qual_internet }
+- { name: app_api_1, target: host_123, port: 443,  venv: pay_qua_1 }
+- { name: app_api_2, target: host_122, port: 443,  venv: pay_qua_1 }
+- { name: app_url, target: host_132, port: 80,  venv: pay_qua_1 }
+- { name: app_api, target: host_147, port: 443,  venv: pay_qua_2 }

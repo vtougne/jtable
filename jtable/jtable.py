@@ -9,6 +9,17 @@ try:
 except:
     import version
 
+class CustomFormatter(logging.Formatter):
+    def format(self, record):
+        frame = inspect.currentframe()
+        
+        parent_function = inspect.getouterframes(frame)[9].function
+        
+        record.parent_function = parent_function
+        class_name = inspect.currentframe().f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_locals["self"].__class__.__name__
+        record.class_name = class_name
+        return super().format(record)
+    
 class _ExcludeErrorsFilter(logging.Filter):
     def filter(self, record):
         """Only lets through log messages with log level below ERROR ."""
@@ -26,7 +37,10 @@ logging_config = {
     },
     'formatters': {
         'my_formatter': {
-            'format': '%(asctime)s (line %(lineno)s) | %(levelname)s %(message)s',
+            '()': CustomFormatter,
+            # 'format': '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s',
+            'format': '%(asctime)s [%(levelname)s] %(message)s',
+            # 'format': logging_format,
             'datefmt': '%H:%M:%S'
 
         }
@@ -44,8 +58,6 @@ logging_config = {
         'handlers': ['console_stderr']
     },
 }
-
-# logging.config.dictConfig(logging_config)
 
 class Filters:
     def jtable(dataset,select=[],path="{}",format="",vars={}, when=[],queryset={}):
@@ -155,7 +167,9 @@ class JtableCli:
         parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
 
         args = parser.parse_args()
-
+        if os.environ.get('JTABLE_LOGGING') == "DEBUG":
+            logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
+        
         if args.verbose == 0:
             logging_config['handlers']['console_stderr']['level'] = 'WARNING'
         if args.verbose == 1:
@@ -163,6 +177,9 @@ class JtableCli:
         elif args.verbose == 2:
             logging_config['handlers']['console_stderr']['level'] = 'DEBUG'
         logging.config.dictConfig(logging_config)
+        
+        # global logging_format
+        # logging_format = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
         
         if args.query_file:
             with open(args.query_file, 'r') as file:
@@ -432,7 +449,10 @@ class JtableCls:
         if self.splitted_path[0] == "['']":
             self.splitted_path[0] = "['input']"
             self.dataset = {"input": self.dataset}
-            
+        
+        logging.info(f"Crossing paths")
+        # for item in inspect.stack():
+        #     logging.info(f"  {item[3]}")
         self.cross_path(self.dataset, self.splitted_path, context=self.vars )
 
         if self.format == "json":

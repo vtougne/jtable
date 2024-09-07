@@ -28,17 +28,17 @@ $`\textcolor{teal}{\text{your text}}`$
 # GRAY text
 ```
 
-### text yaml
+### colorized yaml
 
 \- hosts: localhost  
-  &nbsp;&nbsp;&nbsp;tasks:  
-&nbsp;&nbsp;&nbsp;- name: Install packages  
-    apt:  
-      $`\textcolor{red}{\text{name}}`$ :  
-        - package1  
-        - package2  
-        - package3  
-      state: present  
+   tasks:  
+   - name: Install packages  
+      apt:  
+      $`\textcolor{red}{\text{name}}`$ :  
+        - package1  
+        - package2  
+        - package3  
+      state: present  
 
 
 
