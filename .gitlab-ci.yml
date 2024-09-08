@@ -70,8 +70,8 @@ make_release:
     - git push origin main
     - git tag -f $new_version
     - git push origin $new_version
-
-
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /make_release/
 
 deploy:
   stage: deploy
@@ -95,4 +95,5 @@ deploy:
     - git push origin $new_version
     - git push -f origin main
   rules:
+  - if: '$CI_COMMIT_MESSAGE =~ /make_release/
   - when: manual
