@@ -96,4 +96,4 @@ deploy:
     - git push -f origin main
   rules:
   - if: '$CI_COMMIT_MESSAGE =~ /make_release/
-  - when: manual
+    when: manual
