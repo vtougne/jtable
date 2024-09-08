@@ -394,7 +394,7 @@ queryset:
       expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 else (uptime_in_day | string ) +  ' day'"
     - as: sanity status
       expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
-  vars:
+  views:
     dc_location:
       dc_1: East
       dc_2: North
@@ -406,7 +406,7 @@ out: "{{ stdin | jtable(queryset=queryset)}}"
 
 command: 
 ```bash
-cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
+cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
 ```
 output:
 
@@ -472,7 +472,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
-08:28:37 (line 367) | ERROR .dc was not found in dataset level: 2
+16:41:35 [ERROR] .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -556,7 +556,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-08:28:37 (line 231) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+16:41:35 [WARNING] fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000

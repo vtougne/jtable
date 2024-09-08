@@ -394,7 +394,7 @@ queryset:
       expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 else (uptime_in_day | string ) +  ' day'"
     - as: sanity status
       expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
-  vars:
+  views:
     dc_location:
       dc_1: East
       dc_2: North
@@ -406,7 +406,7 @@ out: "{{ stdin | jtable(queryset=queryset)}}"
 
 command: 
 ```bash
-cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
+cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
 ```
 output:
 
@@ -472,7 +472,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```
-15:15:08 (line 360) | ERROR .dc was not found in dataset level: 2
+16:41:35 [ERROR] .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -556,7 +556,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-15:15:09 (line 231) | WARNING fail loading file data/dev/it_services/config.yml, skipping
+16:41:35 [WARNING] fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -676,14 +676,14 @@ PLAY [localhost] ***************************************************************
 TASK [debug] *******************************************************************
 ok: [localhost] => 
   msg: |-
-    hostname    os         cost  state    service.name        ips
-    ----------  -------  ------  -------  ------------------  ------------------------------
+    hostname    os         cost  state    service.name    ips
+    ----------  -------  ------  -------  --------------  ------------------------------
     host_1      linux      5000  alive    service1
-    service_3
+                                          service_3
     host_2      linux1      200  alive
     host_3      windows     200  alive
-    host_4      windows    5000  decom                        ['192.168.1.1', '192.168.1.2']
-    host_5      windows    5000  decom                        []
+    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
+    host_5      windows    5000  decom                    []
 
 PLAY RECAP *********************************************************************
 localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

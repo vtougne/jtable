@@ -60,11 +60,11 @@ logging_config = {
 }
 
 class Filters:
-    def jtable(dataset,select=[],path="{}",format="",vars={}, when=[],queryset={}):
+    def jtable(dataset,select=[],path="{}",format="",views={}, when=[],queryset={}):
         # logging.info(f"path: {path}")
-        # return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)[format]
-        return JtableCls().render_object( dataset,path=path, select=select,vars=vars, when=when,format=format, queryset=queryset)
-        # return JtableCls().render_object({"stdin": dataset},path=path, select=select,vars=vars)[format]
+        # return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)[format]
+        return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)
+        # return JtableCls().render_object({"stdin": dataset},path=path, select=select,views=views)[format]
     def from_json(str):
         return json.loads(str)
     def from_yaml(data):
@@ -333,7 +333,7 @@ class JtableCls:
         self.splitted_path = []
         self.when = []
         self.select = []
-        self.vars = {}
+        self.views = {}
         self.path = "{}"
         self.format = ""
 
@@ -418,15 +418,15 @@ class JtableCls:
             # logging.info(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
     
-    def render_object(self,dataset,path="{}",select=[],vars={}, when=[],format="",queryset={}):
+    def render_object(self,dataset,path="{}",select=[],views={}, when=[],format="",queryset={}):
         for query_item,query_data in queryset.items():
             if query_item == "select":
                 self.select = query_data
             elif query_item == "path":
                 # logging.info(f"self.path query_data: {query_data}")
                 self.path = query_data
-            elif query_item == "vars":
-                self.vars = query_data
+            elif query_item == "views":
+                self.views = query_data
             elif query_item == "when":
                 self.when = query_data
             elif query_item == "format":
@@ -436,14 +436,14 @@ class JtableCls:
             
         self.path = path if path != "{}" else self.path
         self.select = select if select != [] else self.select
-        self.vars = vars if vars != {} else self.vars
+        self.views = views if views != {} else self.views
         self.when = when if when != [] else self.when
         self.format = format if format != "" else self.format
 
         self.dataset = dataset
         
-        for k,v in self.vars.items():
-            self.vars = {**self.vars, **{ k: '{{' + str(v) + '}}' } }
+        for k,v in self.views.items():
+            self.views = {**self.views, **{ k: '{{' + str(v) + '}}' } }
 
         self.splitted_path = JinjaPathSplitter().split_path(self.path)
         if self.splitted_path[0] == "['']":
@@ -453,7 +453,7 @@ class JtableCls:
         logging.info(f"Crossing paths")
         # for item in inspect.stack():
         #     logging.info(f"  {item[3]}")
-        self.cross_path(self.dataset, self.splitted_path, context=self.vars )
+        self.cross_path(self.dataset, self.splitted_path, context=self.views )
 
         if self.format == "json":
             return json.dumps(self.json)
@@ -499,7 +499,7 @@ class JtableCls:
 
         view_templates = []
         view_context = {}
-        for var_name,var_data in self.vars.items():
+        for var_name,var_data in self.views.items():
             view_templates = view_templates + [Templater(template_string=str(var_data), static_context=static_context)]
 
         when_templates = []
@@ -521,7 +521,7 @@ class JtableCls:
                     condition_context = {}
                     view_index = 0
 
-                    for var_name,var_data in self.vars.items():
+                    for var_name,var_data in self.views.items():
                         view_template = Templater(template_string=str(var_data), static_context= {**context})
                         templated_var = view_template.render({},eval_str=True)
                         view_context.update({var_name: templated_var })
@@ -545,7 +545,7 @@ class JtableCls:
                     loop_context = { item_name: item } if item_name != '' else item
                     view_context = {}
                     view_index = 0
-                    for var_name,var_data in self.vars.items():
+                    for var_name,var_data in self.views.items():
                         templated_var = view_templates[view_index].render({**loop_context},eval_str=True)
                         view_context.update({var_name: templated_var })
                         view_index += 1

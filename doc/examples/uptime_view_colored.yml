@@ -33,7 +33,7 @@ queryset:
         - when:
           - "uptime_in_day | int < 30"
           style: "font-color: green"
-  vars:
+  views:
     dc_location:
       dc_1: East
       dc_2: North 

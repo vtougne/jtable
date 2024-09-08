@@ -118,11 +118,11 @@
     this will helps to make mapping table, or behalf like view
 
 - name: Use variables mapping table or view
-  eval_cmd: cat uptime_view_with_vars.yml
+  eval_cmd: cat uptime_view_with_views.yml
   box_as: yaml
   # collapse: the query
 
-- play_cmd: cat uptime_dataset.yml | jtable -q uptime_view_with_vars.yml
+- play_cmd: cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
   # collapse: command & output
 
 - text: |
