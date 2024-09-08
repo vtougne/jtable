@@ -18,7 +18,7 @@ considering the following dataset (list of dictionnaries)
   command:
 
 ```bash
-cat dataset.yml | jtable -p hosts
+cat simple_list.yml | ./jtable.py
 ```
 
    Will return the following:

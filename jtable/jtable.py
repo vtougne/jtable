@@ -17,6 +17,7 @@ class CustomFormatter(logging.Formatter):
         
         record.parent_function = parent_function
         class_name = inspect.currentframe().f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_locals["self"].__class__.__name__
+        class_name = class_name.replace("Jtable","").lower()
         record.class_name = class_name
         return super().format(record)
     
@@ -39,8 +40,6 @@ logging_config = {
         'my_formatter': {
             '()': CustomFormatter,
             # 'format': '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s',
-            'format': '%(asctime)s [%(levelname)s] %(message)s',
-            # 'format': logging_format,
             'datefmt': '%H:%M:%S'
 
         }
@@ -142,7 +141,6 @@ class JtableCli:
         
     def parse_args(self):
         select = []
-        facts = {}
         queryset = {}
         self.tabulate_var_name="stdin"
         if 'JTABLE_RENDER' in os.environ:
@@ -169,6 +167,9 @@ class JtableCli:
         args = parser.parse_args()
         if os.environ.get('JTABLE_LOGGING') == "DEBUG":
             logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
+        else:
+            logging_config['formatters']['my_formatter']['format'] = '%(asctime)s %(class_name)s.%(parent_function)-16s | %(levelname)s %(message)s'
+
         
         if args.verbose == 0:
             logging_config['handlers']['console_stderr']['level'] = 'WARNING'
@@ -325,6 +326,7 @@ class JtableCli:
 
 class JtableCls:
     def __init__(self, render="jinja_native"):
+        logging.info(f"Initilizing render: {render}")
         self.td = []
         self.th = []
         self.table_headers = []
