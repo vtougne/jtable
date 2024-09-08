@@ -356,7 +356,7 @@ class JtableCls:
             logging.error("Unknown render option")
             exit(1)
     
-    def cross_path(self,dataset,path,context={}):
+    def cross_path(self,dataset,path,cross_path_context={}):
         level = len(path)
         if level > 1:
             # logging.info(f"path: {path}")
@@ -367,7 +367,7 @@ class JtableCls:
             if current_path[0:2] == "['":
                 current_path_value = current_path[2:-2]
                 if current_path_value in list(dataset):
-                    self.cross_path(dataset[current_path_value],next_path, context = context)
+                    self.cross_path(dataset[current_path_value],next_path, cross_path_context = cross_path_context)
                 else:
                     logging.error('keys dataset were:')
                     logging.error(list(dataset))
@@ -376,7 +376,7 @@ class JtableCls:
             elif current_path[0] == ".":
                 current_path_value = current_path[1:]
                 if current_path_value in list(dataset):
-                    self.cross_path(dataset[current_path_value],next_path, context = context)
+                    self.cross_path(dataset[current_path_value],next_path, cross_path_context = cross_path_context)
                 else:
                     logging.info(list(dataset))
                     logging.error(current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
@@ -385,7 +385,7 @@ class JtableCls:
             elif current_path[0] == "[":
                 current_path_value = current_path[1:-1]
                 if int(current_path_value) <= len(dataset):
-                    self.cross_path(dataset[int(current_path_value)],next_path, context = context)
+                    self.cross_path(dataset[int(current_path_value)],next_path, cross_path_context = cross_path_context)
                     
                 else:
                     logging.info("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
@@ -397,28 +397,28 @@ class JtableCls:
                     if type(dataset) is dict:
                         for key,value in dataset.items():
                             next_path = path[1:]
-                            # new_context = {item_name: {"key": key, "value": value}}
-                            context = { **context, **{item_name: {"key": key, "value": value}}}
-                            self.cross_path(dataset[key],next_path,context=context)
+                            # new_cross_path_context = {item_name: {"key": key, "value": value}}
+                            cross_path_context = { **cross_path_context, **{item_name: {"key": key, "value": value}}}
+                            self.cross_path(dataset[key],next_path,cross_path_context=cross_path_context)
                             
                     elif type(dataset) is list:
                         index = 0
                         for item in dataset:
                             next_path = path[1:]
-                            # new_context = { item_name: item }
-                            context = { **context, **{ item_name: item }}
-                            self.cross_path(dataset[index],next_path,context=context)
+                            # new_cross_path_context = { item_name: item }
+                            cross_path_context = { **cross_path_context, **{ item_name: item }}
+                            self.cross_path(dataset[index],next_path,cross_path_context=cross_path_context)
                             index += 1
                 else:
                     logging.info(f"item_name: {item_name}")
-                    self.render_table(dataset=dataset,select=self.select, item_name = item_name, context = context)
+                    self.render_table(dataset=dataset,select=self.select, item_name = item_name, context = cross_path_context)
             else:
                 logging.info("[ERROR] was looking for path...")
                 exit(1)
         else:
             item_name = path[0][1:-1]
             # logging.info(f"item_name: {item_name}")
-            self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=context)
+            self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=cross_path_context)
     
     def render_object(self,dataset,path="{}",select=[],views={}, when=[],format="",queryset={}):
         for query_item,query_data in queryset.items():
@@ -455,7 +455,7 @@ class JtableCls:
         logging.info(f"Crossing paths")
         # for item in inspect.stack():
         #     logging.info(f"  {item[3]}")
-        self.cross_path(self.dataset, self.splitted_path, context=self.views )
+        self.cross_path(self.dataset, self.splitted_path, cross_path_context=self.views )
 
         if self.format == "json":
             return json.dumps(self.json)
@@ -493,20 +493,20 @@ class JtableCls:
         else:
             raise Exception('[ERROR] dataset must be a dict or list, was: ' + str(type(dataset)))
 
-        static_context = {"dataset": dataset, **context}
+        # static_context = {"dataset": dataset, **context}
         column_templates = []
         for expr in expressions:
             jinja_expr = '{{ ' + expr  + ' }}'
-            column_templates = column_templates + [Templater(template_string=jinja_expr, static_context=static_context)]
+            column_templates = column_templates + [Templater(template_string=jinja_expr, static_context=context)]
 
         view_templates = []
         view_context = {}
         for var_name,var_data in self.views.items():
-            view_templates = view_templates + [Templater(template_string=str(var_data), static_context=static_context)]
+            view_templates = view_templates + [Templater(template_string=str(var_data), static_context=context)]
 
         when_templates = []
         for condition in self.when:
-            when_templates = when_templates + [Templater(template_string=condition, static_context=static_context)]
+            when_templates = when_templates + [Templater(template_string=condition, static_context=context)]
 
 
 
