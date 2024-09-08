@@ -37,6 +37,7 @@ test:
     - cd doc/examples
     - ./make_doc.sh --halt
     - ./diff_doc.sh ref_README.md README.md "ERROR .dc was not found in dataset|WARNING fail loading file data/dev/it_s"
+    - echo debug CI_COMMIT_BRANCH: $CI_COMMIT_BRANCH
   rules:
     - if: '$CI_COMMIT_MESSAGE !~ /make_release/ && $CI_COMMIT_BRANCH != "main"'
 
