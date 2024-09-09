@@ -16,8 +16,11 @@ class CustomFormatter(logging.Formatter):
         parent_function = inspect.getouterframes(frame)[9].function
         
         record.parent_function = parent_function
-        class_name = inspect.currentframe().f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_locals["self"].__class__.__name__
-        class_name = class_name.replace("Jtable","").lower()
+        try:
+            class_name = inspect.currentframe().f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_locals["self"].__class__.__name__
+        except:
+            class_name = "UnknownClass"
+        class_name = class_name.lower().replace("jtable","")
         record.class_name = class_name
         return super().format(record)
 
@@ -46,14 +49,6 @@ https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-me
 """
 logging_config = {
     'version': 1,
-    # 'filters': {
-    #     'exclude_errors': {
-    #         '()': _ExcludeErrorsFilter
-    #     }
-    #     # 'custom': {
-    #     #     '()': CustomFilter,
-    #     # },
-    # },
     'formatters': {
         'my_formatter': {
             '()': CustomFormatter,
@@ -83,10 +78,11 @@ logging_config = {
 }
 
 class Filters:
-    def jtable(dataset,select=[],path="{}",format="",views={}, when=[],queryset={}):
-        # logging.info(f"path: {path}")
+    def jtable(dataset,select=[],path="{}",format="",views={}, when=[],context = {}, queryset={}):
+        logging.info(f"context: {str(context)}")
+        # logging.info("coucou")
         # return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)[format]
-        return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)
+        return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when,format=format, context = context, queryset=queryset)
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,views=views)[format]
     def from_json(str):
         return json.loads(str)
@@ -387,18 +383,17 @@ class JtableCls:
             logging.error("Unknown render option")
             exit(1)
     
-    def cross_path(self,dataset,path,cross_path_context={}):
+    def cross_path(self, dataset, path, cross_path_context = {} ):
         level = len(path)
         if level > 1:
             # logging.info(f"path: {path}")
             next_path = path[1:]
             current_path = str(path[0])
             current_path_value = "unknown"
-            current_path_value = current_path_value
             if current_path[0:2] == "['":
                 current_path_value = current_path[2:-2]
                 if current_path_value in list(dataset):
-                    self.cross_path(dataset[current_path_value],next_path, cross_path_context = cross_path_context)
+                    self.cross_path(dataset[current_path_value], next_path, cross_path_context = cross_path_context)
                 else:
                     logging.error('keys dataset were:')
                     logging.error(list(dataset))
@@ -451,7 +446,8 @@ class JtableCls:
             # logging.info(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=cross_path_context)
     
-    def render_object(self,dataset,path="{}",select=[],views={}, when=[],format="",queryset={}):
+    def render_object(self,dataset,path="{}",select=[],views={}, when=[],format="",context = {}, queryset={}):
+        logging.info(f"context: {context}")
         for query_item,query_data in queryset.items():
             if query_item == "select":
                 self.select = query_data
@@ -472,6 +468,7 @@ class JtableCls:
         self.views = views if views != {} else self.views
         self.when = when if when != [] else self.when
         self.format = format if format != "" else self.format
+        self.context = context
 
         self.dataset = dataset
         
@@ -486,7 +483,8 @@ class JtableCls:
         logging.info(f"Crossing paths")
         # for item in inspect.stack():
         #     logging.info(f"  {item[3]}")
-        self.cross_path(self.dataset, self.splitted_path, cross_path_context=self.views )
+        # self.cross_path(self.dataset, self.splitted_path, cross_path_context=self.views )
+        self.cross_path(self.dataset, self.splitted_path )
 
         if self.format == "json":
             return json.dumps(self.json)
@@ -528,16 +526,16 @@ class JtableCls:
         column_templates = []
         for expr in expressions:
             jinja_expr = '{{ ' + expr  + ' }}'
-            column_templates = column_templates + [Templater(template_string=jinja_expr, static_context=context)]
+            column_templates = column_templates + [Templater(template_string=jinja_expr, static_context={**context,**self.context})]
 
         view_templates = []
         view_context = {}
         for var_name,var_data in self.views.items():
-            view_templates = view_templates + [Templater(template_string=str(var_data), static_context=context)]
+            view_templates = view_templates + [Templater(template_string=str(var_data), static_context={**context,**self.context})]
 
         when_templates = []
         for condition in self.when:
-            when_templates = when_templates + [Templater(template_string=condition, static_context=context)]
+            when_templates = when_templates + [Templater(template_string=condition, static_context={**context,**self.context})]
 
 
 
@@ -555,11 +553,11 @@ class JtableCls:
                     view_index = 0
 
                     for var_name,var_data in self.views.items():
-                        view_template = Templater(template_string=str(var_data), static_context= {**context})
+                        view_template = Templater(template_string=str(var_data), static_context= {**context,**self.context})
                         templated_var = view_template.render({},eval_str=True)
                         view_context.update({var_name: templated_var })
                         view_index += 1
-                    condition_template = Templater(template_string=jinja_expr, static_context= {**context,**view_context,**condition_context})
+                    condition_template = Templater(template_string=jinja_expr, static_context= {**self.context,**context,**view_context,**condition_context})
                     condition_test_result = condition_template.render({},eval_str=True)
                     # logging.info(condition_test_result)
                     if condition_test_result == "False":
@@ -819,7 +817,7 @@ class Templater:
                 out = out_str =""
             else:
                 out = out_str = error
-                logging.error(f"Failed while rendering context:\n  {str(error)}")
+                logging.error(f"Failed while rendering context, error was:\n  {str(error)}")
                 raise out
             
         if eval_str == True:

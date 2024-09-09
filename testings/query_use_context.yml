@@ -1,0 +1,27 @@
+
+context:
+  hosts:
+    - { hostname: host_2, os: windows, cost: 200  , dc: dc_1 }
+    - { hostname: host_1, os: linux               , dc: dc_1 }
+    - { hostname: host_3, os: linux   , cost: 200 , dc: dc_2 }
+    - { hostname: host_4, os: aix     , cost: 200 , dc: dc_2 }
+    - { hostname: host_5, os: linux   , cost: 200 , dc: dc_2 }
+  location:
+    dc_1: west coast
+    dc_2: east
+
+queryset:
+  # path: context.hosts{}
+  select:
+  - as: hostname
+    expr: hostname
+  - as: os
+    expr: os
+  - as: cost
+    expr: cost
+  - as: dc
+    expr: dc
+  - as: location
+    expr: location[dc]
+
+out: "{{ hosts | jtable(queryset=queryset,context={'location': location}) }}"
