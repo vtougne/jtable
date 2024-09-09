@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html
+import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil
 from os import isatty
 # from tabulate import tabulate
 import tabulate
@@ -20,7 +20,22 @@ class CustomFormatter(logging.Formatter):
         class_name = class_name.replace("Jtable","").lower()
         record.class_name = class_name
         return super().format(record)
-    
+
+class CustomFilter(logging.Filter):
+    def filter(self, record):
+        record.class_name = getattr(record, 'class_name', 'UnknownClass')
+        record.parent_function = getattr(record, 'parent_function', 'UnknownFunction')
+        
+        context = f"{record.class_name}.{record.parent_function}"
+        record.fixed_context = f"{context:<50}"
+        
+        total_message_size = len(record.fixed_context) + len(record.msg)
+        if total_message_size > terminal_size.columns:
+            record.msg = record.msg[:terminal_size.columns - len(record.fixed_context) ] + '...'
+
+        return True
+
+
 class _ExcludeErrorsFilter(logging.Filter):
     def filter(self, record):
         """Only lets through log messages with log level below ERROR ."""
@@ -31,11 +46,14 @@ https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-me
 """
 logging_config = {
     'version': 1,
-    'filters': {
-        'exclude_errors': {
-            '()': _ExcludeErrorsFilter
-        }
-    },
+    # 'filters': {
+    #     'exclude_errors': {
+    #         '()': _ExcludeErrorsFilter
+    #     }
+    #     # 'custom': {
+    #     #     '()': CustomFilter,
+    #     # },
+    # },
     'formatters': {
         'my_formatter': {
             '()': CustomFormatter,
@@ -44,12 +62,18 @@ logging_config = {
 
         }
     },
+    'filters': {
+        'custom': {
+            '()': CustomFilter,
+        },
+    },
     'handlers': {
         'console_stderr': {
             'class': 'logging.StreamHandler',
             'level': 'ERROR',
             'formatter': 'my_formatter',
-            'stream': sys.stderr
+            'stream': sys.stderr,
+            'filters': ['custom'],
         },
     },
     'root': {
@@ -165,6 +189,9 @@ class JtableCli:
         parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
 
         args = parser.parse_args()
+        global terminal_size
+        terminal_size = shutil.get_terminal_size((80, 20))  # Largeur par défaut 80, hauteur 20
+
         if os.environ.get('JTABLE_LOGGING') == "DEBUG":
             logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
         else:
@@ -183,6 +210,7 @@ class JtableCli:
         # logging_format = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
         
         if args.query_file:
+            logging.info(f"loading query file: {args.query_file}")
             with open(args.query_file, 'r') as file:
                 try:
                     query_file = yaml.safe_load(file)
@@ -198,6 +226,7 @@ class JtableCli:
 
         stdin=""
         if is_pipe:
+            logging.info("stdin is a pipe")
             for line in sys.stdin:
                 stdin = stdin + line
             self.dataset = { self.tabulate_var_name: yaml.safe_load(stdin) }
@@ -214,6 +243,7 @@ class JtableCli:
             exit(1)
 
         if args.json_file:
+            logging.info(f"loading json file: {args.json_file}")
             self.tabulate_var_name = args.json_file.split(':')[0]
             file_name = ':'.join(args.json_file.split(':')[1:])
             with open(file_name, 'r') as input_yaml:
@@ -268,6 +298,7 @@ class JtableCli:
             if 'context' in query_file:
                 context = {}
                 for key,value in query_file['context'].items():
+                    logging.info(f"Covering context, key: {key}")
                     jinja_eval = Templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
                     context.update({key: jinja_eval})
                     self.dataset = {**self.dataset,**context, **{"context": context}}
@@ -320,7 +351,7 @@ class JtableCli:
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
             print(yaml_query_out)
         else:
-            # logging.info(f"queryset: {queryset}")
+            logging.info(f"queryset: {queryset}")
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
 
