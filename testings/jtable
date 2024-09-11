@@ -1,12 +1,15 @@
 #!/bin/bash
 
 # Fonction de complétion
-_mycmd_completion() {
+
+_jtable_comp() {
     local cur prev opts
     cur="${COMP_WORDS[COMP_CWORD]}"    # Mot en cours de complétion
     prev="${COMP_WORDS[COMP_CWORD-1]}" # Mot précédent
-
+    echo debug cur: ${cur}
+    echo debug cur: ${prev}
     opts="start stop resume"
+    jtable --help
     # echo debug COMP_WORDS: ${COMP_WORDS[@]}
     # echo debug COMP_CWORD: ${COMP_CWORD[@]}
 
@@ -16,7 +19,6 @@ _mycmd_completion() {
     fi
 }
 
-# Enregistrer la fonction de complétion pour la commande `mycmd`
-# complete -F _mycmd_completion ./test_completion.sh
-# complete -F vince_comp test_completion.sh
-complete -F _mycmd_completion ./test_completion.sh
+# install -m 644 jtable /usr/share/bash-completion/completions/
+
+complete -F _jtable_comp jtable ./jtable

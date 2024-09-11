@@ -31,7 +31,7 @@ services:
     #     # RUN ln -s /project/jtable /usr/local/lib/python3.10/dist-packages/jtable
     #     # RUN pip install tabulate
     environment:
-      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:.:/project/jtable/jtable
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/project/jtable/jtable
       # - ANSIBLE_CONFIG=/project/jtable/examples/ansible.cfg
       - ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg
       - PYTHONDONTWRITEBYTECODE=1

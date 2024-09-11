@@ -16,11 +16,12 @@ class CustomFormatter(logging.Formatter):
         parent_function = inspect.getouterframes(frame)[9].function
         
         record.parent_function = parent_function
+              
         try:
             class_name = inspect.currentframe().f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_locals["self"].__class__.__name__
         except:
-            class_name = "UnknownClass"
-        class_name = class_name.lower().replace("jtable","")
+            class_name = "unknown"
+        # class_name = class_name.lower().replace("jtable","")
         record.class_name = class_name
         return super().format(record)
 
@@ -33,6 +34,8 @@ class CustomFilter(logging.Filter):
         record.fixed_context = f"{context:<50}"
         
         total_message_size = len(record.fixed_context) + len(record.msg)
+        # logging.info(f"total_message_size: {str(total_message_size)}")
+        # print(f"total_message_size: {str(total_message_size)}")
         if total_message_size > terminal_size.columns:
             record.msg = record.msg[:terminal_size.columns - len(record.fixed_context) ] + '...'
 
@@ -79,10 +82,10 @@ logging_config = {
 
 class Filters:
     def jtable(dataset,select=[],path="{}",format="",views={}, when=[],context = {}, queryset={}):
-        logging.info(f"context: {str(context)}")
+        # logging.info(f"context: {str(context)}",extra={'class_name': 'Filters', 'parent_function': 'jtable'})
         # logging.info("coucou")
         # return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)[format]
-        return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when,format=format, context = context, queryset=queryset)
+        return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when, format=format, context = context, queryset=queryset)
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,views=views)[format]
     def from_json(str):
         return json.loads(str)
@@ -108,8 +111,9 @@ class Filters:
         return datetime.datetime.strptime(_string, format)
     def strftime(string_format, second=None):
         """ return a date string using string.
-        timestamp  option strftime(s) Doesn't works on cygwin => old known cygwin issue
-        See https://docs.python.org/2/library/time.html#time.strftime for format """
+        See https://docs.python.org/2/library/time.html#time.strftime for format
+        timestamp option strftime(s) Doesn't works on Cygwin => old known cygwin issue """
+
         if second is not None:
             try:
                 second = int(second)
@@ -178,8 +182,8 @@ class JtableCli:
         parser.add_argument("-f", "--format", help = "simple,json,th,td")
         parser.add_argument("--inspect", action="store_true", help="inspect stdin")
         parser.add_argument("-jf", "--json_file", help = "load json")
-        parser.add_argument("-jfs", "--json_files",action='append', help = "load multiple Json's")
-        parser.add_argument("-yfs", "--yaml_files", help = "load multiple Yaml's")
+        parser.add_argument("-jfs", "--json_files", action='append', help = "load multiple Json's")
+        parser.add_argument("-yfs", "--yaml_files", action='append', help = "load multiple Yaml's")
         parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
         parser.add_argument('--version', action='version', version=version.__version__)
         parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
@@ -228,7 +232,7 @@ class JtableCli:
             self.dataset = { self.tabulate_var_name: yaml.safe_load(stdin) }
             # self.dataset = yaml.safe_load(stdin)
 
-        if not is_pipe and not args.json_file and not args.json_files and not args.query_file:
+        if not is_pipe and not args.json_file and not args.json_files and not args.query_file and not args.yaml_files:
 
             parser.print_help(sys.stdout)
             jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
@@ -247,41 +251,58 @@ class JtableCli:
                 
         # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
                 
-        def load_multiple_inputs(input,format):
+        def load_multiple_inputs(file_search_string,format):
+            logging.info(f"loading {format} files: {file_search_string}")
             err_help = f"\n[ERROR] {format}_files must looks like this:\n\n\
                 jtable --{format}_files \"{{target_var_name}}:folder_1/*/*/config.yml\"\n"
-            if input[0] != "{":
-                logging.error(err_help)
-                exit(1)
-            else:
-                splitted_path = input[1:].split('}:')
+            got_variable_name_pattern = r'^\{[a-zA-Z_1-9]+\}:.*'
+            if re.match(got_variable_name_pattern, file_search_string):
+                logging.info(f"Contains variable name file_names: {file_search_string}")
+                splitted_path = file_search_string[1:].split('}:')
+                path=splitted_path[1]
                 self.tabulate_var_name = splitted_path[0]
-                # print(tabulate_var_name) ; exit(0)
-                path = input[len(self.tabulate_var_name) + 3 :]
-                files_str = os.popen("ls -1 " + path).read()
-                # for windows syntax will be --> # dir /s /b data\*config.yml
-                file_list_dataset = []
-                for file_name_full_path in files_str.split('\n'):
-                    if file_name_full_path != '':
-                        with open(file_name_full_path, 'r') as input_yaml:
-                            try:
-                                file_content =  yaml.safe_load(input_yaml)
-                                file_path = "/".join(file_name_full_path.split('/')[:-1])
-                                file_name = file_name_full_path.split('/')[-1]
-                                file = { 
-                                        "name": file_name,
-                                        "path": file_path,
-                                        "content": file_content
-                                        }
-                                file_list_dataset = file_list_dataset + [{ **file }]
-                            except Exception as error:
-                                logging.warning(f"fail loading file {file_name_full_path}, skipping")
-                self.dataset = {**self.dataset, **{ self.tabulate_var_name: file_list_dataset } }
+            else:
+                self.tabulate_var_name = "input_1"
+                logging.info(f"Adding var_name: {self.tabulate_var_name}")
+                path = file_search_string
+            logging.info(f"var_name: {self.tabulate_var_name}, path: {path}")
+            # if file_search_string[0] != "{":
+            #     pass
+            #     # logging.error(err_help)
+            #     # exit(1)
+            # else:
+
+            # print(tabulate_var_name) ; exit(0)
+            # path = file_search_string[len(self.tabulate_var_name) + 3 :]
+            logging.info(f"path: {path}")
+
+            files_str = os.popen("ls -1 " + path).read()
+            # for windows syntax will be --> # dir /s /b data\*config.yml
+            file_list_dataset = []
+            for file_name_full_path in files_str.split('\n'):
+                if file_name_full_path != '':
+                    with open(file_name_full_path, 'r') as input_yaml:
+                        try:
+                            file_content =  yaml.safe_load(input_yaml)
+                            file_path = "/".join(file_name_full_path.split('/')[:-1])
+                            file_name = file_name_full_path.split('/')[-1]
+                            file = { 
+                                    "name": file_name,
+                                    "path": file_path,
+                                    "content": file_content
+                                    }
+                            file_list_dataset = file_list_dataset + [{ **file }]
+                        except Exception as error:
+                            logging.warning(f"fail loading file {file_name_full_path}, skipping")
+            self.dataset = {**self.dataset, **{ self.tabulate_var_name: file_list_dataset } }
         
         if args.json_files:
             for file in args.json_files:
-                # print(file) ; exit(0)
                 load_multiple_inputs(file,"json")
+
+        if args.yaml_files:
+            for file in args.yaml_files:
+                load_multiple_inputs(file,"yaml")
         
         if args.json_path:
             new_path = args.json_path
