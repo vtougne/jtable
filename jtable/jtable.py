@@ -179,6 +179,7 @@ class JtableCli:
         parser.add_argument("-h", "--help",action="store_true", help = "Show dis help")
         parser.add_argument("-q", "--query_file", help = "Show Output")
         parser.add_argument("-p", "--json_path", help = "json path")
+        parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
         parser.add_argument("-f", "--format", help = "simple,json,th,td")
         parser.add_argument("--inspect", action="store_true", help="inspect stdin")
         parser.add_argument("-jf", "--json_file", help = "load json")
@@ -320,8 +321,12 @@ class JtableCli:
                     context.update({key: jinja_eval})
                     self.dataset = {**self.dataset,**context, **{"context": context}}
 
+            
         if 'select' in queryset:
             select = queryset['select']
+
+        if args.select:
+            queryset['select'] = args.select
 
         if not 'path' in queryset:
             queryset['path'] = "{}"
@@ -371,6 +376,7 @@ class JtableCli:
             logging.info(f"queryset: {queryset}")
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
+
 
 class JtableCls:
     def __init__(self, render="jinja_native"):
@@ -525,15 +531,24 @@ class JtableCls:
     def render_table(self,dataset,select=[],item_name = '',context={}):
         stylings = []
         if len(select) > 0:
-            expressions = [expressions['expr'] for expressions in select]
-            stylings = [(stylings['styling'] if 'styling' in stylings else []) for stylings in select]
-            fields_label = [fields_label['as'] for fields_label in select]
+            logging.info(f"select: {select.__class__.__name__}")
+            if select.__class__.__name__ == "str":
+                expressions = []
+                expressions = fields_label = select.split(",")
+            else:
+                expressions = [expressions['expr'] for expressions in select]
+                stylings = [(stylings['styling'] if 'styling' in stylings else []) for stylings in select]
+                fields_label = [fields_label['as'] for fields_label in select]
         else:
             fields = path_auto_discover().discover_paths(dataset)
             fields_label = list(map(lambda item: '.'.join(item), fields))
             item_name = 'item' if item_name == '' else item_name
             expressions = list(map(lambda item:  item_name + '[\'' + '\'][\''.join(item) + '\']' , fields))
-            
+
+        logging.info(f"expressions: {expressions}")
+        logging.info(f"fields_label: {fields_label}")
+        # exit()
+
         if type(dataset) is dict:
             dataset_to_cover = []
             for key,value in dataset.items():

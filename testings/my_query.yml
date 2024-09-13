@@ -1,19 +1,12 @@
 queryset:
-  path: host_list{}
-  select:
-  - as: hostname
-    expr: hostname
-  - as: os
-    expr: os
-  - as: cost
-    expr: cost
-  - as: state
-    expr: state
-  - as: env
-    expr: env
-  - as: order_date
-    expr: order_date
-  when:
-    - os == 'linux'
+  path: simple{}
+  select: "hostname,os"
+  # select:
+  # - as: hostname
+  #   expr: hostname
+  # - as: os
+  #   expr: os
+  # - as: cost
+  #   expr: cost
 out: '{{ stdin | jtable(queryset=queryset) }}'
 
