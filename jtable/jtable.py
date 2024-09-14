@@ -594,8 +594,8 @@ class JtableCls:
                 view_context = {}
                 view_index = 0
                 for var_name,var_data in self.views.items():
-                    templated_var = view_templates[view_index].render({**loop_context},eval_str=True)
-                    view_context.update({var_name: templated_var })
+                    templated_var = view_templates[view_index].render({**loop_context,**view_context},eval_str=True)
+                    view_context.update({ var_name: templated_var })
                     view_index += 1
 
             if self.when != []:
