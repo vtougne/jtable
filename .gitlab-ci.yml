@@ -75,7 +75,7 @@ make_release:
   # rules:
   #   - if: '$CI_COMMIT_MESSAGE =~ /make_release/'
   rules:
-    when: manual
+    - when: manual
 
 deploy:
   stage: deploy
@@ -102,4 +102,4 @@ deploy:
   # - if: '$CI_COMMIT_MESSAGE =~ /make_release/'
   #   when: manual
   rules:
-    when: manual
+    - when: manual
