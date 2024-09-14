@@ -565,7 +565,6 @@ class JtableCls:
             column_templates = column_templates + [Templater(template_string=jinja_expr, static_context={**context,**self.context})]
 
         view_templates = []
-        view_context = {}
         for var_name,var_data in self.views.items():
             view_templates = view_templates + [Templater(template_string=str(var_data), static_context={**context,**self.context})]
 
@@ -579,16 +578,13 @@ class JtableCls:
             row = []
             json_dict = {}
 
-            def when(when=[],context={}):
+            def when(when=[],when_context={}):
                 condition_test_result = "True"
                 for condition in when:
                     jinja_expr = '{{ ' + condition  + ' }}'
                     loop_condition_context = { item_name: item } if item_name != '' else item
-                    context = { **context, **loop_condition_context, **self.dataset}
-                    condition_context = {}
-                    condition_template = Templater(template_string=jinja_expr, static_context= {**self.context,**context,**condition_context})
+                    condition_template = Templater(template_string=jinja_expr, static_context= {**when_context,**loop_condition_context})
                     condition_test_result = condition_template.render({},eval_str=True)
-                    # logging.info(condition_test_result)
                     if condition_test_result == "False":
                         break
                 return condition_test_result
@@ -603,7 +599,7 @@ class JtableCls:
                     view_index += 1
 
             if self.when != []:
-                condition_test_result = when(when = self.when, context = {**context,**view_context})
+                condition_test_result = when(when = self.when, when_context = {**context,**view_context})
             else:
                 condition_test_result = "True"
             
@@ -632,7 +628,7 @@ class JtableCls:
                         for styling_attributes in styling:
                             color_conditions = [color_conditions for color_conditions in  styling_attributes['when'] ]
                             # logging.info(color_conditions)
-                            condition_color = when(when = color_conditions, context = {**context,**view_context})
+                            condition_color = when(when = color_conditions, when_context = {**context,**view_context})
                             if condition_color == "True":
                                 value = Styling().apply(value = value,format=self.format, styling_attributes = styling_attributes)
 
