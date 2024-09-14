@@ -193,7 +193,7 @@
 - text: "# Conditional styling"
 
 - name: Styling option
-  play_cmd: "jtable -q uptime_view_colored.yml"
+  play_cmd: "jtable -q uptime_view_colored.yml -f github"
   box_as: bash
   # collapse: dataset & query
 
