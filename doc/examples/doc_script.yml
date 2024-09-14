@@ -194,7 +194,7 @@
 
 - name: Styling option
   play_cmd: "jtable -q uptime_view_colored.yml -f github"
-  box_as: bash
+  # box_as: bash
   # collapse: dataset & query
 
 # - name: Styling view screenshot

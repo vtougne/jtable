@@ -226,14 +226,14 @@ cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
 ```
 output:
 
-```
+
 hostname    os     cost    state        env
 ----------  -----  ------  -----------  -----
 host_1      linux  5000    alive        qua
 host_2      linux  5000    alive        qua
 host_3      linux          unreachable  qua
 
-```
+
 ## Use query file
 if you want to hide, show a given filter you have to build a query file
 You can display the query and redirect it to a given file using the following option:
@@ -292,14 +292,14 @@ cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml
 ```
 output:
 
-```
+
 host    os type
 ------  ---------
 host_1  linux
 host_2  windows
 host_3  linux
 
-```
+
 ## Transform table content using Jinja  
 Your data may not arrived exatcly how you want to represent them.  
 In fact they never arrived as you want.  
@@ -363,14 +363,14 @@ cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
 ```
 output:
 
-```
+
 host    os type    uptime in days
 ------  ---------  ----------------
 host_1  linux      21 days
 host_2             79 days
 host_3  linux      0 days
 
-```
+
 ## Use variables in your query file
 this will helps to make mapping table, or behalf like view
 
@@ -410,14 +410,14 @@ cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
 ```
 output:
 
-```
+
 region    dc name    hostname    os type    uptime in days    sanity status
 --------  ---------  ----------  ---------  ----------------  --------------------
 East      dc_1       host_1      linux      21 days           ✅
 North     dc_2       host_2                 79 days           🔥 host.uptime exceed
           dc_3       host_3      linux      0 day             ✅
 
-```
+
 ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
 This feature will help you for the suite describe after to add more context in your  
 and avoid your variable coming from your input and the ones present.
@@ -471,8 +471,8 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 ```
 output:
 
-```
-16:41:35 [ERROR] .dc was not found in dataset level: 2
+
+12:30:12 (435) JtableCls.cross_path | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -485,7 +485,7 @@ dc_c       east        host_c_1    linux  alive
 dc_c       east        host_c_2    linux  alive
 dc_c       east        host_c_3    linux  alive
 
-```
+
 
 ```yaml
 queryset:
@@ -528,17 +528,17 @@ The plabybook
 ## Load multiple files
 Considering the files below returned by ```ls -1 data/*/*/config.yml```
 
-```
+
 data/dev/it_services/config.yml
 data/dev/pay/config.yml
 data/prod/it_services/config.yml
 data/prod/pay/config.yml
 data/qua/pay/config.yml
 
-```
+
 cat data/dev/it_services/config.yml
 
-```
+
 
 
 
@@ -547,7 +547,7 @@ cat data/dev/it_services/config.yml
 dirty line
 - { hostname: host_dev_its_3, os: win, cost: 200  }
 
-```
+
 
 command: 
 ```bash
@@ -556,7 +556,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-16:41:35 [WARNING] fail loading file data/dev/it_services/config.yml, skipping
+12:30:12 (297) JtableCli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -627,7 +627,7 @@ jtable -q strf_time_example.yml
 ```
 output:
 
-```
+
 hostname    os       cost  state      order_date    strftime
 ----------  -----  ------  -------  ------------  ----------
 host_1      linux    5000  alive     2.02032e+07          12
@@ -635,25 +635,27 @@ host_2      linux     200            2.02032e+07          12
 host_3      linux     200  alive     2.02032e+07          12
 host_3      linux     200  alive     2.02032e+07          12
 
-```
+
 # Conditional styling
   
 #### Styling option
 
 command: 
 ```bash
-jtable -q uptime_view_colored.yml
+jtable -q uptime_view_colored.yml -f github
 ```
 output:
 
-```bash
-region    dc name    hostname    os     state        uptime
---------  ---------  ----------  -----  -----------  --------
-East      dc_1       host_1      linux  [0;31munreachable[0m  [0;32m6 days[0m
-North     dc_2       host_1      linux  [0;32malive[0m        [0;32m21 days[0m
-North     dc_2       host_2      linux  [0;32malive[0m        [0;31m79 days[0m
 
-```
+| hostname   | region   | dc name   | os      | state                                   | uptime                                |
+|------------|----------|-----------|---------|-----------------------------------------|---------------------------------------|
+| host_3     | East     | dc_1      | linux   | $`\textcolor{red}{\text{unreachable}}`$ | $`\textcolor{green}{\text{6 days}}`$  |
+| host_1     | North    | dc_2      | linux   | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{green}{\text{21 days}}`$ |
+| host_8     | North    | dc_2      |         | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{72 days}}`$   |
+| host_2     | North    | dc_2      | linux   |                                         | $`\textcolor{green}{\text{}}`$        |
+| host_7     | North    | dc_2      | windows | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{61 days}}`$   |
+
+
   
 #### Ansible again
 

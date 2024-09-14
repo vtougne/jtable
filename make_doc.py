@@ -103,7 +103,10 @@ for play_doc in play_doc_book:
                 box_as = ""
                 if "box_as" in play_doc:
                     box_as = play_doc['box_as']
-                out = "\n```" + box_as + "\n" + output + "\n```\n"
+                    out = "\n```" + box_as + "\n" + output + "\n```\n"
+                else:
+                    out = "\n" + box_as + "\n" + output + "\n\n"
+
                 if is_play_cmd:
                     out = "output:\n" + out
                 outfile.write(out)
