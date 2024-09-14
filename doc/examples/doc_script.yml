@@ -73,6 +73,7 @@
   # collapse: dataset sample
 
 - play_cmd: "cat key_containing_space.yml | jtable -p \"region.East['Data Center'].dc_1.hosts\""
+  box_as: text
   # collapse: command & output
 
 - text: "## Use query file"
@@ -92,6 +93,7 @@
   # collapse: dataset sample
 
 - play_cmd: "cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml"
+  box_as: text
   # collapse: command & output
 
 
@@ -108,9 +110,11 @@
 
 - eval_cmd: cat uptime_view.yml
   box_as: yaml
+  box_as: text
   # collapse: the query
 
 - play_cmd: cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
+  box_as: text
   # collapse: command & output
 
 - text: |
@@ -123,6 +127,7 @@
   # collapse: the query
 
 - play_cmd: cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
+  box_as: text
   # collapse: command & output
 
 - text: |
@@ -147,6 +152,7 @@
   # collapse: the dataset
 
 - play_cmd: 'cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view.yml'
+  box_as: bash
   # collapse: command & output
 
 - eval_cmd: cat region_view.yml
@@ -167,10 +173,11 @@
 
 - text: "Considering the files below returned by ```ls -1 data/*/*/config.yml```"
   eval_cmd: "ls -1 data/*/*/config.yml"
+  box_as: text
 
 - text: cat data/dev/it_services/config.yml
   eval_cmd: cat data/dev/it_services/config.yml
-
+  box_as: yaml
 
 - play_cmd: 'jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_queryset.yml'
   # collapse: command & output
@@ -185,9 +192,11 @@
 - name: strf_time
 - box_as: yaml
   eval_cmd: cat strf_time_example.yml
+  box_as: bash
   # collapse: dataset & query
 
 - play_cmd: jtable -q strf_time_example.yml
+  box_as: bash
   # collapse: command & output
 
 - text: "# Conditional styling"
