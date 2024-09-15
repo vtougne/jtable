@@ -34,9 +34,7 @@ test:
   script:
     - pip install .
     - jtable -h || true
-    - pwd
-    - env | grep ${PWD}
-    - cd {CI_PROJECT_DIR}/doc/examples
+    - cd doc/examples
     - ./make_doc.sh --halt
     - ./diff_doc.sh ref_README.md README.md "^[0-2][0-9]:[0-6][0-9]:[0-6][0-9]"
     - 'echo debug CI_COMMIT_MESSAGE: "$CI_COMMIT_MESSAGE"'
@@ -51,11 +49,8 @@ make_release:
   variables:
     SECURE_FILES_DOWNLOAD_PATH: '.ssh'
   script:
-    - cd {CI_PROJECT_DIR}/doc/examples
-    - ./make_doc.sh --halt
-    - ./diff_doc.sh ref_README.md README.md "^[0-2][0-9]:[0-6][0-9]:[0-6][0-9]"
-    - mkdir {CI_PROJECT_DIR}/release || true
-    - cd {CI_PROJECT_DIR}/release
+    - mkdir ../release || true
+    - cd ../release
     - rm -rf *
     - git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git
     - git config --global user.email "vincebot@vince.com"
