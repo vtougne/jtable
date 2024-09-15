@@ -41,7 +41,6 @@ class CustomFilter(logging.Filter):
 
         return True
 
-
 class _ExcludeErrorsFilter(logging.Filter):
     def filter(self, record):
         """Only lets through log messages with log level below ERROR ."""
@@ -81,11 +80,11 @@ logging_config = {
 }
 
 class Filters:
-    def jtable(dataset,select=[],path="{}",format="",views={}, when=[],context = {}, queryset={}):
+    def jtable(dataset,select=[], unselect=[],path="{}",format="",views={}, when=[],context = {}, queryset={}):
         # logging.info(f"context: {str(context)}",extra={'class_name': 'Filters', 'parent_function': 'jtable'})
         # logging.info("coucou")
         # return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)[format]
-        return JtableCls().render_object( dataset,path=path, select=select,views=views, when=when, format=format, context = context, queryset=queryset)
+        return JtableCls().render_object( dataset,path=path, select=select, unselect=unselect,views=views, when=when, format=format, context = context, queryset=queryset)
         # return JtableCls().render_object({"stdin": dataset},path=path, select=select,views=views)[format]
     def from_json(str):
         return json.loads(str)
@@ -180,6 +179,7 @@ class JtableCli:
         parser.add_argument("-q", "--query_file", help = "Show Output")
         parser.add_argument("-p", "--json_path", help = "json path")
         parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
+        parser.add_argument("-us", "--unselect", help = "unselect unwanted key_1,key_2,...")
         parser.add_argument("-f", "--format", help = "simple,json,th,td")
         parser.add_argument("--inspect", action="store_true", help="inspect stdin")
         parser.add_argument("-jf", "--json_file", help = "load json")
@@ -325,6 +325,9 @@ class JtableCli:
         if 'select' in queryset:
             select = queryset['select']
 
+        if args.unselect:
+           queryset['unselect'] = args.unselect
+
         if args.select:
             queryset['select'] = args.select
 
@@ -376,7 +379,6 @@ class JtableCli:
             logging.info(f"queryset: {queryset}")
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
-
 
 class JtableCls:
     def __init__(self, render="jinja_native"):
@@ -473,11 +475,13 @@ class JtableCls:
             # logging.info(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=cross_path_context)
     
-    def render_object(self, dataset, path="{}",select=[], views={}, when=[],format="", context = {}, queryset={}):
-        logging.info(f"context: {context}")
+    def render_object(self, dataset, path="{}", select=[], unselect=[], views={}, when=[], format="", context={}, queryset={}):
+        # exit(0)
         for query_item,query_data in queryset.items():
             if query_item == "select":
                 self.select = query_data
+            if query_item == "unselect":
+                self.unselect = query_data
             elif query_item == "path":
                 # logging.info(f"self.path query_data: {query_data}")
                 self.path = query_data
@@ -492,10 +496,12 @@ class JtableCls:
             
         self.path = path if path != "{}" else self.path
         self.select = select if select != [] else self.select
+        self.unselect = unselect if unselect != [] else self.unselect
         self.views = views if views != {} else self.views
         self.when = when if when != [] else self.when
         self.format = format if format != "" else self.format
         self.context = context
+        logging.info(f"unselect: {self.unselect}")
 
         self.dataset = dataset
         
@@ -528,12 +534,12 @@ class JtableCls:
         
         # return out_return[self.format]
     
-    def render_table(self, dataset, select=[],item_name = '',context={}):
+    def render_table(self, dataset, select=[], item_name='', context={}):
         stylings = []
+        logging.info(f"unselect: {self.unselect}")
         if len(select) > 0:
             logging.info(f"select: {select.__class__.__name__}")
             if select.__class__.__name__ == "str":
-                expressions = []
                 expressions = fields_label = select.split(",")
             else:
                 expressions = [expressions['expr'] for expressions in select]
@@ -544,6 +550,15 @@ class JtableCls:
             fields_label = list(map(lambda item: '.'.join(item), fields))
             item_name = 'item' if item_name == '' else item_name
             expressions = list(map(lambda item:  item_name + '[\'' + '\'][\''.join(item) + '\']' , fields))
+        
+        if self.unselect != []:
+            for field in self.unselect.split(','):
+                if field in fields_label:
+                    index = fields_label.index(field)
+                    del expressions[index]
+                    del fields_label[index]
+                    if stylings != []:
+                        del stylings[index]
 
         logging.info(f"expressions: {expressions}")
         logging.info(f"fields_label: {fields_label}")
