@@ -35,12 +35,12 @@ test:
     - pip install .
     - jtable -h || true
     - pwd
+    - env | grep ${PWD}
     - cd doc/examples
     - ./make_doc.sh --halt
     - ./diff_doc.sh ref_README.md README.md "^[0-2][0-9]:[0-6][0-9]:[0-6][0-9]"
     - 'echo debug CI_COMMIT_MESSAGE: "$CI_COMMIT_MESSAGE"'
     - 'echo debug CI_COMMIT_MESSAGE: $CI_COMMIT_MESSAGE'
-    - env | grep ${PWD}
   rules:
     - if: '$CI_COMMIT_MESSAGE !~ /make_release/ && $CI_COMMIT_BRANCH != "main"'
 
