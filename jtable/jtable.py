@@ -391,6 +391,7 @@ class JtableCls:
         self.splitted_path = []
         self.when = []
         self.select = []
+        self.unselect = []
         self.views = {}
         self.path = "{}"
         self.format = ""
