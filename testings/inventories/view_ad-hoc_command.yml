@@ -22,7 +22,7 @@ queryset:
 
 
   
-  vars:
+  views:
     location:
       dc1: West Coast
       dc2: East Coast
