@@ -479,9 +479,11 @@ class JtableCls:
     def render_object(self, dataset, path="{}", select=[], unselect=[], views={}, when=[], format="", context={}, queryset={}):
         # exit(0)
         for query_item,query_data in queryset.items():
+            logging.info(f"query_item: {query_item}")
+            # exit(0)
             if query_item == "select":
                 self.select = query_data
-            if query_item == "unselect":
+            elif query_item == "unselect":
                 self.unselect = query_data
             elif query_item == "path":
                 # logging.info(f"self.path query_data: {query_data}")
@@ -496,8 +498,8 @@ class JtableCls:
                 raise Exception(f"the queryset argument contains a non accepted key: {query_item}")
             
         self.path = path if path != "{}" else self.path
-        self.select = select if select != [] else self.select
-        self.unselect = unselect if unselect != [] else self.unselect
+        self.select = select if select != [] and select != "" else self.select
+        self.unselect = unselect if unselect != [] and unselect != "" else self.unselect
         self.views = views if views != {} else self.views
         self.when = when if when != [] else self.when
         self.format = format if format != "" else self.format
@@ -552,7 +554,7 @@ class JtableCls:
             item_name = 'item' if item_name == '' else item_name
             expressions = list(map(lambda item:  item_name + '[\'' + '\'][\''.join(item) + '\']' , fields))
         
-        if self.unselect != []:
+        if self.unselect != [] and self.unselect != "":
             for field in self.unselect.split(','):
                 if field in fields_label:
                     index = fields_label.index(field)
