@@ -21,7 +21,7 @@ class CustomFormatter(logging.Formatter):
             class_name = inspect.currentframe().f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_back.f_locals["self"].__class__.__name__
         except:
             class_name = "unknown"
-        # class_name = class_name.lower().replace("jtable","")
+        class_name = class_name.lower().replace("jtable","")
         record.class_name = class_name
         return super().format(record)
 
@@ -194,9 +194,9 @@ class JtableCli:
         terminal_size = shutil.get_terminal_size((80, 20))  # Largeur par défaut 80, hauteur 20
 
         if os.environ.get('JTABLE_LOGGING') == "DEBUG":
-            logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
+            logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)-16s | %(levelname)s %(message)s'
         else:
-            logging_config['formatters']['my_formatter']['format'] = '%(asctime)s %(class_name)s.%(parent_function)-16s | %(levelname)s %(message)s'
+            logging_config['formatters']['my_formatter']['format'] = '%(asctime)s %(class_name)s.%(parent_function)-15s | %(levelname)s %(message)s'
 
         
         if args.verbose == 0:
@@ -245,8 +245,15 @@ class JtableCli:
 
         if args.json_file:
             logging.info(f"loading json file: {args.json_file}")
-            self.tabulate_var_name = args.json_file.split(':')[0]
-            file_name = ':'.join(args.json_file.split(':')[1:])
+            got_variable_name_pattern = r'^\{[a-zA-Z_1-9]+\}:.*'
+            if re.match(got_variable_name_pattern, args.json_file):
+                self.tabulate_var_name = args.json_file[1:].split('}:')[0]
+                file_name = ':'.join(args.json_file.split(':')[1:])
+            else:
+                self.tabulate_var_name = "input_1"
+                file_name = args.json_file
+            logging.info(f"file_name: {file_name}, self.tabulate_var_name: {self.tabulate_var_name}")
+            # exit(0)
             with open(file_name, 'r') as input_yaml:
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
                 

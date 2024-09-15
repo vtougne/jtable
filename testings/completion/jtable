@@ -9,7 +9,7 @@ _jtable_comp() {
     echo debug cur: ${cur}
     echo debug cur: ${prev}
     opts="start stop resume"
-    jtable --help
+    # jtable --help
     # echo debug COMP_WORDS: ${COMP_WORDS[@]}
     # echo debug COMP_CWORD: ${COMP_CWORD[@]}
 

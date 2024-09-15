@@ -15,8 +15,8 @@ queryset:
     expr: value.msg.inventory_dir.split('/')[-2]
   - as: dept
     expr: value.msg.inventory_dir.split('/')[-1]
-  - as: type
-    expr: "component | intersect(value.msg.group_names) | join(', ')"
+  - as: component
+    expr: "known_component | intersect(value.msg.group_names) | join(', ')"
   - as: port
     expr: value.msg.rmp_port
 
@@ -26,7 +26,7 @@ queryset:
     location:
       dc1: West Coast
       dc2: East Coast
-    component:
+    known_component:
       - app
       - rmp
 

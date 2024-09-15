@@ -15,6 +15,7 @@ suzie_tests = [
 # Create new dataset
 tests = tablib.Dataset()
 tests.headers = ['Date', 'Test Name', 'Grade']
+tests.title = 'Test Scores'
 
 # Daniel's Tests
 tests.append_separator('Daniel\'s Scores')
