@@ -634,7 +634,7 @@ class JtableCls:
                 for expr in expressions:
                     loop_context = { item_name: item } if item_name != '' else item
                     try:
-                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context})
+                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context},eval_str=True)
                     except:
                         break
                     del loop_context

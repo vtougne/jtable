@@ -1,0 +1,31 @@
+context:
+  hosts:
+    - {hostname: host_1, os: linux, uptime: 1879723, state: alive, env: qua, dc: dc_2, svc: [svc_1, svc_2]}
+    - {hostname: host_8,  uptime: 6279723, state: alive, env: qua, dc: dc_2}
+    - {hostname: host_2, os: linux,  env: qua, dc: dc_2,svc: [svc_1, svc_2]}
+    - {hostname: host_7, os: windows, uptime: 6879723, state: alive, env: qua, dc: dc_2}
+    - {hostname: host_3, os: linux, uptime: 534554, state: "unreachable", env: qua, dc: dc_1}
+    # - {hostname: host_4, os: linux, env: qua, dc: dc_1}
+  slect_0:
+  - as: svc
+    expr: svc | type_debug
+queryset:
+  # path: context.hosts{}
+  select:
+  - as: hostname
+    expr: hostname
+  - as: os
+    expr: os
+  - as: uptime
+    expr: uptime
+  - as: state
+    expr: state
+  - as: env
+    expr: env
+  - as: dc
+    expr: dc
+  - as: svc
+    expr: svc | type_debug
+  - as: svc
+    expr: svc
+out: '{{ hosts | jtable(queryset=queryset) }}'
