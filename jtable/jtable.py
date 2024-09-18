@@ -179,6 +179,7 @@ class JtableCli:
         parser.add_argument("-q", "--query_file", help = "Show Output")
         parser.add_argument("-p", "--json_path", help = "json path")
         parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
+        parser.add_argument("-w", "--when", help = "key_1 == 'value'")
         parser.add_argument("-us", "--unselect", help = "unselect unwanted key_1,key_2,...")
         parser.add_argument("-f", "--format", help = "simple,json,th,td")
         parser.add_argument("--inspect", action="store_true", help="inspect stdin")
@@ -337,6 +338,9 @@ class JtableCli:
 
         if args.select:
             queryset['select'] = args.select
+
+        if args.when:
+            queryset['when'] = args.when
 
         if not 'path' in queryset:
             queryset['path'] = "{}"
@@ -508,7 +512,13 @@ class JtableCls:
         self.select = select if select != [] and select != "" else self.select
         self.unselect = unselect if unselect != [] and unselect != "" else self.unselect
         self.views = views if views != {} else self.views
-        self.when = when if when != [] else self.when
+        # self.when = when if when != [] else self.when
+        self.when = when if when != [] and when != "" else self.when
+        logging.info(f"when: {self.when.__class__.__name__}")
+        if self.when.__class__.__name__ == "str":
+            self.when = self.when.split(',')
+        logging.info(f"when: {self.when}")
+        # exit(0)
         self.format = format if format != "" else self.format
         self.context = context
         logging.info(f"unselect: {self.unselect}")
