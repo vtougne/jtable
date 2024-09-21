@@ -124,13 +124,26 @@ class Filters:
     def to_json(a, *args, **kw):
         """ Convert the value to JSON """
         return json.dumps(a, *args, **kw)
+
+
+        ######  PIE ######   
+
+
+    def to_pie(dataset):
+        title = [list(key.keys()) for key in dataset][0][0]
+        out = f"```mermaid\n  pie\n      title {title}\n"
+        for item in dataset:
+            item_prop = list(item.keys())
+            out = out + f"      \"{item_prop[0]}\" : {str(item[item_prop[1]])}\n"
+        out = out + "```"
+        return out
+
+
+
     def to_yaml(v):
         """ Convert the value to JSON """
         return yaml.dump(v, allow_unicode=True)
     
-    def tuple_to_dict(t):    
-        return dict(t)
-
     def type_debug(o):
         return  o.__class__.__name__
 

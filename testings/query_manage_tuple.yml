@@ -15,10 +15,10 @@ queryset:
       expr: key 
     - as: count
       expr: value | map(attribute='hostname')| list | count
-    - as: price
-      expr: value | map(attribute='cost')| list | sum
+    # - as: price
+    #   expr: value | map(attribute='cost')| list | sum
 
 
       
 
-out: "{{ hosts | groupby(attribute='os') | tuple_to_dict | jtable(queryset=queryset) }}"
+out: "{{ dict(hosts | groupby(attribute='os')) | jtable(queryset=queryset,format='json') | from_json | to_pie }}"
