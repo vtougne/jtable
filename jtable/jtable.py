@@ -134,7 +134,8 @@ class Filters:
         out = f"```mermaid\n  pie\n      title {title}\n"
         for item in dataset:
             item_prop = list(item.keys())
-            out = out + f"      \"{item_prop[0]}\" : {str(item[item_prop[1]])}\n"
+            logging.warning(f"item_prop: {item[item_prop[0]]}")
+            out = out + f"      \"{item[item_prop[0]]}\" : {str(item[item_prop[1]])}\n"
         out = out + "```"
         return out
 

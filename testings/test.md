@@ -1,6 +1,7 @@
 ```mermaid
   pie
       title os
-      "os" : 4
-      "os" : 3
+      "linux" : 4
+      "unknown" : 1
+      "windows" : 2
 ```
