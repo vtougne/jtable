@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil
 from os import isatty
+from sys import exit
 # from tabulate import tabulate
 import tabulate
 from typing import Any, Dict, Optional
@@ -617,7 +618,13 @@ class JtableCls:
                 condition_test_result = "True"
                 for condition in when:
                     jinja_expr = '{{ ' + condition  + ' }}'
-                    loop_condition_context = { item_name: item } if item_name != '' else item
+                    logging.info(f"item_name: {item_name}")
+                    logging.info(f"when: {when}")
+                    # loop_condition_context = item
+                    # loop_condition_context = { item_name: item } if item_name != '' else item
+                    loop_condition_context = { item_name: item } if (item_name != '' and item_name != 'item' ) else item
+                    logging.info(f"loop_condition_context: {loop_condition_context}")
+                    # loop_condition_context = { item_name: item }
                     condition_template = Templater(template_string=jinja_expr, static_context= {**when_context,**loop_condition_context})
                     condition_test_result = condition_template.render({},eval_str=True)
                     if condition_test_result == "False":

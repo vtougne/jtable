@@ -37,8 +37,8 @@ queryset:
           - "uptime_in_day | int >= 30"
           style: "font-color: red"
           formating: "underlined"
-  when:
-    - "uptime_in_day | int > 30 or host.state == 'unreachable'"
+  when: "uptime_in_day | int > 30 or host.state == 'unreachable'"
+    # - "uptime_in_day | int > 30 or host.state == 'unreachable'"
     # - "host.os == 'linux'"
       
   views:

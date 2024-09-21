@@ -1,7 +1,18 @@
-| hostname   | os      | state                                   |   cost |
-|------------|---------|-----------------------------------------|--------|
-| host_1     | linux   | $`\textcolor{green}{\text{alive}}`$     |   5000 |
-| host_2     | windows |                                         |    200 |
-| host_3     | linux   | $`\textcolor{red}{\text{unreachable}}`$ |    200 |
-| host_4     | aix     | $`\textcolor{green}{\text{alive}}`$     |    200 |
-| host_5     | linux   | $`\textcolor{red}{\text{unreachable}}`$ |    200 |
+[[_TOC_]]
+# coucou
+
+```bash
+hostname    os       cost
+----------  -------  ------
+host_2      windows  200
+host_1      linux
+host_3      linux    200
+host_4      aix      200
+host_5      linux    200
+
+```
+
+```
+bash💥 Something was wrong with this report
+ cmd was  ->  time ./hello.sh
+```
