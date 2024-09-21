@@ -93,22 +93,22 @@ class Filters:
         return yaml.safe_load(data)
     def from_yaml_all(data):
         return yaml.safe_load_all(data)
+    
     def intersect(a, b):
         # logging.info(b)
         # return set(a).intersection(b)
         return list(set(a).intersection(b))
-    def to_json(a, *args, **kw):
-        """ Convert the value to JSON """
-        return json.dumps(a, *args, **kw)
-    def to_yaml(v):
-        """ Convert the value to JSON """
-        return yaml.dump(v, allow_unicode=True)
     
-    def type_debug(o):
-        return  o.__class__.__name__
+    def regex_replace(value="", pattern="", replacement="", ignorecase=False):
+        """ Perform a `re.sub` returning a string """
+        if ignorecase:
+            flags = re.I
+        else:
+            flags = 0
+        _re = re.compile(pattern, flags=flags)
+        return _re.sub(replacement, value)
 
-    def to_datetime(_string, format="%Y-%m-%d %H:%M:%S"):
-        return datetime.datetime.strptime(_string, format)
+
     def strftime(string_format, second=None):
         """ return a date string using string.
         See https://docs.python.org/2/library/time.html#time.strftime for format
@@ -121,14 +121,24 @@ class Filters:
                 raise "Invalid value for epoch value (%s)" % second
         return time.strftime(string_format, time.localtime(second))
     
-    def regex_replace(value="", pattern="", replacement="", ignorecase=False):
-        """ Perform a `re.sub` returning a string """
-        if ignorecase:
-            flags = re.I
-        else:
-            flags = 0
-        _re = re.compile(pattern, flags=flags)
-        return _re.sub(replacement, value)
+    def to_json(a, *args, **kw):
+        """ Convert the value to JSON """
+        return json.dumps(a, *args, **kw)
+    def to_yaml(v):
+        """ Convert the value to JSON """
+        return yaml.dump(v, allow_unicode=True)
+    
+    def tuple_to_dict(t):    
+        return dict(t)
+
+    def type_debug(o):
+        return  o.__class__.__name__
+
+    def to_datetime(_string, format="%Y-%m-%d %H:%M:%S"):
+        return datetime.datetime.strptime(_string, format)
+
+
+    
 
 class Inspect:
     def __init__(self):
