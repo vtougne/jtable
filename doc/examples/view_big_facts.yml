@@ -1,4 +1,4 @@
-out: '{{ stdin.plays[0].tasks[0].hosts | jtable(select=select, format=format) }}'
+stdout: '{{ stdin.plays[0].tasks[0].hosts | jtable(select=select, format=format) }}'
 
 queryset:
   select:

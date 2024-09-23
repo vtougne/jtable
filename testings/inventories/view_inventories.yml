@@ -1,5 +1,5 @@
 # out: '{{ stdin | jtable(select=select,format=format,path=path,vars=views ) }}'
-out: '{{ stdin | jtable(queryset=queryset ) }}'
+stdout: '{{ stdin | jtable(queryset=queryset ) }}'
 
 
 queryset:
@@ -8,7 +8,7 @@ queryset:
   - as: location
     expr: "location[(location | list | intersect(value.msg.group_names))[0]]"
   - as: dc
-    expr: "(location | list | intersect(value.group_names))[0]"
+    expr: dc
   - as: hostname
     expr: key
   - as: env
@@ -19,6 +19,9 @@ queryset:
     expr: "known_component | intersect(value.msg.group_names) | join(', ')"
   - as: port
     expr: value.msg.rmp_port
+  - as: group_names
+    expr: value.msg.group_names
+  # when: dc =='dc1'
 
 
   
@@ -29,6 +32,7 @@ queryset:
     known_component:
       - app
       - rmp
+    dc: "(location | list | intersect(value.msg.group_names))[0]"
 
 # queryset:
 #   path: plays[0].tasks[0].hosts{}

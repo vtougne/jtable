@@ -48,4 +48,4 @@ queryset:
     uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
     days: "(uptime_in_day | string) + ' days' if uptime_in_day | int > 1 else '' if uptime_in_day == '' else (uptime_in_day | string)"
 
-out: "{{ hosts | sort (attribute='dc')| jtable(queryset=queryset,unselect='hostname,state') }}"
+stdout: "{{ hosts | sort (attribute='dc')| jtable(queryset=queryset,unselect='hostname,state') }}"

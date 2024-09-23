@@ -28,8 +28,8 @@ queryset:
   # when:
   #   - "(os == 'linux') or (os == 'windows')"
   #   - "state == 'alive'"
-out: "{{ host_list | jtable(queryset=queryset ) }}"
-# out: |
+stdout: "{{ host_list | jtable(queryset=queryset ) }}"
+# stdout: |
 #   Hell every body
 #   How it going on ?
 #   {{ when }}

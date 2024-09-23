@@ -13,7 +13,7 @@ queryset:
     - as: my hostname
       expr: hostname
 
-out: "{{ host_list_sorted | jtable(select=select,format='text') }}"
+stdout: "{{ host_list_sorted | jtable(select=select,format='text') }}"
 
 # queryset:
 #   path: "{host}"
@@ -35,4 +35,4 @@ out: "{{ host_list_sorted | jtable(select=select,format='text') }}"
 #   format: text
 
 
-# out: "{{ host_list_sorted | jtable(select=select,path=path,vars={'env_corresp': env_corresp, 'views': views }, format='text') }}"
+# stdout: "{{ host_list_sorted | jtable(select=select,path=path,vars={'env_corresp': env_corresp, 'views': views }, format='text') }}"

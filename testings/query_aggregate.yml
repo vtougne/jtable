@@ -21,4 +21,5 @@ queryset:
 
       
 
-out: "{{ dict(hosts | groupby(attribute='os',default='unknown')) | jtable(queryset=queryset,format='json') | from_json | to_pie }}"
+stdout: "{{ dict(hosts | groupby(attribute='os',default='unknown')) |
+ jtable(queryset=queryset,format='json') | from_json | to_pie }}"

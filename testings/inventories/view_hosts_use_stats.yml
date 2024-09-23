@@ -79,4 +79,4 @@ queryset:
   #   expr: value.groups.ungrouped
 
 
-out: '{{ stdin | jtable(select=select,path="global_custom_stats{}", format=format  ) }}'
+stdout: '{{ stdin | jtable(select=select,path="global_custom_stats{}", format=format  ) }}'

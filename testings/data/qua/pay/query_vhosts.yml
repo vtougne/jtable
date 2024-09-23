@@ -16,5 +16,5 @@ queryset:
     expr: parent.value.zone | selectattr('name', '==', venv) | map(attribute='exposed') | first
   - as: parent
     expr: parent.key
-out: '{{ context | jtable(queryset=queryset) }}'
+stdout: '{{ context | jtable(queryset=queryset) }}'
 

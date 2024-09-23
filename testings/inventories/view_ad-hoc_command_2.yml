@@ -1,4 +1,4 @@
-out: '{{ stdin | jtable(select=select,format=format,path=path,vars=views ) }}'
+stdout: '{{ stdin | jtable(select=select,format=format,path=path,vars=views ) }}'
 
 
 queryset:

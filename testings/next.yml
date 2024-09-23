@@ -36,9 +36,9 @@ queryset:
     uptime_in_days: "{{ host.uptime_seconds / 60 / 60 / 24 }}"
 
 
-out: "{{ host_list | jtable(select=select, path=path, views=views) }}"
+stdout: "{{ host_list | jtable(select=select, path=path, views=views) }}"
 
 
 
 
-# out: "{{ host_list | jtable(select=select) }}"
+# stdout: "{{ host_list | jtable(select=select) }}"

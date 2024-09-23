@@ -159,10 +159,10 @@ class Inspect:
         self.out = []
     def add_row(self,row):
         self.out = self.out + [ [row[0][1:]] + [row[1]] ]
-    def view_paths(self,dataset):
-        self.cover_data(dataset)
+    def view_paths(self,dataset,path="", max_depth=0):
+        self.cover_data(dataset,path="", max_depth=0)
         return self.out
-    def cover_data(self,dataset,path=""):
+    def cover_data(self,dataset,path="", max_depth=0):
         if type(dataset) is dict:
             for key,value in dataset.items():
                 if " " in str(key):
@@ -386,8 +386,8 @@ class JtableCli:
         out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
         # print(out_expr) ; exit(0)
         if args.query_file:
-            if 'out' in query_file:
-                out_expr = query_file['out']
+            if 'stdout' in query_file:
+                out_expr = query_file['stdout']
             
         if args.inspect:
             inspected_paths = Inspect().view_paths(self.dataset[self.tabulate_var_name])

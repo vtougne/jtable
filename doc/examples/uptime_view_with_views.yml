@@ -21,4 +21,4 @@ queryset:
     uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
-out: "{{ stdin | jtable(queryset=queryset)}}"
+stdout: "{{ stdin | jtable(queryset=queryset)}}"

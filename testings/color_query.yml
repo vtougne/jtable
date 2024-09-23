@@ -9,4 +9,4 @@ queryset:
     expr: "hex_code"
 
 
-out: '{{ stdin | jtable(select=select,path="{}", format=''text'' ) }}'
+stdout: '{{ stdin | jtable(select=select,path="{}", format=''text'' ) }}'

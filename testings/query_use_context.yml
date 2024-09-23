@@ -24,4 +24,4 @@ queryset:
   - as: location
     expr: location[dc]
 
-out: "{{ hosts | jtable(queryset=queryset,context={'location': location}) }}"
+stdout: "{{ hosts | jtable(queryset=queryset,context={'location': location}) }}"

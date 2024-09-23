@@ -21,4 +21,4 @@ context:
     format: 'json'
 
 
-out: '{{ context | jtable(queryset=queryset,format=''json'') }}'
+stdout: '{{ context | jtable(queryset=queryset,format=''json'') }}'s

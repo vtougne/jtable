@@ -7,6 +7,5 @@ queryset:
     expr: os
   - as: cost
     expr: cost
-  # when: "os == 'linux'"
-out: '{{ stdin | jtable(queryset=queryset) }}'
+stdout: '{{ stdin | jtable(queryset=queryset,unselect=''cost'') }}'
 

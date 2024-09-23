@@ -86,4 +86,4 @@ queryset:
   # - as: value.groups.ungrouped
   #   expr: value.groups.ungrouped
 
-out: '{{ inv | jtable(select=select,path=path, format=format  ) }}'
+stdout: '{{ inv | jtable(select=select,path=path, format=format  ) }}'

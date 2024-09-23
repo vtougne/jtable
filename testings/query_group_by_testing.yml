@@ -37,7 +37,7 @@ queryset:
 
       
 
-out: |
+stdout: |
   
   * Details:
   {{ hosts | jtable(queryset=queryset) }}

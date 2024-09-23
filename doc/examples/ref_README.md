@@ -260,7 +260,7 @@ queryset:
     expr: state
   - as: env
     expr: env
-out: '{{ stdin | jtable(queryset=queryset) }}'
+stdout: '{{ stdin | jtable(queryset=queryset) }}'
 
 
 ```
@@ -351,7 +351,7 @@ queryset:
     - as: uptime in days
       expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
 
-out: "{{ stdin | jtable(queryset=queryset) }}"
+stdout: "{{ stdin | jtable(queryset=queryset) }}"
 
 
 
@@ -401,7 +401,7 @@ queryset:
     uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
-out: "{{ stdin | jtable(queryset=queryset)}}"
+stdout: "{{ stdin | jtable(queryset=queryset)}}"
 ```
 
 command: 
@@ -618,7 +618,7 @@ queryset:
     - as: strftime 
       expr: "  (order_date|to_datetime).strftime('%S') "
 
-out: "{{ host_list | jtable(queryset=queryset) }}"
+stdout: "{{ host_list | jtable(queryset=queryset) }}"
 ```
 
 command: 

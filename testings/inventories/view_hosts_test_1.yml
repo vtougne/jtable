@@ -24,6 +24,6 @@ queryset:
   views:
     dc_view: "(value.group_names | intersect(dc))[0]"
 
-out: '{{ dataset | jtable(select=select,path=path, format=format,vars=views ) }}'
+stdout: '{{ dataset | jtable(select=select,path=path, format=format,vars=views ) }}'
 # out: "{{ ds  | type_debug }}"
 # out: '{{ ds | type_debug }}'

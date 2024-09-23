@@ -1,4 +1,4 @@
-out: '{{ config | jtable(select=select,path="{file}.content.plays[0].tasks[0].hosts{host}.msg{}",
+stdout: '{{ config | jtable(select=select,path="{file}.content.plays[0].tasks[0].hosts{host}.msg{}",
   format=format ) }}'
 queryset:
   path: '{file}.content.plays[0].tasks[0].hosts{host}.msg{}'

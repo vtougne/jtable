@@ -351,7 +351,7 @@ queryset:
     - as: uptime in days
       expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
 
-out: "{{ stdin | jtable(queryset=queryset) }}"
+stdout: "{{ stdin | jtable(queryset=queryset) }}"
 
 
 
@@ -401,7 +401,7 @@ queryset:
     uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
-out: "{{ stdin | jtable(queryset=queryset)}}"
+stdout: "{{ stdin | jtable(queryset=queryset)}}"
 ```
 
 command: 
@@ -472,7 +472,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-10:57:24 JtableCls.cross_path       | ERROR .dc was not found in dataset l...
+14:08:53 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -556,7 +556,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-10:57:24 JtableCli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+14:08:54 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -618,7 +618,7 @@ queryset:
     - as: strftime 
       expr: "  (order_date|to_datetime).strftime('%S') "
 
-out: "{{ host_list | jtable(queryset=queryset) }}"
+stdout: "{{ host_list | jtable(queryset=queryset) }}"
 ```
 
 command: 

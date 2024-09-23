@@ -33,5 +33,5 @@ ansible-playbook $(find . -name hosts_dc*.ini |  sed "s/.*/-i &/g") \
 
 
 time ansible $(find . -name hosts_dc* |  sed "s/.*/-i &/g") all -m debug -a "msg={{ hostvars[inventory_hostname] }}" |\
- jtable -q view_ad-hoc_command.yml
+ jtable -q view_inventories.yml
 ```

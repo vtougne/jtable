@@ -1,4 +1,4 @@
-out: '{{ stdin | jtable(queryset=queryset ) }}'
+stdout: '{{ stdin | jtable(queryset=queryset ) }}'
 
 queryset:
   path: "plays[0].tasks[0].hosts{host}.msg{}"

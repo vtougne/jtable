@@ -30,4 +30,4 @@ queryset:
     expr: svc
   # when: "os == 'linux'"
   # - os == "linux"
-out: '{{ hosts | jtable(queryset=queryset) }}'
+stdout: '{{ hosts | jtable(queryset=queryset) }}'

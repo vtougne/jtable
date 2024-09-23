@@ -28,8 +28,8 @@ queryset:
       expr: host.order_date
   # when:
   #   - "host.os == 'linux'"
-out: "{{ host_list | jtable(queryset = queryset) }}"
-# out: |
+stdout: "{{ host_list | jtable(queryset = queryset) }}"
+# stdout: |
 #   Hell every body
 #   How it going on ?
 #   {{ when }}
