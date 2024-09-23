@@ -408,7 +408,7 @@ class JtableCli:
             # query_file_out['queryset'] = query_set_out
             query_file_out['queryset'] = query_set_out
             # query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'simple')
-            query_file_out['out'] = out_expr
+            query_file_out['stdout'] = out_expr
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
             print(yaml_query_out)
         else:

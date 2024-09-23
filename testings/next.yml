@@ -39,6 +39,18 @@ queryset:
 stdout: "{{ host_list | jtable(select=select, path=path, views=views) }}"
 
 
+outfiles:
+  excel_report:
+    file: "report.xlsx"
+    content:
+      sheet_1: 
+      - [['hosts:']]
+      - [[{'content': 'hostname'}, { Styling: {bold: True}}}]]
+      - "{{ host_list | jtable(queryset,format='excel') }}"
+
+
+
+
 
 
 # stdout: "{{ host_list | jtable(select=select) }}"
