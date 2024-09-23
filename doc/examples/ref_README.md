@@ -260,7 +260,7 @@ queryset:
     expr: state
   - as: env
     expr: env
-out: '{{ stdin | jtable(queryset=queryset) }}'
+stdout: '{{ stdin | jtable(queryset=queryset) }}'
 
 
 ```
@@ -472,7 +472,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-14:08:53 cls.cross_path      | ERROR .dc was not found in dataset l...
+18:12:54 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -556,7 +556,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-14:08:54 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+18:12:54 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
