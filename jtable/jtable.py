@@ -158,7 +158,9 @@ class Inspect:
     def __init__(self):
         self.out = []
     def add_row(self,row):
-        self.out = self.out + [ [row[0][1:]] + [row[1]] ]
+        # self.out = self.out + [ [row[0][1:]] + [row[1]] ]
+        self.out = self.out + [ [row[0]] + [row[1]] ]
+        # print([ [row[0]] + [row[1]] ])
     def view_paths(self,dataset,path="", max_depth=0):
         self.cover_data(dataset,path="", max_depth=0)
         return self.out
@@ -168,12 +170,16 @@ class Inspect:
                 if " " in str(key):
                     the_path = path + "['" + str(key) + "']"
                 else:
-                    the_path = path + "." + str(key)
+                    if path == "":
+                        the_path = path + str(key)
+                    else:
+                        the_path = path + "." + str(key)
                 self.cover_data(value,the_path )
         elif type(dataset) is list:
             index=0
             for item in dataset:
                 the_path = path + "[" + str(index) + "]"
+                # logging.warning(f"the_path: {the_path}")
                 index += 1
                 self.cover_data(item,the_path)
         else:
