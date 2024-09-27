@@ -207,25 +207,28 @@ class JtableCli:
         parser = argparse.ArgumentParser(description='Tabulate your JSON/Yaml data and transform it using Jinja',add_help=False)
 
         parser.add_argument("-h", "--help",action="store_true", help = "Show dis help")
-        parser.add_argument("-q", "--query_file", help = "Show Output")
+        parser.add_argument("-q", "--query_file", help = "load jtbale query file")
         parser.add_argument("-p", "--json_path", help = "json path")
         parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
         parser.add_argument("-w", "--when", help = "key_1 == 'value'")
-        parser.add_argument("-us", "--unselect", help = "unselect unwanted key_1,key_2,...")
-        parser.add_argument("-f", "--format", help = "simple,json,th,td")
-        parser.add_argument("--inspect", action="store_true", help="inspect stdin")
-        parser.add_argument("-jf", "--json_file", help = "load json")
-        parser.add_argument("-jfs", "--json_files", action='append', help = "load multiple Json's")
-        parser.add_argument("-yfs", "--yaml_files", action='append', help = "load multiple Yaml's")
+        parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
+        parser.add_argument("-f", "--format", help = "Table format applyed in simple,json,th,td... list below")
+        parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
+        parser.add_argument("-jf", "--json_file", help = "Load json")
+        parser.add_argument("-jfs", "--json_files", action='append', help = "Load multiple Json's")
+        parser.add_argument("-yfs", "--yaml_files", action='append', help = "Load multiple Yaml's")
         parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
         parser.add_argument('--version', action='version', version=version.__version__)
-        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
+        parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
+        parser.add_argument( '--stdout', help='Ovewrite applyed ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
 
         args = parser.parse_args()
         global terminal_size
         terminal_size = shutil.get_terminal_size((80, 20))  # Largeur par défaut 80, hauteur 20
+        # logging.warning(f"terminal_size: {terminal_size}")  
 
-        if os.environ.get('JTABLE_LOGGING') == "DEBUG":
+        if os.environ.get('JTABLE_LOGGING') == "DEBUG" or args.debug:
             logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)-16s | %(levelname)s %(message)s'
         else:
             logging_config['formatters']['my_formatter']['format'] = '%(asctime)s %(class_name)s.%(parent_function)-15s | %(levelname)s %(message)s'
@@ -389,7 +392,10 @@ class JtableCli:
             # return "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
             
         # out_expr = out_expr_fct(str(select), queryset['path'] , queryset['format'])
-        out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
+        if args.stdout:
+            out_expr = args.stdout
+        else:
+            out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
         # print(out_expr) ; exit(0)
         if args.query_file:
             if 'stdout' in query_file:
