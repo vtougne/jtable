@@ -77,6 +77,23 @@ make_release:
   rules:
     - when: manual
 
+
+make_windows:
+  stage: make_release
+  # image: $CI_REGISTRY_IMAGE:latest
+  tags:
+    - windows
+  script:
+    - if (-not (Test-Path C:\temp\build)) {New-Item -Path C:\temp\build -ItemType Directory }
+    - cd C:\temp\build
+    - if (-not (Test-Path C:\temp\build\jtable)) {git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git}
+    - cd C:\temp\build\jtable
+    - git switch ${CI_COMMIT_BRANCH}
+    # - current_tag=$(git for-each-ref --sort=creatordate --format '%(refname)' refs/tags | tail -1 | cut -d"/" -f3)
+  rules:
+  - when: never
+
+
 deploy:
   stage: deploy
   image: $CI_REGISTRY_IMAGE:latest

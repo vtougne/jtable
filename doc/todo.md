@@ -1,6 +1,7 @@
 ### Todo
 | #         | category    |   task |
 |------------------|-------|--------|
+ 1 | bug | jtable -jf dataset.yml -q query_bench.yml => jinja2.exceptions.UndefinedError: 'stdin' is undefined
  1 | fix/format | unaccepeted chars in json format input
  1 | feature    | preview pagination
  1 | feature    | inspect pagination

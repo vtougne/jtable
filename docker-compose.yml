@@ -1,69 +1,14 @@
-# version: "3.9"
-# networks:
-#   default:
-#     name: my_infra
-#     external: true
-      
-
 services:
   jtable:
     hostname: jtable
     container_name: jtable
     image: jtable
     privileged: true
-    # restart: always
     working_dir: /project/jtable
-    # build:
-    #   dockerfile_inline: |
-    #     FROM ubuntu:22.04
-    #     RUN apt-get update
-    #     RUN apt-get install -y pip
-    #     RUN echo 'set -o vi' >> /root/.bashrc
-    #     RUN echo 'alias ll="ls -lrt"' >> /root/.bashrc
-    #     RUN apt-get install -y curl less
-    #     RUN pip install ansible-core==2.13.13
-    #     RUN pip install jmespath
-    #     RUN ansible-galaxy collection install community.general ansible.posix
-
-        
-    #     # RUN ln -s /usr/bin/python3 /usr/bin/python
-    #     RUN echo localhost > /tmp/ansible_inventory.txt
-    #     # RUN ln -s /project/jtable /usr/local/lib/python3.10/dist-packages/jtable
-    #     # RUN pip install tabulate
     environment:
       - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/project/jtable/jtable
-      # - ANSIBLE_CONFIG=/project/jtable/examples/ansible.cfg
       - ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg
       - PYTHONDONTWRITEBYTECODE=1
-      # - ANSIBLE_ROLES_PATH=/project
-      # - LC_ALL=C
-      # - LC_ALL=en_US.UTF-8
     command: ["tail","-f"]
     volumes:
       - ../jtable:/project/jtable
-
-  # jtable_testing:
-  #   hostname: jtable_testing
-  #   container_name: jtable_testing
-  #   image: jtable_testing
-  #   privileged: true
-  #   # restart: always
-  #   working_dir: /project/jtable
-  #   build:
-  #     dockerfile_inline: |
-  #       FROM ubuntu:22.04
-  #       RUN apt-get update
-  #       RUN apt-get install -y pip
-  #       RUN echo 'set -o vi' >> /root/.bashrc
-  #       RUN echo 'alias ll="ls -lrt"' >> /root/.bashrc
-  #       RUN ln -s /usr/bin/python3 /usr/bin/python
-  #   #     RUN ln -s /project/jtable /usr/local/lib/python3.10/dist-packages/jtable
-  #   #     RUN echo localhost > /tmp/ansible_inventory.txt
-  #   # environment:
-  #   #   - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:.:/project/jtable
-  #   #   - ANSIBLE_CONFIG=/project/jtable/examples/ansible.cfg
-  #   #   - PYTHONDONTWRITEBYTECODE=1
-  #   # command: ["tail","-f"]
-  #   # volumes:
-  #   #   - ../jtable:/project/jtable
-  #   profiles: [jtable_testing]
