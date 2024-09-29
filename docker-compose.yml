@@ -1,14 +1,19 @@
 services:
   jtable:
-    hostname: jtable
+    # hostname: jtable
     container_name: jtable
-    image: jtable
+    # image: jtable
     privileged: true
     working_dir: /project/jtable
-    environment:
-      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/project/jtable/jtable
-      - ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg
-      - PYTHONDONTWRITEBYTECODE=1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: jtable
+    # user: "1000:1001"
+    # environment:
+    #   - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/project/jtable/jtable
+    #   - ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg
+    #   - PYTHONDONTWRITEBYTECODE=1
     command: ["tail","-f"]
     volumes:
       - ../jtable:/project/jtable
