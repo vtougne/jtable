@@ -1,8 +1,7 @@
 FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y sudo
 RUN groupadd jtable
-# RUN useradd -m -G jtable_grp jtable
-RUN useradd -m -s /bin/bash jtable
+RUN useradd -m -g jtable jtable
 RUN usermod -aG sudo jtable
 RUN echo "jtable ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 USER jtable

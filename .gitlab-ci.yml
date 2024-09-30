@@ -91,9 +91,10 @@ make_windows:
     - if (-not (Test-Path C:\temp\build\jtable)) {git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git}
     - cd C:\temp\build\jtable
     - git switch ${CI_COMMIT_BRANCH}
-    # - current_tag=$(git for-each-ref --sort=creatordate --format '%(refname)' refs/tags | tail -1 | cut -d"/" -f3)
+    - cd c:\temp
+    - virtualenv jtable_env
   rules:
-  - when: never
+    - when: manual
 
 
 deploy:
@@ -104,12 +105,12 @@ deploy:
   script:
     - cd $HOME
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - sleep 2000
+    # - sleep 2000
     - cd $HOME/.ssh
     - mv vince_bot_ssh.pub id_rsa.pub
     - mv vince_bot_ssh.priv id_rsa
-    - chmod -R 600 $HOME/.ssh
-    - ssh-keyscan github.com >> /root/.ssh/known_hosts
+    - chmod -R 700 $HOME/.ssh
+    - ssh-keyscan github.com >> /home/jtable/.ssh/known_hosts
     - cd $CI_BUILDS_DIR/root/release/$CI_PROJECT_NAME
     - new_version=$(cat jtable/version.py  | awk '{print $3'} | xargs echo)
     - echo $new_version
