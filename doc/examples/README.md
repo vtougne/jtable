@@ -472,7 +472,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-13:05:10 cls.cross_path      | ERROR .dc was not found in dataset l...
+21:47:57 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -556,7 +556,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-13:05:10 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+21:47:58 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -671,14 +671,25 @@ ansible-playbook ansible_playbook_example.yml
 ```
 output:
 
-```
-bash💥 Something was wrong with this report
- cmd was  ->  export export ANSIBLE_CONFIG="$PWD/ansible.cfg" && \
-export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
-export ANSIBLE_ACTION_WARNINGS=False && \
-export ANSIBLE_STDOUT_CALLBACK=yaml && \
-export ANSIBLE_INVENTORY=./local_inv && \
-ansible-playbook ansible_playbook_example.yml
+```bash
+
+PLAY [localhost] ***************************************************************
+
+TASK [debug] *******************************************************************
+ok: [localhost] => 
+  msg: |-
+    hostname    os         cost  state    service.name    ips
+    ----------  -------  ------  -------  --------------  ------------------------------
+    host_1      linux      5000  alive    service1
+                                          service_3
+    host_2      linux1      200  alive
+    host_3      windows     200  alive
+    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
+    host_5      windows    5000  decom                    []
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
 
 ```
 ![uptime_view_colored](./uptime_view_colored.png)
