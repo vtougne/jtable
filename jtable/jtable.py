@@ -475,7 +475,7 @@ class JtableCls:
                 else:
                     logging.error('keys dataset were:')
                     logging.error(list(dataset))
-                    logging.error("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
+                    logging.error(current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
                     # exit(1)
             elif current_path[0] == ".":
                 current_path_value = current_path[1:]
@@ -492,7 +492,7 @@ class JtableCls:
                     self.cross_path(dataset[int(current_path_value)],next_path, cross_path_context = cross_path_context)
                     
                 else:
-                    logging.info("ERROR " + current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
+                    logging.error( current_path + " was not found in dataset level: " + str(len(self.splitted_path) - level))
                     exit(1)
             
             elif current_path[0] == "{":
@@ -764,7 +764,6 @@ class path_auto_discover:
             for key,value in dataset.items():
                 dataset_as_list = dataset_as_list + [ {'key': key, 'value': value} ]
             dataset = dataset_as_list
-            
         index=0
 
         try:
@@ -773,8 +772,9 @@ class path_auto_discover:
                     self.cover_paths(value,[str(index),key])
                     index+=1
                 self.raw_rows = self.raw_rows + [ item ]
-        except (AttributeError, TypeError):
-            logging.info("ERROR Something wrong with your dataset")
+        except(Exception) as error:
+            logging.error(f"Something wrong with your dataset, error was:")
+            logging.error(f"    {error}")
             exit(1)
 
         return self.fields

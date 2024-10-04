@@ -40,19 +40,15 @@ test:
     - 'echo debug CI_COMMIT_MESSAGE: "$CI_COMMIT_MESSAGE"'
     - 'echo debug CI_COMMIT_MESSAGE: $CI_COMMIT_MESSAGE'
   rules:
-    - if: '$CI_COMMIT_BRANCH != "main"'
+    - if: '$CI_COMMIT_MESSAGE !~ /make_release/ && $CI_COMMIT_BRANCH != "main"'
 
 
 make_release:
-  # before_script:
-  #   - sudo su -
   stage: make_release
-  image:
-    name: $CI_REGISTRY_IMAGE:latest
+  image: $CI_REGISTRY_IMAGE:latest
   variables:
     SECURE_FILES_DOWNLOAD_PATH: '.ssh'
   script:
-    # - sleep 2000
     - mkdir ../release || true
     - cd ../release
     - rm -rf *
@@ -76,26 +72,10 @@ make_release:
     - git push origin main
     - git tag -f $new_version
     - git push origin $new_version
+  # rules:
+  #   - if: '$CI_COMMIT_MESSAGE =~ /make_release/'
   rules:
     - when: manual
-
-
-make_windows:
-  stage: make_release
-  # image: $CI_REGISTRY_IMAGE:latest
-  tags:
-    - windows
-  script:
-    - if (-not (Test-Path C:\temp\build)) {New-Item -Path C:\temp\build -ItemType Directory }
-    - cd C:\temp\build
-    - if (-not (Test-Path C:\temp\build\jtable)) {git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git}
-    - cd C:\temp\build\jtable
-    - git switch ${CI_COMMIT_BRANCH}
-    - cd c:\temp
-    - virtualenv jtable_env
-  rules:
-    - when: manual
-
 
 deploy:
   stage: deploy
@@ -105,12 +85,11 @@ deploy:
   script:
     - cd $HOME
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    # - sleep 2000
     - cd $HOME/.ssh
     - mv vince_bot_ssh.pub id_rsa.pub
     - mv vince_bot_ssh.priv id_rsa
-    - chmod -R 700 $HOME/.ssh
-    - ssh-keyscan github.com >> /home/jtable/.ssh/known_hosts
+    - chmod -R 600 $HOME/.ssh
+    - ssh-keyscan github.com >> /root/.ssh/known_hosts
     - cd $CI_BUILDS_DIR/root/release/$CI_PROJECT_NAME
     - new_version=$(cat jtable/version.py  | awk '{print $3'} | xargs echo)
     - echo $new_version
