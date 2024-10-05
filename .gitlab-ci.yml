@@ -99,6 +99,7 @@ make_windows:
     - python -m venv jtable_env
     - .\jtable_env\Scripts\activate
     - cd C:\temp\build\jtable
+    - git pull origin main
     - pip install .
     - pip install PyInstaller
     - cd jtable
