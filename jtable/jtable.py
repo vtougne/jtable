@@ -206,13 +206,13 @@ class JtableCli:
 
         parser = argparse.ArgumentParser(description='Tabulate your JSON/Yaml data and transform it using Jinja',add_help=False)
 
-        parser.add_argument("-h", "--help",action="store_true", help = "Show dis help")
-        parser.add_argument("-q", "--query_file", help = "load jtbale query file")
+        parser.add_argument("-h", "--help",action="store_true", help = "Show this help")
         parser.add_argument("-p", "--json_path", help = "json path")
         parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
         parser.add_argument("-w", "--when", help = "key_1 == 'value'")
-        parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
         parser.add_argument("-f", "--format", help = "Table format applyed in simple,json,th,td... list below")
+        parser.add_argument("-q", "--query_file", help = "load jtbale query file")
+        parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
         parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
         parser.add_argument("-jf", "--json_file", help = "Load json")
         parser.add_argument("-jfs", "--json_files", action='append', help = "Load multiple Json's")
