@@ -1,0 +1,9 @@
+OutFile "jtable_setup.exe"
+InstallDir "$PROGRAMFILES\jtable"
+RequestExecutionLevel user
+
+Section
+    SetOutPath "$INSTDIR"
+    File ".\dist\jtable.exe"
+    CreateShortcut "$DESKTOP\jtable.lnk" "$INSTDIR\jtable.exe"
+SectionEnd
