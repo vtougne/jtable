@@ -5,6 +5,7 @@ stages:
   - build
   - test
   - make_release
+  - make_windows_setup
   - deploy
 
 workflow:
@@ -80,8 +81,7 @@ make_release:
     - when: manual
 
 
-make_windows:
-  stage: test
+make_windows_setup:
   # image: $CI_REGISTRY_IMAGE:latest
   tags:
     - windows
@@ -137,5 +137,5 @@ deploy:
   # rules:
   # - if: '$CI_COMMIT_MESSAGE =~ /make_release/'
   #   when: manual
-  # rules:
-  #   - when: manual
+  rules:
+    - when: manual
