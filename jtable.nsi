@@ -1,5 +1,5 @@
 OutFile "jtable_setup.exe"
-InstallDir "$PROGRAMFILES\jtable"
+InstallDir "$LOCALAPPDATA\jtable"
 RequestExecutionLevel user
 
 Section
