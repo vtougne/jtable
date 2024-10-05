@@ -82,6 +82,7 @@ make_release:
 
 
 make_windows_setup:
+  stage: make_windows_setup
   # image: $CI_REGISTRY_IMAGE:latest
   tags:
     - windows
