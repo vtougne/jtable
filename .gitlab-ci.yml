@@ -81,7 +81,7 @@ make_release:
 
 
 make_windows:
-  stage: make_release
+  stage: test
   # image: $CI_REGISTRY_IMAGE:latest
   tags:
     - windows
@@ -97,8 +97,14 @@ make_windows:
     # - Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
     # - choco install python3 -y -f
     - python -m venv jtable_env
-  rules:
-    - when: manual
+    - .\jtable_env\Scripts\activate
+    - cd C:\temp\build\jtable
+    - pip install .
+    - pip install PyInstaller
+    - cd jtable
+    - python -m PyInstaller --name jtable.exe --distpath ..\dist --onefile jtable.py
+  # rules:
+  #   - when: manual
 
 
 deploy:

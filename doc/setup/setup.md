@@ -24,6 +24,13 @@ python -m PyInstaller  --name jtable.exe --distpath ../dist --onefile jtable.py
 python -m PyInstaller  --workpath ../build --specpath ../build --name jtable.exe --distpath ../dist --onefile jtable.py
 ```
 
+### from windows
+```bash
+cd jtable
+python -m PyInstaller --name jtable.exe --distpath ..\dist --onefile jtable.py
+python -m PyInstaller --workpath ../build --specpath ../build --name jtable.exe --distpath ../dist --onefile jtable.py
+```
+
 ### build setup file
 ```bash
 "C:\Program Files (x86)\NSIS\makensis.exe" jtable.nsi
