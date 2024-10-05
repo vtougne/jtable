@@ -1,22 +1,97 @@
-hosts:
-  - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_2"}  }
-  - { hostname: host_2, os: linux1, cost: 200, state: a very long text to truncate }
+truc_qui_fait_planter: john
+
+
+simple:
+  - { hostname: host_2, os: windows, cost: 200 }
+  - { hostname: host_1, os: linux }
+  - { hostname: host_3, os: linux, cost: 200 }
+  - { hostname: host_4, os: aix, cost: 200 }
+  - { hostname: host_5, os: linux, cost: 200 }
+
+host_list:
+  - { hostname: host_1, os: linux, cost: 5000, state: alive, env: '{ "env": "qua" }', order_date: "2016-08-14 20:00:12"  }
+  - { hostname: host_2, os: windows, cost: 200, env: '{ "env": "test" }', order_date: "2016-08-14 20:00:12"}
+  - { hostname: host_3, os: linux, cost: 200, state: "unreachable", env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
+  - { hostname: host_4, os: aix, cost: "200", state: "alive", env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
+  - { hostname: host_5, os: linux, cost: 200, state: unreachable, env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12" }
+
+host_list_testing:
+  - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_3"}  }
+  - { hostname: host_2, os: linux1, cost: 200, state: alive }
   - { hostname: host_3, os: windows, cost: 200, state: alive }
   - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
   - { hostname: host_5, os: windows, cost: 5000, state: decom, ips: [] }
 
-# host:
-#   - { region: ouest, datacenter: dc_1, hostname: host_1, os: linux, cost: 5000, state: alive }
-#   - { region: ouest, datacenter: dc_2, hostname: host_2, os: linux, cost: 200, state: alive}
+host_list_debug:
+  - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_3"}  }
+  - { hostname: host_2, os: linux1, cost: 200, state: alive }
+  - { hostname: host_3, os: windows, cost: 200, state: alive }
+  - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+  - { hostname: host_5, os: windows, cost: 5000, state: decom }
+
+colored_host_list:
+  - { hostname: host_1, os: linux, cost: 5000, state: alive, env: '{ "env": "qua" }', order_date: "2016-08-14 20:00:12"  }
+  - { hostname: host_2, os: windows, cost: 200, env: '{ "env": "test" }', order_date: "2016-08-14 20:00:12"}
+  - { hostname: host_3, os: linux, cost: 200, state: "\e[44munreachable\e[0m", env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
+  - { hostname: host_4, os: linux, cost: "\e[38;5;205m200\e[0m", state: "\e[1;92malive\e[0m", env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
+  - { hostname: host_5, os: linux, cost: 200, state: unreachable, env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
+  
+hosts:
+  - { hostname: host_1, os: linux, cost: 5000, state: alive  }
+  - { hostname: host_2, os: linux1, cost: 200, state: a very long text to truncate ,services:  {'svc_1': 'super service 1', 'svc_2': 'super service 2'} }
+  - { hostname: host_3, os: windows, cost: 200 }
+  - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+  - { hostname: host_5, os: windows, cost: 5000, state: decom, ips: [] }
+cloud:
+  - { hostname: cloud_1, os: linux, cost: 5000, state: "a\nlive",service: {name: bob\njackgregegegergergre} }
+  - { hostname: cloud_2, os: linux1, cost: 200, state: alive }
+  - { hostname: cloud_3, os: windows, cost: 200}
+  - { hostname: cloud_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+  - { hostname: cloud_5, os: windows, cost: 5000, state: decom, ips: [] }
+host_dict:
+  host_1: { os: linux, cost: 5000, state: alive, service: {name: bob } }
+  host_2: { os: linux1, cost: 200, state: alive }
+  host_3: { os: windows, cost: 200, state: alive }
+  host_4: { os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
+
+regions:
+  west coast:
+    dc:
+      dc_a: 
+        - { hostname: host_a_1, os: linux, state: alive }
+        - { hostname: host_a_2, os: linux, state: "unreachable" }
+        - { hostname: host_a_3, os: linux, state: alive }
+      dc_b: 
+        - { hostname: host_b_1, os: linux, state: alive }
+        - { hostname: host_b_2, os: linux, state: alive }
+        - { hostname: host_b_3, os: linux, state: alive }
+  east:
+    dc:
+      dc_c:
+        - { hostname: host_c_1, os: linux, state: alive }
+        - { hostname: host_c_2, os: linux, state: alive }
+        - { hostname: host_c_3, os: linux, state: alive }
 
 
-# host_list[0]['hostname']: joe
-# host_list[0]['os']: linux
+city:
+  - name: paris
+    hosts:  
+      - { hostname: host_p_1, os: linux, cost: 5000, state: alive }
+      - { hostname: host_p_2, os: linux, cost: 5000, state: "unreachable" }
+      - { hostname: host_p_3, os: linux, cost: 5000, state: alive }
+  - name: bordeaux
+    hosts:  
+      - { hostname: host_b_1, os: linux, cost: 5000, state: alive }
+      - { hostname: host_b_2, os: linux, cost: 5000, state: "unreachable" }
+      - { hostname: host_b_3, os: linux, cost: 5000, state: alive }
+  - name: nancy
+    hosts:  
+      - { hostname: host_n_1, os: linux, cost: 5000, state: alive }
+      - { hostname: host_n_2, os: linux, cost: 5000, state: "unreachable" }
+      - { hostname: host_n_3, os: linux, cost: 5000, state: alive }
 
-# host_list[1]['hostname']: joe
-# host_list[1]['os']: linux1
-# ...
-# host_list[3]['hostname']: elton
-# host_list[3]['os']: windows
-# host_list[3]['ip'][0]: 192.168.1.1
-# host_list[3]['ip'][1]: 192.168.1.2
+
+env:
+  dev: { payment: config.yml }
+  qua: { payment: config.yml }
+  prod: { payment: config.yml }
