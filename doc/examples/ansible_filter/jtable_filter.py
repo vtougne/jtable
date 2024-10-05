@@ -6,7 +6,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 # from data_cls import data_cls
 import site
-print(site.getusersitepackages())
+# print(site.getusersitepackages())
 
 def jtable_filter(dataset,select=[],path="{}",format="simple",views={}, when=[],queryset={}):
     from jtable import jtable
