@@ -21,7 +21,6 @@ except:
     running_os = "windows"
 
 
-logging.info(f"running_os: {running_os}")
 
 
 
@@ -209,6 +208,7 @@ class JtableCli:
         from jinja2 import Environment, BaseLoader
         
     def parse_args(self):
+
         select = []
         queryset = {}
         self.tabulate_var_name="stdin"
@@ -256,6 +256,7 @@ class JtableCli:
         elif args.verbose == 2:
             logging_config['handlers']['console_stderr']['level'] = 'DEBUG'
         logging.config.dictConfig(logging_config)
+        logging.info(f"running_os: {running_os}")
         
         # global logging_format
         # logging_format = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
