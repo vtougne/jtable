@@ -356,7 +356,8 @@ class JtableCli:
                         try:
                             file_content =  yaml.safe_load(input_yaml)
                             if running_os == "Windows":
-                                file_path = "\\".join(file_name_full_path.split('\\')[:-1])
+                                sep = "\\"
+                                file_path = sep.join(file_name_full_path.split('\\')[:-1])
                                 file_name = file_name_full_path.split('\\')[-1]
                             else:
                                 file_path = "/".join(file_name_full_path.split('/')[:-1])
