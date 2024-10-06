@@ -15,7 +15,8 @@ except:
 # sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
 
 try:
-    running_os = os.popen("uname -a").read()
+    running_os = os.waitstatus_to_exitcode(os.popen("uname -a").close())
+
 except:
     running_os = "unknown"
 
