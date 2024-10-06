@@ -100,8 +100,8 @@ make_windows_setup:
     - python -m venv jtable_env
     - .\jtable_env\Scripts\activate
     - cd C:\temp\build\jtable
-    - git switch ${CI_COMMIT_BRANCH}
     - git pull
+    - git switch ${CI_COMMIT_BRANCH}
     - pip install .
     - pip install PyInstaller
     - cd jtable
