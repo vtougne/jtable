@@ -343,6 +343,8 @@ class JtableCli:
             logging.info(f"path: {path}")
             
             if running_os == "Windows":
+                cmd = f"dir /s /b {path}"
+                logging.info(f"cmd: {cmd}")
                 files_str = os.popen("dir /s /b " + path).read()
             else:
                 files_str = os.popen("ls -1 " + path).read()
