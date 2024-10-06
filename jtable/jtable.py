@@ -15,10 +15,9 @@ except:
 # sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
 
 try:
-    os.popen("uname -a").read()
-    running_os = "linux"
+    running_os = os.popen("uname -a").read()
 except:
-    running_os = "windows"
+    running_os = "unknown"
 
 
 
