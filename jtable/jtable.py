@@ -355,8 +355,12 @@ class JtableCli:
                     with open(file_name_full_path, 'r') as input_yaml:
                         try:
                             file_content =  yaml.safe_load(input_yaml)
-                            file_path = "/".join(file_name_full_path.split('/')[:-1])
-                            file_name = file_name_full_path.split('/')[-1]
+                            if running_os == "Windows":
+                                file_path = "\\".join(file_name_full_path.split('\\')[:-1])
+                                file_name = file_name_full_path.split('\\')[-1]
+                            else:
+                                file_path = "/".join(file_name_full_path.split('/')[:-1])
+                                file_name = file_name_full_path.split('/')[-1]
                             file = { 
                                     "name": file_name,
                                     "path": file_path,
