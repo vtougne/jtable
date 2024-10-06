@@ -14,6 +14,16 @@ except:
 # sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
 # sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
 
+try:
+    os.popen("uname -a").read()
+    running_os = "linux"
+except:
+    running_os = "windows"
+
+
+logging.info(f"running_os: {running_os}")
+
+
 
 class CustomFormatter(logging.Formatter):
     def format(self, record):
