@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil
+import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform
 from os import isatty
 from sys import exit
 # from tabulate import tabulate
@@ -14,11 +14,18 @@ except:
 # sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
 # sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
 
-try:
-    running_os = os.waitstatus_to_exitcode(os.popen("uname -a").close())
+running_platform = platform.system()
 
-except:
-    running_os = "unknown"
+if running_platform == "Windows":
+    ms_system = os.environ.get('MSYSTEM', '')
+    if ms_system == "MINGW64" or ms_system == "CLANGARM64":
+        running_os = "Linux"
+    elif os.environ.get('TERM', '')  == "xterm":
+            running_os = "Linux"
+    else:
+        running_os = "Windows"
+else:
+    running_os = running_platform
 
 
 
