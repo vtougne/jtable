@@ -341,8 +341,11 @@ class JtableCli:
             # print(tabulate_var_name) ; exit(0)
             # path = file_search_string[len(self.tabulate_var_name) + 3 :]
             logging.info(f"path: {path}")
-
-            files_str = os.popen("ls -1 " + path).read()
+            
+            if running_os == "Windows":
+                files_str = os.popen("dir /s /b " + path).read()
+            else:
+                files_str = os.popen("ls -1 " + path).read()
             # for windows syntax will be --> # dir /s /b data\*config.yml
             file_list_dataset = []
             for file_name_full_path in files_str.split('\n'):
