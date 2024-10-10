@@ -5,7 +5,6 @@ stages:
   - build
   - test
   - make_release
-  - make_windows_setup
   - deploy
 
 workflow:
@@ -82,7 +81,7 @@ make_release:
 
 
 make_windows_setup:
-  stage: make_windows_setup
+  stage: deploy
   # image: $CI_REGISTRY_IMAGE:latest
   tags:
     - windows
@@ -108,9 +107,8 @@ make_windows_setup:
     - python -m PyInstaller --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
     - cd C:\temp\build\jtable\dist
     - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
-
-  # rules:
-  #   - when: manual
+  rules:
+    - when: manual
 
 
 deploy:
