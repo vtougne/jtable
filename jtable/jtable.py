@@ -710,7 +710,7 @@ class JtableCls:
                     view_index += 1
 
             if self.when != []:
-                condition_test_result = when(when = self.when, when_context = {**context,**view_context})
+                condition_test_result = when(when = self.when, when_context = {**self.context,**context,**view_context})
             else:
                 condition_test_result = "True"
             
