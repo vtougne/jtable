@@ -247,19 +247,20 @@ cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
 output:
 
 ```yaml
-queryset:
-  path: region.East['Data Center'].dc_1.hosts{}
-  select:
-  - as: hostname
-    expr: hostname
-  - as: os
-    expr: os
-  - as: cost
-    expr: cost
-  - as: state
-    expr: state
-  - as: env
-    expr: env
+vars:
+  queryset:
+    path: region.East['Data Center'].dc_1.hosts{}
+    select:
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost
+    - as: state
+      expr: state
+    - as: env
+      expr: env
 stdout: '{{ stdin | jtable(queryset=queryset) }}'
 
 
@@ -332,24 +333,16 @@ hosts:
 ```
 
 ```text
-# select:
-#   - as: host
-#     expr: hostname
-#   - as: os type
-#     expr: os
-#   - as: uptime in days
-#     expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
-
-
-queryset:
-  path: hosts{}
-  select:
-    - as: host
-      expr: hostname
-    - as: os type
-      expr: os
-    - as: uptime in days
-      expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
+vars:
+  queryset:
+    path: hosts{}
+    select:
+      - as: host
+        expr: hostname
+      - as: os type
+        expr: os
+      - as: uptime in days
+        expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
 
 stdout: "{{ stdin | jtable(queryset=queryset) }}"
 
@@ -378,27 +371,27 @@ this will helps to make mapping table, or behalf like view
 #### Use variables mapping table or view
 
 ```yaml
-
-queryset:
-  path: hosts{host}
-  select:
-    - as: region
-      expr: dc_location[host.dc]
-    - as: dc name
-      expr: host.dc
-    - as: hostname
-      expr: host.hostname
-    - as: os type
-      expr: host.os
-    - as: uptime in days
-      expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 else (uptime_in_day | string ) +  ' day'"
-    - as: sanity status
-      expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
-  views:
-    dc_location:
-      dc_1: East
-      dc_2: North
-    uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
+vars:
+  queryset:
+    path: hosts{host}
+    select:
+      - as: region
+        expr: dc_location[host.dc]
+      - as: dc name
+        expr: host.dc
+      - as: hostname
+        expr: host.hostname
+      - as: os type
+        expr: host.os
+      - as: uptime in days
+        expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 else (uptime_in_day | string ) +  ' day'"
+      - as: sanity status
+        expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
+    views:
+      dc_location:
+        dc_1: East
+        dc_2: North
+      uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
 stdout: "{{ stdin | jtable(queryset=queryset)}}"
@@ -430,13 +423,13 @@ cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
 
 
 ```yaml
-
-queryset:
-  select:
-    - as: hostname
-      expr: host.hostname
-    - as: os
-      expr: host.os
+vars:
+  queryset:
+    select:
+      - as: hostname
+        expr: host.hostname
+      - as: os
+        expr: host.os
 ```
   
 #### store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"
@@ -472,7 +465,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-12:47:09 cls.cross_path      | ERROR .dc was not found in dataset l...
+14:04:02 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -488,18 +481,19 @@ dc_c       east        host_c_3    linux  alive
 ```
 
 ```yaml
-queryset:
-  select:
-  - as: dc name
-    expr: dc.key
-  - as: region
-    expr: region.key
-  - as: hostname
-    expr: host.hostname
-  - as: os
-    expr: host.os
-  - as: state
-    expr: host.state
+vars:
+  queryset:
+    select:
+    - as: dc name
+      expr: dc.key
+    - as: region
+      expr: region.key
+    - as: hostname
+      expr: host.hostname
+    - as: os
+      expr: host.os
+    - as: state
+      expr: host.state
 ```
 ## Use jtable with Ansible
 The plabybook
@@ -556,7 +550,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-12:47:10 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+14:04:02 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -575,19 +569,19 @@ qua    pay          host_qua_pay_3R3  win       200
 ```
 
 ```yaml
-
-queryset:
-  select:
-    - as: env
-      expr: file.path.split('/')[1]
-    - as: dept
-      expr: file.path.split('/')[2]
-    - as: hostname
-      expr: hostname
-    - as: os
-      expr: os
-    - as: cost
-      expr: cost
+vars:
+  queryset:
+    select:
+      - as: env
+        expr: file.path.split('/')[1]
+      - as: dept
+        expr: file.path.split('/')[2]
+      - as: hostname
+        expr: hostname
+      - as: os
+        expr: os
+      - as: cost
+        expr: cost
 ```
 # Embded filters
   
@@ -602,21 +596,21 @@ vars:
     - { hostname: host_3, os: linux, cost: 200, state: alive, env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
 
 
-queryset:
-  path: "{}"
-  select:
-    - as: hostname
-      expr: hostname
-    - as: os
-      expr: os
-    - as: cost
-      expr: cost 
-    - as: state
-      expr: state
-    - as: order_date
-      expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
-    - as: strftime 
-      expr: "  (order_date|to_datetime).strftime('%S') "
+  queryset:
+    path: "{}"
+    select:
+      - as: hostname
+        expr: hostname
+      - as: os
+        expr: os
+      - as: cost
+        expr: cost 
+      - as: state
+        expr: state
+      - as: order_date
+        expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
+      - as: strftime 
+        expr: "  (order_date|to_datetime).strftime('%S') "
 
 stdout: "{{ host_list | jtable(queryset=queryset) }}"
 ```
