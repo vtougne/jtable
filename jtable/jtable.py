@@ -388,13 +388,13 @@ class JtableCli:
             queryset['path'] = new_path
 
         if args.query_file:
-            if 'context' in query_file:
-                context = {}
-                for key,value in query_file['context'].items():
-                    logging.info(f"Covering context, key: {key}")
+            if 'vars' in query_file:
+                vars = {}
+                for key,value in query_file['vars'].items():
+                    logging.info(f"Covering vars, key: {key}")
                     jinja_eval = Templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
-                    context.update({key: jinja_eval})
-                    self.dataset = {**self.dataset,**context, **{"context": context}}
+                    vars.update({key: jinja_eval})
+                    self.dataset = {**self.dataset,**vars, **{"vars": vars}}
 
             
         if 'select' in queryset:

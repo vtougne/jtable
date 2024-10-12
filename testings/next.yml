@@ -1,10 +1,15 @@
+secrets:
+  - tower_token
+
 sources:
   entities:
     json_files: "data/*/*/entity.json"
   ref_data:
     yaml_files: "data/*/*/entity.yaml"
+  tower_token:
+    env_var: TOWE_TOKEN
   more_ref_data:
-    shell: curl -s https://the_site/orga?name=53
+    shell: 'curl -s https://the_site/orga?name=53 -H "Authorization: Bearer {{ tower_token }}"'
 
 vars:
   more_ref_data: "{{ stdin | from_json }}"
@@ -18,7 +23,7 @@ vars:
     path: "host_list{host}"
     select:
       - as: env
-        expr: "lookup('url','https://the_site/orga?name=' + host.orga_id )"
+        expr: "host.env"
       - as: my hostname
         expr: host.hostname
       - as: os
@@ -43,9 +48,3 @@ outfiles:
       - [[{'content': 'hostname'}, { Styling: {bold: True}}}]]
       - "{{ host_list | jtable(queryset,format='excel') }}"
 
-
-
-
-
-
-# stdout: "{{ host_list | jtable(select=select) }}"
