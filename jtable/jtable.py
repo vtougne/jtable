@@ -233,8 +233,8 @@ class JtableCli:
         parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
         parser.add_argument("-w", "--when", help = "key_1 == 'value'")
         parser.add_argument("-f", "--format", help = "Table format applyed in simple,json,th,td... list below")
-        parser.add_argument("-q", "--query_file", help = "load jtbale query file")
         parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
+        parser.add_argument("-q", "--query_file", help = "Load jtbale query file")
         parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
         parser.add_argument("-jf", "--json_file", help = "Load json")
         parser.add_argument("-jfs", "--json_files", action='append', help = "Load multiple Json's")
@@ -278,8 +278,9 @@ class JtableCli:
                     logging.error(f"error was:\n{error}")
                     exit(2)
                 
-            if 'queryset' in query_file:
-                queryset = query_file['queryset']
+            if 'vars' in query_file:
+                if 'queryset' in query_file['vars']:
+                    queryset = query_file['vars']['queryset']
                 
         is_pipe = not isatty(sys.stdin.fileno())
 
@@ -450,8 +451,10 @@ class JtableCli:
                     select = select + [ {'as': field, 'expr':field }  ]
             query_set_out['path'] = queryset['path']
             query_set_out['select'] = select
+            if args.when:
+                query_set_out['when'] = args.when
             # query_file_out['queryset'] = query_set_out
-            query_file_out['queryset'] = query_set_out
+            query_file_out['vars'] = {'queryset': query_set_out }
             # query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'simple')
             query_file_out['stdout'] = out_expr
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)

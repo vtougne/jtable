@@ -1,0 +1,13 @@
+vars:
+  queryset:
+    path: simple{}
+    select:
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost
+    when: os == 'linux'
+stdout: '{{ stdin | jtable(queryset=queryset) }}'
+
