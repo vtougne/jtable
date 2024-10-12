@@ -294,11 +294,11 @@ cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml
 output:
 
 ```text
-hostname    os       cost    state        env
-----------  -------  ------  -----------  -----
-host_1      linux    5000    alive        qua
-host_2      windows  5000    alive        qua
-host_3      linux            unreachable  qua
+host    os type
+------  ---------
+host_1  linux
+host_2  windows
+host_3  linux
 
 ```
 ## Transform table content using Jinja  
@@ -333,24 +333,16 @@ hosts:
 ```
 
 ```text
-# select:
-#   - as: host
-#     expr: hostname
-#   - as: os type
-#     expr: os
-#   - as: uptime in days
-#     expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
-
-
-queryset:
-  path: hosts{}
-  select:
-    - as: host
-      expr: hostname
-    - as: os type
-      expr: os
-    - as: uptime in days
-      expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
+vars:
+  queryset:
+    path: hosts{}
+    select:
+      - as: host
+        expr: hostname
+      - as: os type
+        expr: os
+      - as: uptime in days
+        expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
 
 stdout: "{{ stdin | jtable(queryset=queryset) }}"
 
@@ -365,11 +357,11 @@ cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
 output:
 
 ```text
-hostname    os       uptime  state        env    dc
-----------  -----  --------  -----------  -----  ----
-host_1      linux   1879723  alive        qua    dc_1
-host_2              6879723  alive        qua    dc_2
-host_3      linux     23455  unreachable  qua    dc_3
+host    os type    uptime in days
+------  ---------  ----------------
+host_1  linux      21 days
+host_2             79 days
+host_3  linux      0 days
 
 ```
 ## Use variables in your query file
@@ -379,27 +371,27 @@ this will helps to make mapping table, or behalf like view
 #### Use variables mapping table or view
 
 ```yaml
-
-queryset:
-  path: hosts{host}
-  select:
-    - as: region
-      expr: dc_location[host.dc]
-    - as: dc name
-      expr: host.dc
-    - as: hostname
-      expr: host.hostname
-    - as: os type
-      expr: host.os
-    - as: uptime in days
-      expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 else (uptime_in_day | string ) +  ' day'"
-    - as: sanity status
-      expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
-  views:
-    dc_location:
-      dc_1: East
-      dc_2: North
-    uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
+vars:
+  queryset:
+    path: hosts{host}
+    select:
+      - as: region
+        expr: dc_location[host.dc]
+      - as: dc name
+        expr: host.dc
+      - as: hostname
+        expr: host.hostname
+      - as: os type
+        expr: host.os
+      - as: uptime in days
+        expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 else (uptime_in_day | string ) +  ' day'"
+      - as: sanity status
+        expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
+    views:
+      dc_location:
+        dc_1: East
+        dc_2: North
+      uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
 stdout: "{{ stdin | jtable(queryset=queryset)}}"
@@ -412,9 +404,11 @@ cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
 output:
 
 ```text
-key    value.hostname    value.os    value.uptime    value.state    value.env    value.dc
------  ----------------  ----------  --------------  -------------  -----------  ----------
-hosts
+region    dc name    hostname    os type    uptime in days    sanity status
+--------  ---------  ----------  ---------  ----------------  --------------------
+East      dc_1       host_1      linux      21 days           ✅
+North     dc_2       host_2                 79 days           🔥 host.uptime exceed
+          dc_3       host_3      linux      0 day             ✅
 
 ```
 ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
@@ -429,13 +423,13 @@ cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
 
 
 ```yaml
-
-queryset:
-  select:
-    - as: hostname
-      expr: host.hostname
-    - as: os
-      expr: host.os
+vars:
+  queryset:
+    select:
+      - as: hostname
+        expr: host.hostname
+      - as: os
+        expr: host.os
 ```
   
 #### store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"
@@ -471,34 +465,35 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-13:58:38 cls.cross_path      | ERROR .dc was not found in dataset l...
-hostname    os     state
-----------  -----  -----------
-host_a_1    linux  alive
-host_a_2    linux  unreachable
-host_a_3    linux  alive
-host_b_1    linux  alive
-host_b_2    linux  alive
-host_b_3    linux  alive
-host_c_1    linux  alive
-host_c_2    linux  alive
-host_c_3    linux  alive
+14:04:02 cls.cross_path      | ERROR .dc was not found in dataset l...
+dc name    region      hostname    os     state
+---------  ----------  ----------  -----  -----------
+dc_a       west coast  host_a_1    linux  alive
+dc_a       west coast  host_a_2    linux  unreachable
+dc_a       west coast  host_a_3    linux  alive
+dc_b       west coast  host_b_1    linux  alive
+dc_b       west coast  host_b_2    linux  alive
+dc_b       west coast  host_b_3    linux  alive
+dc_c       east        host_c_1    linux  alive
+dc_c       east        host_c_2    linux  alive
+dc_c       east        host_c_3    linux  alive
 
 ```
 
 ```yaml
-queryset:
-  select:
-  - as: dc name
-    expr: dc.key
-  - as: region
-    expr: region.key
-  - as: hostname
-    expr: host.hostname
-  - as: os
-    expr: host.os
-  - as: state
-    expr: host.state
+vars:
+  queryset:
+    select:
+    - as: dc name
+      expr: dc.key
+    - as: region
+      expr: region.key
+    - as: hostname
+      expr: host.hostname
+    - as: os
+      expr: host.os
+    - as: state
+      expr: host.state
 ```
 ## Use jtable with Ansible
 The plabybook
@@ -555,38 +550,38 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-13:58:38 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
-hostname          os       cost
-----------------  -----  ------
-host_dev_pay_1    linux    5000
-host_dev_pay_2    linux     200
-host_dev_pay_3    win       200
-host_dev_its_1    linux    5000
-host_dev_its_2    linux     200
-host_dev_its_3    win       200
-host_prd_pay_22   linux    5000
-host_prd_pay_44   linux     200
-host_prd_pay_33   win       200
-host_qua_pay_22   linux    5000
-host_qua_pay_444  linux     200
-host_qua_pay_3R3  win       200
+14:04:02 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+env    dept         hostname          os       cost
+-----  -----------  ----------------  -----  ------
+dev    pay          host_dev_pay_1    linux    5000
+dev    pay          host_dev_pay_2    linux     200
+dev    pay          host_dev_pay_3    win       200
+prod   it_services  host_dev_its_1    linux    5000
+prod   it_services  host_dev_its_2    linux     200
+prod   it_services  host_dev_its_3    win       200
+prod   pay          host_prd_pay_22   linux    5000
+prod   pay          host_prd_pay_44   linux     200
+prod   pay          host_prd_pay_33   win       200
+qua    pay          host_qua_pay_22   linux    5000
+qua    pay          host_qua_pay_444  linux     200
+qua    pay          host_qua_pay_3R3  win       200
 
 ```
 
 ```yaml
-
-queryset:
-  select:
-    - as: env
-      expr: file.path.split('/')[1]
-    - as: dept
-      expr: file.path.split('/')[2]
-    - as: hostname
-      expr: hostname
-    - as: os
-      expr: os
-    - as: cost
-      expr: cost
+vars:
+  queryset:
+    select:
+      - as: env
+        expr: file.path.split('/')[1]
+      - as: dept
+        expr: file.path.split('/')[2]
+      - as: hostname
+        expr: hostname
+      - as: os
+        expr: os
+      - as: cost
+        expr: cost
 ```
 # Embded filters
   
@@ -601,21 +596,21 @@ vars:
     - { hostname: host_3, os: linux, cost: 200, state: alive, env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
 
 
-queryset:
-  path: "{}"
-  select:
-    - as: hostname
-      expr: hostname
-    - as: os
-      expr: os
-    - as: cost
-      expr: cost 
-    - as: state
-      expr: state
-    - as: order_date
-      expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
-    - as: strftime 
-      expr: "  (order_date|to_datetime).strftime('%S') "
+  queryset:
+    path: "{}"
+    select:
+      - as: hostname
+        expr: hostname
+      - as: os
+        expr: os
+      - as: cost
+        expr: cost 
+      - as: state
+        expr: state
+      - as: order_date
+        expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
+      - as: strftime 
+        expr: "  (order_date|to_datetime).strftime('%S') "
 
 stdout: "{{ host_list | jtable(queryset=queryset) }}"
 ```
@@ -627,12 +622,12 @@ jtable -q strf_time_example.yml
 output:
 
 ```bash
-hostname    os       cost  state    env              order_date
-----------  -----  ------  -------  ---------------  -------------------
-host_1      linux    5000  alive    {'env': 'qua'}   2016-08-14 20:00:12
-host_2      linux     200           {'env': 'test'}  2016-08-14 20:00:12
-host_3      linux     200  alive    {'env': 'dev'}   2017-02-13 20:00:12
-host_3      linux     200  alive    {'env': 'qua'}   2018-09-14 14:00:12
+hostname    os       cost  state      order_date    strftime
+----------  -----  ------  -------  ------------  ----------
+host_1      linux    5000  alive     2.02032e+07          12
+host_2      linux     200            2.02032e+07          12
+host_3      linux     200  alive     2.02032e+07          12
+host_3      linux     200  alive     2.02032e+07          12
 
 ```
 # Conditional styling
@@ -646,13 +641,13 @@ jtable -q uptime_view_colored.yml -f github
 output:
 
 
-| hostname   | os      | uptime   | state       | env   | dc   |
-|------------|---------|----------|-------------|-------|------|
-| host_3     | linux   | 534554   | unreachable | qua   | dc_1 |
-| host_1     | linux   | 1879723  | alive       | qua   | dc_2 |
-| host_8     |         | 6279723  | alive       | qua   | dc_2 |
-| host_2     | linux   |          |             | qua   | dc_2 |
-| host_7     | windows | 5279723  | alive       | qua   | dc_2 |
+| hostname   | region   | dc name   | os      | state                                   | uptime                                |
+|------------|----------|-----------|---------|-----------------------------------------|---------------------------------------|
+| host_3     | East     | dc_1      | linux   | $`\textcolor{red}{\text{unreachable}}`$ | $`\textcolor{green}{\text{6 days}}`$  |
+| host_1     | North    | dc_2      | linux   | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{green}{\text{21 days}}`$ |
+| host_8     | North    | dc_2      |         | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{72 days}}`$   |
+| host_2     | North    | dc_2      | linux   |                                         | $`\textcolor{green}{\text{}}`$        |
+| host_7     | North    | dc_2      | windows | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{61 days}}`$   |
 
 
   

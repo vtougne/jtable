@@ -7,25 +7,25 @@ vars:
     - { hostname: host_5, os: linux, cost: 200, state: unreachable, env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12"}
     
 
-queryset:
-  path: "{host}"
-  format: text
-  select:
-    - as: hostname
-      expr: host.hostname
-    - as: os
-      expr: host.os
-    - as: cost
-      expr: host.cost 
-    - as: state
-      expr: host.state
-      styling:
-        - when: ["host.state == 'alive'"]
-          style: "font-color: green"
-        - when: ["host.state == 'unreachable'"]
-          style: "font-color: red"
-    - as: order_date
-      expr: host.order_date
+  queryset:
+    path: "{host}"
+    format: text
+    select:
+      - as: hostname
+        expr: host.hostname
+      - as: os
+        expr: host.os
+      - as: cost
+        expr: host.cost 
+      - as: state
+        expr: host.state
+        styling:
+          - when: ["host.state == 'alive'"]
+            style: "font-color: green"
+          - when: ["host.state == 'unreachable'"]
+            style: "font-color: red"
+      - as: order_date
+        expr: host.order_date
   # when:
   #   - "host.os == 'linux'"
 stdout: "{{ host_list | jtable(queryset = queryset) }}"

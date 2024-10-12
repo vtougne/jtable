@@ -6,20 +6,20 @@ vars:
     - { hostname: host_3, os: linux, cost: 200, state: alive, env: '{ "env": "qua" }'  , order_date: "2018-09-14 14:00:12"}
 
 
-queryset:
-  path: "{}"
-  select:
-    - as: hostname
-      expr: hostname
-    - as: os
-      expr: os
-    - as: cost
-      expr: cost 
-    - as: state
-      expr: state
-    - as: order_date
-      expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
-    - as: strftime 
-      expr: "  (order_date|to_datetime).strftime('%S') "
+  queryset:
+    path: "{}"
+    select:
+      - as: hostname
+        expr: hostname
+      - as: os
+        expr: os
+      - as: cost
+        expr: cost 
+      - as: state
+        expr: state
+      - as: order_date
+        expr: '(("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds()'
+      - as: strftime 
+        expr: "  (order_date|to_datetime).strftime('%S') "
 
 stdout: "{{ host_list | jtable(queryset=queryset) }}"

@@ -1,12 +1,13 @@
-queryset:
-  select:
-  - as: dc name
-    expr: dc.key
-  - as: region
-    expr: region.key
-  - as: hostname
-    expr: host.hostname
-  - as: os
-    expr: host.os
-  - as: state
-    expr: host.state
+vars:
+  queryset:
+    select:
+    - as: dc name
+      expr: dc.key
+    - as: region
+      expr: region.key
+    - as: hostname
+      expr: host.hostname
+    - as: os
+      expr: host.os
+    - as: state
+      expr: host.state
