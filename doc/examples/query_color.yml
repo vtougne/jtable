@@ -1,4 +1,4 @@
-context:
+vars:
   host_list:
     - { hostname: host_1, os: linux, cost: 5000, state: alive, env: '{ "env": "qua" }', order_date: "2016-08-14 20:00:12"  }
     - { hostname: host_2, os: windows, cost: 200, env: '{ "env": "test" }', order_date: "2016-08-14 20:00:12"}
