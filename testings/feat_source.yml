@@ -1,0 +1,17 @@
+sources:
+  configs:
+    shell: cat dataset.yml
+
+vars:
+  new_configs: "{{ configs | from_yaml }}"
+  queryset:
+    path: "simple{host}"
+    select:
+      - as: hostname
+        expr: "host.hostname"
+      - as: os
+        expr: "host.os"
+      - as: cost
+        expr: "host.cost"
+  
+stdout: "{{ new_configs | jtable(queryset=queryset) }}" 

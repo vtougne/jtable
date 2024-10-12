@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform
+import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform, subprocess
 from os import isatty
 from sys import exit
 # from tabulate import tabulate
@@ -59,7 +59,7 @@ class CustomFilter(logging.Filter):
         # logging.info(f"total_message_size: {str(total_message_size)}")
         # print(f"total_message_size: {str(total_message_size)}")
         if total_message_size > terminal_size.columns:
-            record.msg = record.msg[:terminal_size.columns - len(record.fixed_context) ] + '...'
+            record.msg = str(record.msg)[:terminal_size.columns - len(record.fixed_context) ] + '...'
 
         return True
 
@@ -389,6 +389,24 @@ class JtableCli:
             queryset['path'] = new_path
 
         if args.query_file:
+            if 'sources' in query_file:
+                for source_name in query_file['sources']: 
+                    if 'json_files' in query_file['sources'][source_name]:
+                        expr = query_file['sources'][source_name]['json_files']
+                        expr_with_name = f"{{{source_name}}}:{expr}"
+                        load_multiple_inputs(expr_with_name,"json")
+                    if 'yaml_files' in query_file['sources'][source_name]:
+                        expr = query_file['sources'][source_name]['yaml_files']
+                        expr_with_name = f"{{{source_name}}}:{expr}"
+                        load_multiple_inputs(expr_with_name,"yaml")
+                    if 'shell' in query_file['sources'][source_name]:
+                        shell_command = query_file['sources'][source_name]['shell']
+                        logging.info(f"shell_command: {shell_command}")
+                        shell_output = subprocess.check_output(shell_command, shell=True,universal_newlines=True)
+                        # print(shell_output)
+
+                        logging.info(f"shell_output: {shell_output}")
+                        self.dataset = {**self.dataset, **{ source_name: shell_output } }
             if 'vars' in query_file:
                 vars = {}
                 for key,value in query_file['vars'].items():
@@ -434,13 +452,18 @@ class JtableCli:
         if args.query_file:
             if 'stdout' in query_file:
                 out_expr = query_file['stdout']
+
+
+                    
             
         if args.inspect:
             inspected_paths = Inspect().view_paths(self.dataset[self.tabulate_var_name])
             tbl = tabulate.tabulate(inspected_paths,['path','value'])
             print(tbl)
             return
-        
+
+
+
         if args.view_query:
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
             query_file_out = {}
