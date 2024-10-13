@@ -2,8 +2,6 @@ secrets:
   - git_token
 
 sources:
-  git_token:
-    env: git_token
   projects:
     shell: |
       gitlab_api_url=http://local-gitlab/api/v4
