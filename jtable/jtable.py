@@ -10,10 +10,6 @@ try:
 except:
     import version
 
-# import io
-# sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
-# sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
-
 running_platform = platform.system()
 
 if running_platform == "Windows":
@@ -26,9 +22,6 @@ if running_platform == "Windows":
         running_os = "Windows"
 else:
     running_os = running_platform
-
-
-
 
 
 class CustomFormatter(logging.Formatter):
@@ -171,9 +164,6 @@ class Filters:
 
     def to_datetime(_string, format="%Y-%m-%d %H:%M:%S"):
         return datetime.datetime.strptime(_string, format)
-
-
-    
 
 class Inspect:
     def __init__(self):
@@ -401,12 +391,18 @@ class JtableCli:
                         load_multiple_inputs(expr_with_name,"yaml")
                     if 'shell' in query_file['sources'][source_name]:
                         shell_command = query_file['sources'][source_name]['shell']
-                        logging.info(f"shell_command: {shell_command}")
-                        shell_output = subprocess.check_output(shell_command, shell=True,universal_newlines=True)
-                        # print(shell_output)
-
-                        logging.info(f"shell_output: {shell_output}")
+                        jinja_eval = Templater(template_string=str(shell_command), static_context=self.dataset).render({},eval_str=True)
+                        logging.info(f"Launch shell, cmd: {jinja_eval}")
+                        # shell_output = subprocess.check_output(shell_command, shell=True,universal_newlines=True)
+                        shell_output = Lookup.shell(jinja_eval)
                         self.dataset = {**self.dataset, **{ source_name: shell_output } }
+
+                    if 'env' in query_file['sources'][source_name]:
+                        env_var = query_file['sources'][source_name]['env']
+                        env_value = Lookup.env(env_var)
+                        # print(f"env_value: {env_value}")
+                        # exit(0)
+                        self.dataset = {**self.dataset, **{ source_name: env_value } }
             if 'vars' in query_file:
                 vars = {}
                 for key,value in query_file['vars'].items():
@@ -790,6 +786,34 @@ class JtableCls:
             logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
             exit(2)
 
+class Lookup:
+    def env(var_name,**kwargs):
+        if var_name not in os.environ:
+            if 'default' in kwargs:
+                return kwargs['default']
+            else:
+                raise Exception(f"Environment variable {var_name} not found")
+        else:
+            return os.environ[var_name]
+
+    def shell(cmd,default=None):
+        shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
+        return shell_output
+
+    
+    # def shell(*args,**kwargs):
+    #     cmd = args[0]
+    #     if len(args) > 1:
+    #         evaluate = args[1]
+    #     elif 'evaluate' in kwargs:
+    #         evaluate = kwargs['evaluate']
+    #     else:
+    #         evaluate = False
+    #     logging.info(f"Launch shell, cmd: {cmd}")
+    #     shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
+    #     return shell_output + str(evaluate)
+
+
 class path_auto_discover:
     def __init__(self):
         self.paths = []
@@ -962,13 +986,39 @@ class Styling:
 
 class Templater:
     def __init__(self, template_string = "", static_context = {}):
-        from jinja2 import Environment
+        if 'Environment' not in sys.modules:
+            from jinja2 import Environment
         env = Environment()
-        jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
+        jtable_core_filters = [name[0] for name in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
             env.filters[filter_name] = getattr(Filters, filter_name)
 
-        # self.template_string = template_string
+        ####################  Add lookup function ####################
+        jtable_core_lookups = [name[0] for name in inspect.getmembers(Lookup, predicate=inspect.isfunction)]
+        logging.info(f"jtable_core_lookups: {jtable_core_lookups}")
+        class lookup_fct(object):
+            def process_lookup(self,*args, **kwargs):
+                if len(args) == 0 and len(kwargs) == 0:
+                    logging.error("lookup function must have at least one argument in:")
+                    exit(3)
+                if args[0] not in jtable_core_lookups:
+                    logging.error(f"lookup function {args[0]} not found in {', '.join(jtable_core_lookups)}")
+                    exit(3)
+                method_to_call = getattr(Lookup, args[0], None)
+                try:
+                    res = method_to_call(*args[1:],**kwargs)
+                except Exception as error:
+                    logging.error(f"Failed to call lookup function {args[0]}, error was:\n  {str(error)}")
+                    exit(3)
+                return res
+
+            
+        lookup = lambda: lookup_fct().process_lookup
+        static_context = {**static_context, **{"lookup": lookup()}}
+
+        ##############################################################
+
+
         self.template = env.from_string(template_string, globals=static_context)
     
     def render(self, vars, eval_str = False):

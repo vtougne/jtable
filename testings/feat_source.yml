@@ -1,17 +1,32 @@
+secrets:
+  - git_token
+
 sources:
-  configs:
-    shell: cat dataset.yml
+  git_token:
+    env: git_token
+  projects:
+    shell: |
+      gitlab_api_url=http://local-gitlab/api/v4
+      git_token={{ lookup("env","git_token") }}
+      lookup="projects"
+
+      curl -s -k -X GET "${gitlab_api_url}/projects" \
+          -H "Content-Type: application/json" \
+          -H "PRIVATE-TOKEN: ${git_token}"
+
 
 vars:
-  new_configs: "{{ configs | from_yaml }}"
   queryset:
-    path: "simple{host}"
+    path: "{}"
     select:
-      - as: hostname
-        expr: "host.hostname"
-      - as: os
-        expr: "host.os"
-      - as: cost
-        expr: "host.cost"
+      - as: name
+        expr: name
+      - as: url
+        expr: ssh_url_to_repo
+      - as: created_at
+        expr: created_at
+      - as: last_activity_at
+        expr: last_activity_at
   
-stdout: "{{ new_configs | jtable(queryset=queryset) }}" 
+# stdout: "{{ projects  }}" 
+stdout: "{{ projects | from_json | jtable(queryset=queryset) }}" 

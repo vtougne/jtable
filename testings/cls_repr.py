@@ -5,13 +5,9 @@ class my_cls(object):
         self.name = name
 
     def __repr__(self):
-        return {'name': self.name}
+        return f"Hello {self.name}"
 
 
-result = my_cls('vincent')
+result = my_cls('Vince')
 
-print(repr(result))
-
-if __name__ == '__main__':
-    import sys
-    print('coucou')
+print(result)

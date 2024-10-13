@@ -1,12 +1,13 @@
-queryset:
-  path: '{}'
-  select:
-  - as: name
-    expr: "'\e[1;' + ansi_code | string  +  'm' + name + '\e[0m'"
-  - as: ansi_code
-    expr: ansi_code
-  - as: hex_code
-    expr: "hex_code"
+vars:
+  queryset:
+    path: '{}'
+    select:
+    - as: name
+      expr: "'\e[1;' + ansi_code | string  +  'm' + name + '\e[0m'"
+    - as: ansi_code
+      expr: ansi_code
+    - as: hex_code
+      expr: "hex_code"
 
 
 stdout: '{{ stdin | jtable(select=select,path="{}", format=''text'' ) }}'
