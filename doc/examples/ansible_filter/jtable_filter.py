@@ -7,13 +7,14 @@ import sys,os
 # parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 parent_path = '/'.join(__file__.split("/")[:-4]) + "/jtable"
 # parent_path = '/'.join(__file__.split("/")[:-2])
-print(parent_path)
+# print(parent_path)
 # exit(0)
 sys.path.append(parent_path)
 
-# import jtable
-
-import jtable
+try:
+   import jtable
+except:
+  import jtable.jtable as jtable
 # print(dir(jtable))
 
 def jtable_filter(dataset,select=[],path="{}",format="simple",views={}, when=[],queryset={}):
