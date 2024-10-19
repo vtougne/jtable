@@ -12,9 +12,10 @@ parent_path = '/'.join(__file__.split("/")[:-4]) + "/jtable"
 sys.path.append(parent_path)
 
 try:
-   import jtable
+   import jtable.jtable as jtable
 except:
-  import jtable.jtable as jtable
+   import jtable
+  
 # print(dir(jtable))
 
 def jtable_filter(dataset,select=[],path="{}",format="simple",views={}, when=[],queryset={}):
