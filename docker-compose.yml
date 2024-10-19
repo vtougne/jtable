@@ -17,3 +17,4 @@ services:
     command: ["tail","-f"]
     volumes:
       - ../jtable:/project/jtable
+      - ../../sample/python:/project/testings

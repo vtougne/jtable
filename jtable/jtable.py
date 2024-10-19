@@ -271,6 +271,10 @@ class JtableCli:
             if 'vars' in query_file:
                 if 'queryset' in query_file['vars']:
                     queryset = query_file['vars']['queryset']
+            if 'secrets' in query_file:
+                global secrets
+                secrets = query_file['secrets']
+
                 
         is_pipe = not isatty(sys.stdin.fileno())
 

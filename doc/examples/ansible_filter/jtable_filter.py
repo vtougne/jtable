@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-import os, sys
+import sys,os
 
-from ansible.module_utils.basic import AnsibleModule
+# print(sys.path)
+# parent_path = (os.path.realpath("f{__file__}/.."))
+# print(parent_path)
+# parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+parent_path = '/'.join(__file__.split("/")[:-4]) + "/jtable"
+# parent_path = '/'.join(__file__.split("/")[:-2])
+print(parent_path)
+# exit(0)
+sys.path.append(parent_path)
 
+# import jtable
 
-# from data_cls import data_cls
-import site
-# print(site.getusersitepackages())
+import jtable
+# print(dir(jtable))
 
 def jtable_filter(dataset,select=[],path="{}",format="simple",views={}, when=[],queryset={}):
-    from jtable import jtable
     # print(jtable.__file__)
     # print(dataset)
     # return jtable.JtableCls(render="jinja_ansible").render_object({"stdin": dataset},path=path, select=select)[format]

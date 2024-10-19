@@ -25,6 +25,10 @@ vars:
         expr: created_at
       - as: last_activity_at
         expr: last_activity_at
+      - as: git_token
+        expr: lookup("env","git_token")
+  truc: "{{ projects }}"
+
   
-# stdout: "{{ projects  }}" 
-stdout: "{{ projects | from_json | jtable(queryset=queryset) }}" 
+# stdout: "{{ truc  }}" 
+stdout: "{{ truc | from_json | jtable(queryset=queryset) }}" 
