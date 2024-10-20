@@ -394,7 +394,7 @@ vars:
       uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
-stdout: "{{ stdin | jtable(queryset=queryset)}}"
+stdout: "{{ stdin | from_yaml | jtable(queryset=queryset)}}"
 ```
 
 command: 
@@ -404,10 +404,11 @@ cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
 output:
 
 ```text
-15:57:32 cls.cross_path      | ERROR keys dataset were:
-15:57:32 cls.cross_path      | ERROR ['h', 'o', 's', 't', 's', ':',...
-15:57:32 cls.cross_path      | ERROR ['hosts'] was not found in dat...
-
+region    dc name    hostname    os type    uptime in days    sanity status
+--------  ---------  ----------  ---------  ----------------  --------------------
+East      dc_1       host_1      linux      21 days           ✅
+North     dc_2       host_2                 79 days           🔥 host.uptime exceed
+          dc_3       host_3      linux      0 day             ✅
 
 ```
 ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
@@ -464,7 +465,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-15:57:32 cls.cross_path      | ERROR .dc was not found in dataset l...
+16:07:47 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -549,7 +550,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-15:57:32 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+16:07:47 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
