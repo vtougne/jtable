@@ -467,7 +467,10 @@ class JtableCli:
         if args.stdout:
             out_expr = args.stdout
         else:
-            out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
+            if self.tabulate_var_name == "stdin":
+                out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
+            else:
+                out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
         # print(out_expr) ; exit(0)
         if args.query_file:
             if 'stdout' in query_file:
