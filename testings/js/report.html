@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Reports</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        /* width: 100%; */
+    }
+    td, th {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 0 10px;
+        /* width: 100%; */
+    }
+    .search-container {
+      display: flex;
+      align-items: center;
+      border: 1px solid #4f1616;
+      padding: 5px;
+      border-radius: 5px;
+      width: 300px;
+    }
+
+    .search-icon {
+      margin-right: 5px;
+    }
+
+    .search-input {
+      border: none;
+      outline: none;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Reports</h1>
+  <div class="search-container">
+    <div class="search-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search"
+        viewBox="0 0 16 16">
+        <path
+          d="M11.742 10.318a6.5 6.5 0 1 0-1.424 1.424l3.852 3.852a1 1 0 0 0 1.415-1.415l-3.852-3.852zM1 6.5a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0z" />
+      </svg>
+    </div>
+    <input type="text" id="search" class="search-input" placeholder="Search...">
+  </div>
+</body>
+
+<script>
+  var reports = [{"users": [{"firstname": "vince", "lastname": "touche"}, {"firstname": "max", "lastname": "foufou"}, {"lastname": "john", "firstname": null}]}, {"orga": [{"name": "payment", "short_code": "PAY"}, {"name": "it", "short_code": "ITS"}, {"name": "purshase", "short_code": "PUR"}, {"name": "selling", "short_code": "SEL"}]}]
+  // var reports = [{ "users": [{ "firstname": "vince", "lastname": "touche" }, { "firstname": "max", "lastname": "foufou" }] }, { "orga": [{ "name": "payment", "short_code": "PAY" }, { "name": "it", "short_code": "ITS" }, { "name": "purshase", "short_code": "PUR" }, { "name": "selling", "short_code": "SEL" }] }]
+
+
+
+  $(document).ready(function () {
+    for (const report_index in reports) {
+      var report = reports[report_index]
+      for (const report_name in report) {
+        $("body").append("<div id=" + report_name + ">")
+        var report_div = $("#" + report_name)
+        report_div.append("<h1>" + report_name + "</h1>");
+        report_div.append("<div id=" + report_name + "_table>")
+        // report_div.append("<table>")
+        // var table = $("<table>");
+        var report_table = $("#" + report_name + "_table")
+        for (const row_index in reports[report_index][report_name]) {
+          this.headers = new Set();
+
+          var item = reports[report_index][report_name][row_index]
+          var line = ""
+          for (const key in item) {
+            this.headers.add(key);
+
+            var line = line + "<td>" + item[key] + "</td>";
+          }
+          report_table.append("<tr class=rows>" + line + "</tr>");
+        }
+        var header_line = ""
+        for (var header_index in Array.from(this.headers)) {
+          var header_line = header_line + "<th>" + Array.from(this.headers)[header_index] + "</th>";
+        }
+        report_table.prepend("<tr>" + header_line + "</tr>");
+      }
+    }
+
+    $("#search").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $(".rows").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+    })
+
+  });
+
+</script>
+
+</html>
