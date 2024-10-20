@@ -177,22 +177,23 @@ cat host_list_of_dict_in_key.yml  | jtable --inspect
 output:
 
 ```text
-path               value
------------------  -----------
-hosts[0].hostname  host_1
-hosts[0].os        linux
-hosts[0].cost      5000
-hosts[0].state     alive
-hosts[0].env       qua
-hosts[1].hostname  host_2
-hosts[1].os        windows
-hosts[1].cost      5000
-hosts[1].state     alive
-hosts[1].env       qua
-hosts[2].hostname  host_3
-hosts[2].os        linux
-hosts[2].state     unreachable
-hosts[2].env       qua
+path    value
+------  ----------------------
+        hosts:
+          - hostname: host_1
+            os: linux
+            cost: 5000
+            state: alive
+            env: qua
+          - hostname: host_2
+            os: windows
+            cost: 5000
+            state: alive
+            env: qua
+          - hostname: host_3
+            os: linux
+            state: unreachable
+            env: qua
 
 ```
 
@@ -261,7 +262,7 @@ vars:
       expr: state
     - as: env
       expr: env
-stdout: '{{ stdin | jtable(queryset=queryset) }}'
+stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
 
 
 ```
@@ -357,11 +358,10 @@ cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
 output:
 
 ```text
-host    os type    uptime in days
-------  ---------  ----------------
-host_1  linux      21 days
-host_2             79 days
-host_3  linux      0 days
+15:48:08 cls.cross_path      | ERROR keys dataset were:
+15:48:08 cls.cross_path      | ERROR ['h', 'o', 's', 't', 's', ':',...
+15:48:08 cls.cross_path      | ERROR ['hosts'] was not found in dat...
+
 
 ```
 ## Use variables in your query file
@@ -404,11 +404,10 @@ cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
 output:
 
 ```text
-region    dc name    hostname    os type    uptime in days    sanity status
---------  ---------  ----------  ---------  ----------------  --------------------
-East      dc_1       host_1      linux      21 days           ✅
-North     dc_2       host_2                 79 days           🔥 host.uptime exceed
-          dc_3       host_3      linux      0 day             ✅
+15:48:08 cls.cross_path      | ERROR keys dataset were:
+15:48:08 cls.cross_path      | ERROR ['h', 'o', 's', 't', 's', ':',...
+15:48:08 cls.cross_path      | ERROR ['hosts'] was not found in dat...
+
 
 ```
 ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
@@ -465,7 +464,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-14:47:49 cls.cross_path      | ERROR .dc was not found in dataset l...
+15:48:08 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -550,7 +549,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-14:47:49 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+15:48:08 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000

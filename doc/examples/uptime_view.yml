@@ -9,6 +9,6 @@ vars:
       - as: uptime in days
         expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
 
-stdout: "{{ stdin | jtable(queryset=queryset) }}"
+stdout: "{{ stdin | from_yaml | jtable(queryset=queryset) }}"
 
 
