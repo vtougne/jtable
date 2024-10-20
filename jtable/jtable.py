@@ -480,7 +480,10 @@ class JtableCli:
                     
             
         if args.inspect:
-            inspected_paths = Inspect().view_paths(self.dataset[self.tabulate_var_name])
+            if self.tabulate_var_name == "stdin":
+                inspected_paths = Inspect().view_paths(yaml.safe_load(stdin))
+            else:
+                inspected_paths = Inspect().view_paths(self.dataset[self.tabulate_var_name])
             tbl = tabulate.tabulate(inspected_paths,['path','value'])
             print(tbl)
             return
