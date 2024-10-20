@@ -111,6 +111,8 @@ class Filters:
         return json.loads(str)
     def from_yaml(data):
         return yaml.safe_load(data)
+    def from_json_or_yaml(data):
+        return yaml.safe_load(data)
     def from_yaml_all(data):
         return yaml.safe_load_all(data)
     
@@ -465,7 +467,7 @@ class JtableCli:
         if args.stdout:
             out_expr = args.stdout
         else:
-            out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
+            out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
         # print(out_expr) ; exit(0)
         if args.query_file:
             if 'stdout' in query_file:
