@@ -21,4 +21,4 @@ vars:
       uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
-stdout: "{{ stdin | jtable(queryset=queryset)}}"
+stdout: "{{ stdin | from_yaml | jtable(queryset=queryset)}}"
