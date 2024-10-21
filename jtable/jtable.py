@@ -777,7 +777,7 @@ class JtableCls:
                         break
                     del loop_context
                     if self.format == "html":
-                        value = html.escape(value)
+                        value = html.escape(str(value))
                     key = fields_label[column_index]
                     if value_for_json != None:
                         json_value = { key: value_for_json }
