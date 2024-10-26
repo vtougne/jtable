@@ -12,12 +12,15 @@ vars:
     - {name: vip_2, traget_host: host_2, port: 80 }
     - {name: vip_3, traget_host: host_3, port: 80 }
     - {name: vip_4, traget_host: host_4, port: 80 }
+    - {name: vip_4fefezfezf   ezfbbbbezbbb  fezfezfezfez, traget_host: host_4fezfezfzefezfezfze, port: 80 }
   html_out: |
     <h1>Hosts</h1>
     {{ hosts | jtable(format='html') }}
       <br>
     <h1>the VIPs</h1>
     {{ vips | jtable(format='html') }}
+    <br>
+    ans other html
 
 
 stdout: "{{ html_out | js_wrap() }}"

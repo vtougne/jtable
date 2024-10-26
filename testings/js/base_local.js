@@ -1,0 +1,1 @@
+console.log('base_local.js loaded');
