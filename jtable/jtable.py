@@ -115,7 +115,6 @@ class Filters:
         return yaml.safe_load(data)
     def from_yaml_all(data):
         return yaml.safe_load_all(data)
-    
     def intersect(a, b):
         # logging.info(b)
         # return set(a).intersection(b)
@@ -148,8 +147,6 @@ class Filters:
             flags = 0
         _re = re.compile(pattern, flags=flags)
         return _re.sub(replacement, value)
-
-
     def strftime(string_format, second=None):
         """ return a date string using string.
         See https://docs.python.org/2/library/time.html#time.strftime for format
@@ -161,15 +158,11 @@ class Filters:
             except Exception:
                 raise "Invalid value for epoch value (%s)" % second
         return time.strftime(string_format, time.localtime(second))
-    
+    def to_nice_json(v, *args, **kw):
+        out = json.dumps(v, indent=2, separators=(',', ': '))
+        return out
     def to_json(a, *args, **kw):
-        """ Convert the value to JSON """
         return json.dumps(a, *args, **kw)
-
-
-        ######  PIE ######   
-
-
     def to_pie(dataset):
         title = [list(key.keys()) for key in dataset][0][0]
         out = f"```mermaid\n  pie\n      title {title}\n"
@@ -179,16 +172,13 @@ class Filters:
             out = out + f"      \"{item[item_prop[0]]} ({str(item[item_prop[1]])})\" : {str(item[item_prop[1]])}\n"
         out = out + "```"
         return out
-
-
-
+    def to_nice_yaml(v,indent=2):
+        return yaml.dump(v, allow_unicode=True,indent=indent)
     def to_yaml(v):
-        """ Convert the value to JSON """
-        return yaml.dump(v, allow_unicode=True)
-    
+        out = "".join([v.strip() for v in yaml.dump(v,default_flow_style=True).split('\n')])
+        return out
     def type_debug(o):
         return  o.__class__.__name__
-
     def to_datetime(_string, format="%Y-%m-%d %H:%M:%S"):
         return datetime.datetime.strptime(_string, format)
 
