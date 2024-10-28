@@ -1,79 +1,4 @@
-
-          <!DOCTYPE html>
-            <html>
-              <head>
-                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-                
-                <style>
-                  
-table {
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-    /* width: 80%; */
-    text-align: left;
-    margin-left: 2.5%
-  }
-  th, td {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-  }
-  tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
-  #top-search-container {
-    display: block;
-    align-items: center;
-    /* border: 1px solid #4f1616; */
-    /* padding: 5px; */
-    margin: 5px auto;
-    border-radius: 5px;
-    /* width: 300px; */
-  }
-  .search-container {
-    /* display: flex; */
-    align-items: center;
-    border: 1px solid #4f1616;
-    /* padding: 5px; */
-    border-radius: 5px;
-    /* width: 300px; */
-  }
-
-                </style>
-                <body>
-                  <h1>Hosts</h1>
-<table>
-<thead>
-<tr><th>hostname  </th><th>os     </th><th style="text-align: right;">  cost</th></tr>
-</thead>
-<tbody>
-<tr><td>host_4    </td><td>windows</td><td style="text-align: right;">   800</td></tr>
-<tr><td>host_1    </td><td>linux  </td><td style="text-align: right;">   500</td></tr>
-<tr><td>host_2    </td><td>linux  </td><td style="text-align: right;">   600</td></tr>
-<tr><td>host_3    </td><td>windows</td><td style="text-align: right;">   700</td></tr>
-<tr><td>host_5    </td><td>linux  </td><td style="text-align: right;">   900</td></tr>
-<tr><td>host_6    </td><td>windows</td><td style="text-align: right;">  1000</td></tr>
-<tr><td>host_7    </td><td>linux  </td><td style="text-align: right;">   950</td></tr>
-</tbody>
-</table>
-  <br>
-<h1>the VIPs</h1>
-<table>
-<thead>
-<tr><th>name                                       </th><th>traget_host             </th><th style="text-align: right;">  port</th></tr>
-</thead>
-<tbody>
-<tr><td>vip_1                                      </td><td>host_1                  </td><td style="text-align: right;">    80</td></tr>
-<tr><td>vip_2                                      </td><td>host_2                  </td><td style="text-align: right;">    80</td></tr>
-<tr><td>vip_3                                      </td><td>host_3                  </td><td style="text-align: right;">    80</td></tr>
-<tr><td>vip_4                                      </td><td>host_4                  </td><td style="text-align: right;">    80</td></tr>
-<tr><td>vip_4fefezfezf   ezfbbbbezbbb  fezfezfezfez</td><td>host_4fezfezfzefezfezfze</td><td style="text-align: right;">    80</td></tr>
-</tbody>
-</table>
-<br>
-ans other html
-                <script>
-                  // var tables = document.getElementsByTagName('table');
+// var tables = document.getElementsByTagName('table');
 const tables = document.querySelectorAll("table");
 top_search_box = "<input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'>\n"
 
@@ -205,8 +130,3 @@ function sortTable(table_id, column) {
     table.tBodies[0].appendChild(row);
   });
 }
-
-                </script>
-                </body>
-            </html>
-          
