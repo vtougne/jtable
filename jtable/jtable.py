@@ -171,6 +171,8 @@ class Filters:
             except Exception:
                 raise "Invalid value for epoch value (%s)" % second
         return time.strftime(string_format, time.localtime(second))
+    def to_datetime(_string, format="%Y-%m-%d %H:%M:%S"):
+            return datetime.datetime.strptime(_string, format)
     def to_nice_json(v, *args, **kw):
         out = json.dumps(v, indent=2, separators=(',', ': '))
         return out
