@@ -90,20 +90,20 @@ make_windows_setup:
     - cd C:\temp\build
     - if ( (Test-Path .\jtable )) {Remove-Item .\jtable -Recurse -Force}
     - git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git
-    # - cd c:\temp
-    # - $Env:USERNAME
-    # - $Env:LOCALAPPDATA
-    # - python -m venv jtable_env
-    # - .\jtable_env\Scripts\activate
-    # - cd C:\temp\build\jtable
-    # - git pull
-    # - git switch ${CI_COMMIT_BRANCH}
-    # - pip install .
-    # - pip install PyInstaller
-    # - cd jtable
-    # - python -m PyInstaller --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
-    # - cd C:\temp\build\jtable\dist
-    # - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
+    - cd c:\temp
+    - $Env:USERNAME
+    - $Env:LOCALAPPDATA
+    - python -m venv jtable_env
+    - .\jtable_env\Scripts\activate
+    - cd C:\temp\build\jtable
+    - git pull
+    - git switch ${CI_COMMIT_BRANCH}
+    - pip install .
+    - pip install PyInstaller
+    - cd jtable
+    - python -m PyInstaller --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
+    - cd C:\temp\build\jtable\dist
+    - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
   rules:
     - when: manual
 
