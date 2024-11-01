@@ -89,26 +89,21 @@ make_windows_setup:
     - if (-not (Test-Path C:\temp\build)) {New-Item -Path C:\temp\build -ItemType Directory }
     - cd C:\temp\build
     - if ( (Test-Path .\jtable )) {Remove-Item .\jtable -Recurse -Force}
-    # - if (-not (Test-Path C:\temp\build\jtable)) {git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git}
     - git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git
+    # - cd c:\temp
+    # - $Env:USERNAME
+    # - $Env:LOCALAPPDATA
+    # - python -m venv jtable_env
+    # - .\jtable_env\Scripts\activate
     # - cd C:\temp\build\jtable
+    # - git pull
     # - git switch ${CI_COMMIT_BRANCH}
-    - cd c:\temp
-    - $Env:USERNAME
-    - $Env:LOCALAPPDATA
-    # - Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-    # - choco install python3 -y -f
-    - python -m venv jtable_env
-    - .\jtable_env\Scripts\activate
-    - cd C:\temp\build\jtable
-    - git pull
-    - git switch ${CI_COMMIT_BRANCH}
-    - pip install .
-    - pip install PyInstaller
-    - cd jtable
-    - python -m PyInstaller --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
-    - cd C:\temp\build\jtable\dist
-    - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
+    # - pip install .
+    # - pip install PyInstaller
+    # - cd jtable
+    # - python -m PyInstaller --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
+    # - cd C:\temp\build\jtable\dist
+    # - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
   rules:
     - when: manual
 
