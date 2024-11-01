@@ -579,6 +579,11 @@ class JtableCls:
                 current_path_value = current_path[2:-2]
                 if current_path_value in list(dataset):
                     self.cross_path(dataset[current_path_value], next_path, cross_path_context = cross_path_context)
+                    # try:
+                    #     self.cross_path(dataset[current_path_value], next_path, cross_path_context = cross_path_context)
+                    # except:
+                    #     logging.error(f"Failed while crossing path: {current_path_value}")
+                    #     exit(1)
                 else:
                     logging.error('keys dataset were:')
                     logging.error(list(dataset))
@@ -769,7 +774,7 @@ class JtableCls:
                     logging.info(f"loop_condition_context: {loop_condition_context}")
                     # loop_condition_context = { item_name: item }
                     condition_template = Templater(template_string=jinja_expr, static_context= {**when_context,**loop_condition_context})
-                    condition_test_result = condition_template.render({},eval_str=True)
+                    condition_test_result = condition_template.render({},eval_str=True,strict_undefined=False)
                     if condition_test_result == "False":
                         break
                 return condition_test_result
@@ -779,7 +784,11 @@ class JtableCls:
                 view_context = {}
                 view_index = 0
                 for var_name,var_data in self.views.items():
-                    templated_var = view_templates[view_index].render({**loop_context,**view_context},eval_str=True)
+                    try:
+                        templated_var = view_templates[view_index].render({**loop_context,**view_context},eval_str=True,strict_undefined=False)
+                    except:
+                        logging.error(f"Error while rendering var_name: {var_name}, var_data: {var_data}")
+                        exit(1)
                     view_context.update({ var_name: templated_var })
                     view_index += 1
 
@@ -1067,10 +1076,12 @@ class Templater:
         try:
             out_str = self.template.render(vars)
         except Exception as error:
-            if str(error)[0:30] == "'dict object' has no attribute" or str(error)[0:30] == "'list object' has no attribute":
+            if str(error)[0:30] == "'dict object' has no attribute" \
+                or str(error)[0:30] == "'list object' has no attribute"\
+                or str(error).__contains__("is undefined"):
                 if strict_undefined == True:
                     logging.error(f"Failed while rendering context, error was:\n  {str(error)}")
-                    exit(3)
+                    raise error
                 else:
                     out = out_str =""
             else:
