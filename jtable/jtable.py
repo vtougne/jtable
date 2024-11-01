@@ -175,9 +175,15 @@ class Filters:
         return time.strftime(string_format, time.localtime(second))
     def to_datetime(_string, format=r"%Y-%m-%d %H:%M:%S"):
             return datetime.datetime.strptime(_string, format)
-    def to_nice_json(v, *args, **kw):
-        out = json.dumps(v, indent=2, separators=(',', ': '))
-        return out
+    def to_epoch(date_str):
+        f"""Convert a date string to epoch
+        Args:
+            date_str (str): Date string format: %Y-%m-%d %H:%M:%S !!! only !!!
+        """
+        if running_platform == "Windows":
+            return Lookup.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\"")
+        else:
+            return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
     def to_json(a, *args, **kw):
         return json.dumps(a, *args, **kw)
     def to_pie(dataset):
@@ -189,6 +195,9 @@ class Filters:
             out = out + f"      \"{item[item_prop[0]]} ({str(item[item_prop[1]])})\" : {str(item[item_prop[1]])}\n"
         out = out + "```"
         return out
+    def to_nice_json(v, *args, **kw):
+        out = json.dumps(v, indent=2, separators=(',', ': '))
+        return out    
     def to_nice_yaml(v,indent=2):
         return yaml.dump(v, allow_unicode=True,indent=indent)
     def to_yaml(v):
