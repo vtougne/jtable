@@ -794,7 +794,7 @@ class JtableCls:
                 for expr in expressions:
                     loop_context = { item_name: item } if item_name != '' else item
                     try:
-                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context},eval_str=True)
+                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context},eval_str=True,strict_undefined=False)
                     except:
                         break
                     del loop_context
@@ -1025,8 +1025,9 @@ class Styling:
 class Templater:
     def __init__(self, template_string = "", static_context = {}):
         if 'Environment' not in sys.modules:
-            from jinja2 import Environment
-        env = Environment()
+            from jinja2 import Environment, StrictUndefined
+        env = Environment(undefined=StrictUndefined)
+        
         jtable_core_filters = [name[0] for name in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
             env.filters[filter_name] = getattr(Filters, filter_name)
@@ -1055,18 +1056,23 @@ class Templater:
         static_context = {**static_context, **{"lookup": lookup()}}
 
         ##############################################################
-
-
-        self.template = env.from_string(template_string, globals=static_context)
+        try:
+            self.template = env.from_string(template_string, globals=static_context)
+        except Exception as error:
+            logging.error(f"Failed to compile template, error was:\n  {str(error)}")
+            exit(3)
     
-    def render(self, vars, eval_str = False):
+    def render(self, vars, eval_str = False, strict_undefined = True):
+
         try:
             out_str = self.template.render(vars)
         except Exception as error:
-            if str(error)[0:30] == "'dict object' has no attribute":
-                out = out_str =""
-            elif str(error)[0:30] == "'list object' has no attribute":
-                out = out_str =""
+            if str(error)[0:30] == "'dict object' has no attribute" or str(error)[0:30] == "'list object' has no attribute":
+                if strict_undefined == True:
+                    logging.error(f"Failed while rendering context, error was:\n  {str(error)}")
+                    exit(3)
+                else:
+                    out = out_str =""
             else:
                 out = out_str = error
                 logging.error(f"Failed while rendering context, error was:\n  {str(error)}")
