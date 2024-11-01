@@ -101,6 +101,8 @@ class Filters:
     def b64encode(value):
         import base64
         return base64.b64encode(value.encode('utf-8')).decode('utf-8')
+    def flatten(matrix):
+        return [item for row in matrix for item in row]
     def from_json(str):
         return json.loads(str)
     def from_yaml(data):
