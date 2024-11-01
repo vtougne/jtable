@@ -181,9 +181,9 @@ class Filters:
             date_str (str): Date string format: %Y-%m-%d %H:%M:%S !!! only !!!
         """
         if running_platform == "Windows":
-            return Lookup.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\"")
+            return int(Lookup.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\""))
         else:
-            return datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+            return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").timetuple()))
     def to_json(a, *args, **kw):
         return json.dumps(a, *args, **kw)
     def to_pie(dataset):
