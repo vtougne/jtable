@@ -274,7 +274,8 @@ class JtableCli:
         parser.add_argument('--version', action='version', version=version.__version__)
         parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
         parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
-        parser.add_argument( '--stdout', help='Ovewrite applyed ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
+        parser.add_argument('-o', '--stdout', help='Ovewrite applyed ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
+        parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
 
         args = parser.parse_args()
         global terminal_size
@@ -493,7 +494,11 @@ class JtableCli:
                 out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
             else:
                 out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
-        # print(out_expr) ; exit(0)
+
+
+
+
+
         if args.query_file:
             if 'stdout' in query_file:
                 out_expr = query_file['stdout']
@@ -510,16 +515,24 @@ class JtableCli:
             print(tbl)
             return
 
-
+        if args.post_filter and not args.view_query:
+            eval_pre_filter = Templater(template_string=str(out_expr), static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
+            prepa_dataset = {"prepa_stdout": eval_pre_filter}
+            self.dataset = {**self.dataset,**prepa_dataset}
+            out_expr = "{{ prepa_stdout | " + args.post_filter + " }}"
 
         if args.view_query:
+            if args.post_filter:
+                print(f"queryset: {queryset}")
+                print(f"out_expr: {out_expr}")
+                return
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
             query_file_out = {}
             query_set_out = {}
             fields = out
             if select == []:
                 for field in fields:
-                    select = select + [ {'as': field, 'expr':field }  ]
+                    select = select + [ {'as': field, 'expr': field }  ]
             query_set_out['path'] = queryset['path']
             query_set_out['select'] = select
             if args.when:
@@ -528,10 +541,14 @@ class JtableCli:
             query_file_out['vars'] = {'queryset': query_set_out }
             # query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'simple')
             query_file_out['stdout'] = out_expr
+
+
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
             print(yaml_query_out)
         else:
             logging.info(f"queryset: {queryset}")
+            # print(self.dataset)
+            # exit(0)
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
 

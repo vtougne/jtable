@@ -1,24 +1,7 @@
-[[_TOC_]]
-## Overview  
-- jtable helps you to render table from key / lists / values sources like json, yaml, and Python objects.  
-- It works as a cli in a shell and as a Jinja filter that may be integrated in a Python framework like Ansible, Django, Flask and others  
-## Simple usage
-
-  
-#### json coming from curl
-
-command: 
-```bash
-curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p books
-```
-output:
-
-```text
-title                                  author               genre
--------------------------------------  -------------------  -----------
-The Catcher in the Rye                 J.D. Salinger        Fiction
-To Kill a Mockingbird                  Harper Lee           Classics
-The Great Gatsby                       F. Scott Fitzgerald  Classics
-Sapiens: A Brief History of Humankind  Yuval Noah Harari    Non-Fiction
-
-```
+| hostname   | region   | dc name   | os      | state                                   | uptime                                |
+|------------|----------|-----------|---------|-----------------------------------------|---------------------------------------|
+| host_3     | East     | dc_1      | linux   | $`\textcolor{red}{\text{unreachable}}`$ | $`\textcolor{green}{\text{6 days}}`$  |
+| host_1     | North    | dc_2      | linux   | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{green}{\text{21 days}}`$ |
+| host_8     | North    | dc_2      |         | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{72 days}}`$   |
+| host_2     | North    | dc_2      | linux   |                                         | $`\textcolor{green}{\text{}}`$        |
+| host_7     | North    | dc_2      | windows | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{61 days}}`$   |

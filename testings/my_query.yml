@@ -1,0 +1,14 @@
+vars:
+  queryset:
+    path: simple{}
+    select:
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost
+    format: json
+  prepa_stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
+stdout: '{{ prepa_stdout | type_debug }}'
+
