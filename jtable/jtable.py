@@ -325,7 +325,6 @@ class JtableCli:
             logging.info("stdin is a pipe")
             for line in sys.stdin:
                 stdin = stdin + line
-            # self.dataset = { self.tabulate_var_name: yaml.safe_load(stdin) }
             self.dataset = { self.tabulate_var_name: stdin }
 
         if not is_pipe and not args.json_file and not args.json_files and not args.query_file and not args.yaml_files and not args.stdout:
@@ -349,11 +348,8 @@ class JtableCli:
                 self.tabulate_var_name = "input_1"
                 file_name = args.json_file
             logging.info(f"file_name: {file_name}, self.tabulate_var_name: {self.tabulate_var_name}")
-            # exit(0)
             with open(file_name, 'r') as input_yaml:
                 self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
-                
-        # logging.info(f"queryset['path']: {queryset['path']}") ; exit(0)
                 
         def load_multiple_inputs(file_search_string,format):
             logging.info(f"loading {format} files: {file_search_string}")
@@ -370,14 +366,6 @@ class JtableCli:
                 logging.info(f"Adding var_name: {self.tabulate_var_name}")
                 path = file_search_string
             logging.info(f"var_name: {self.tabulate_var_name}, path: {path}")
-            # if file_search_string[0] != "{":
-            #     pass
-            #     # logging.error(err_help)
-            #     # exit(1)
-            # else:
-
-            # print(tabulate_var_name) ; exit(0)
-            # path = file_search_string[len(self.tabulate_var_name) + 3 :]
             logging.info(f"path: {path}")
             
             if running_os == "Windows":
@@ -440,15 +428,12 @@ class JtableCli:
                         shell_command = query_file['sources'][source_name]['shell']
                         jinja_eval = Templater(template_string=str(shell_command), static_context=self.dataset).render({},eval_str=True)
                         logging.info(f"Launch shell, cmd: {jinja_eval}")
-                        # shell_output = subprocess.check_output(shell_command, shell=True,universal_newlines=True)
                         shell_output = Lookup.shell(jinja_eval)
                         self.dataset = {**self.dataset, **{ source_name: shell_output } }
 
                     if 'env' in query_file['sources'][source_name]:
                         env_var = query_file['sources'][source_name]['env']
                         env_value = Lookup.env(env_var)
-                        # print(f"env_value: {env_value}")
-                        # exit(0)
                         self.dataset = {**self.dataset, **{ source_name: env_value } }
             if 'vars' in query_file:
                 vars = {}
@@ -481,30 +466,25 @@ class JtableCli:
             queryset['format'] = args.format
 
         if args.view_query:
+            original_format = queryset['format']
             queryset['format'] = "th"
             
-        # def out_expr_fct(select,path,format):
-            # return "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
-            
-        # out_expr = out_expr_fct(str(select), queryset['path'] , queryset['format'])
         if args.stdout:
             out_expr = args.stdout
         else:
             if self.tabulate_var_name == "stdin":
-                out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
+                if args.post_filter:
+                    original_out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
+                    out_expr = "{{ " + self.tabulate_var_name + f" | from_json_or_yaml | jtable(queryset=queryset) | {args.post_filter} }}}}"
+                else:
+                    out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
             else:
                 out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
-
-
-
 
 
         if args.query_file:
             if 'stdout' in query_file:
                 out_expr = query_file['stdout']
-
-
-                    
             
         if args.inspect:
             if self.tabulate_var_name == "stdin":
@@ -515,18 +495,11 @@ class JtableCli:
             print(tbl)
             return
 
-        if args.post_filter and not args.view_query:
-            eval_pre_filter = Templater(template_string=str(out_expr), static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
-            prepa_dataset = {"prepa_stdout": eval_pre_filter}
-            self.dataset = {**self.dataset,**prepa_dataset}
-            out_expr = "{{ prepa_stdout | " + args.post_filter + " }}"
-
         if args.view_query:
             if args.post_filter:
-                print(f"queryset: {queryset}")
-                print(f"out_expr: {out_expr}")
-                return
-            out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
+                out = Templater(template_string=original_out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
+            else:
+                out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
             query_file_out = {}
             query_set_out = {}
             fields = out
@@ -535,20 +508,21 @@ class JtableCli:
                     select = select + [ {'as': field, 'expr': field }  ]
             query_set_out['path'] = queryset['path']
             query_set_out['select'] = select
+            query_set_out['format'] = original_format
             if args.when:
                 query_set_out['when'] = args.when
-            # query_file_out['queryset'] = query_set_out
             query_file_out['vars'] = {'queryset': query_set_out }
-            # query_file_out['out'] = out_expr_fct('select', queryset['path'] , 'simple')
+            # if args.post_filter:
+            #     query_file_out['vars'].update({'prepa_stdout': f"{out_expr}" })
+            # query_file_out['stdout'] = f"{{{{ prepa_stdout | {args.post_filter} }}}}"
             query_file_out['stdout'] = out_expr
+
 
 
             yaml_query_out = yaml.dump(query_file_out, allow_unicode=True,sort_keys=False)
             print(yaml_query_out)
         else:
             logging.info(f"queryset: {queryset}")
-            # print(self.dataset)
-            # exit(0)
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
 

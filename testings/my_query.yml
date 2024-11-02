@@ -10,5 +10,5 @@ vars:
       expr: cost
     format: json
   prepa_stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
-stdout: '{{ prepa_stdout | type_debug }}'
+stdout: '{{ prepa_stdout | from_json|to_nice_yaml }}'
 
