@@ -4,14 +4,14 @@
       - It works as a cli in a shell and as a Jinja filter that may be integrated in a Python framework like Ansible, Django, Flask and others  
       ## Simple usage
 
-- name: "json coming from curl"
-  play_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p books
-  box_as: text
-  # collapse: command & output
+# - name: "json coming from curl"
+#   play_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p books
+#   box_as: text
+#   # collapse: command & output
 
-- eval_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json
-  box_as: json
-  # collapse: json returned by curl cmd
+# - eval_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json
+#   box_as: json
+#   # collapse: json returned by curl cmd
 
 - text: |
     ### display a list of dictionnaries as a table

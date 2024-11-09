@@ -4,52 +4,6 @@
 - It works as a cli in a shell and as a Jinja filter that may be integrated in a Python framework like Ansible, Django, Flask and others  
 ## Simple usage
 
-  
-#### json coming from curl
-
-command: 
-```bash
-curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p books
-```
-output:
-
-```text
-title                                  author               genre
--------------------------------------  -------------------  -----------
-The Catcher in the Rye                 J.D. Salinger        Fiction
-To Kill a Mockingbird                  Harper Lee           Classics
-The Great Gatsby                       F. Scott Fitzgerald  Classics
-Sapiens: A Brief History of Humankind  Yuval Noah Harari    Non-Fiction
-
-```
-
-```json
-{
-    "books": [
-      {
-        "title": "The Catcher in the Rye",
-        "author": "J.D. Salinger",
-        "genre": "Fiction"
-      },
-      {
-        "title": "To Kill a Mockingbird",
-        "author": "Harper Lee",
-        "genre": "Classics"
-      },
-      {
-        "title": "The Great Gatsby",
-        "author": "F. Scott Fitzgerald",
-        "genre": "Classics"
-      },
-      {
-        "title": "Sapiens: A Brief History of Humankind",
-        "author": "Yuval Noah Harari",
-        "genre": "Non-Fiction"
-      }
-    ]
-  }
-  
-```
 ### display a list of dictionnaries as a table
 Considering the following dataset you want to display as a table  
 
@@ -466,7 +420,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-16:29:02 cls.cross_path      | ERROR .dc was not found in dataset l...
+13:41:45 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -551,7 +505,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-16:29:02 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+13:41:45 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -667,6 +621,8 @@ ansible-playbook ansible_playbook_example.yml
 output:
 
 ```bash
+[WARNING]: Collection community.general does not support Ansible version
+2.13.13
 
 PLAY [localhost] ***************************************************************
 

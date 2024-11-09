@@ -22,7 +22,7 @@ build:
     DOCKER_TLS_CERTDIR: ""
   script:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
-    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker build --no-cache -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE
   rules: 
     - if: '$CI_COMMIT_MESSAGE =~ /build_image/'
@@ -56,6 +56,7 @@ make_release:
     - mkdir ../release || true
     - cd ../release
     - rm -rf *
+    - echo git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git
     - git clone http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git
     - git config --global user.email "vincebot@vince.com"
     - git config --global user.name "Vince bot"

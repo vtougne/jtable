@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liste déroulante avec sélection persistante</title>
+  <style>
+    /* Conteneur de la liste déroulante */
+    .dropdown-container {
+      width: 200px;
+      margin: 50px auto;
+    }
+
+    /* Style de la liste déroulante */
+    .dropdown {
+      width: 100%;
+      height: 150px; /* Hauteur pour environ 5 options visibles */
+      overflow-y: auto; /* Activer l'ascenseur vertical */
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      font-size: 16px;
+    }
+
+    /* Style des options sélectionnées */
+    .dropdown option.selected {
+      background-color: #cce5ff; /* Couleur de fond des éléments sélectionnés */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dropdown-container">
+    <select class="dropdown" size="5" id="dropdown">
+      <option value="1">Option 1</option>
+      <option value="2">Option 2</option>
+      <option value="3">Option 3</option>
+      <option value="4">Option 4</option>
+      <option value="5">Option 5</option>
+      <option value="6">Option 6</option>
+      <option value="7">Option 7</option>
+      <option value="8">Option 8</option>
+      <option value="9">Option 9</option>
+      <option value="10">Option 10</option>
+    </select>
+  </div>
+
+  <script>
+    // Sélectionner l'élément <select>
+    const dropdown = document.getElementById("dropdown");
+
+    // Ajouter un gestionnaire d'événement pour détecter les clics
+    dropdown.addEventListener("click", (event) => {
+      const option = event.target;
+
+      // Vérifier si l'option est déjà sélectionnée
+      if (option.classList.contains("selected")) {
+        // Si oui, désélectionner en retirant la classe "selected"
+        option.classList.remove("selected");
+      } else {
+        // Sinon, sélectionner en ajoutant la classe "selected"
+        option.classList.add("selected");
+      }
+
+      // Empêcher le comportement de sélection par défaut
+      event.preventDefault();
+    });
+  </script>
+
+</body>
+</html>

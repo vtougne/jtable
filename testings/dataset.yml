@@ -2,10 +2,10 @@ truc_qui_fait_planter: john
 
 
 simple:
-  - { hostname: host_2, os: windows, cost: 200 }
+  - { hostname: host_2, os: windows, cost: 300 }
   - { hostname: host_1, os: linux }
   - { hostname: host_3, os: linux, cost: 200 }
-  - { hostname: host_4, os: aix, cost: 200 }
+  - { hostname: host_4, os: aix, cost: 600 }
   - { hostname: host_5, os: linux, cost: 200 }
 
 host_list:

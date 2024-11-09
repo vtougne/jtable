@@ -181,7 +181,7 @@ class Filters:
             date_str (str): Date string format: %Y-%m-%d %H:%M:%S !!! only !!!
         """
         if running_platform == "Windows":
-            return int(Lookup.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\""))
+            return int(Plugin.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\""))
         else:
             return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").timetuple()))
     def to_json(a, *args, **kw):
@@ -210,9 +210,8 @@ class Inspect:
     def __init__(self):
         self.out = []
     def add_row(self,row):
-        # self.out = self.out + [ [row[0][1:]] + [row[1]] ]
         self.out = self.out + [ [row[0]] + [row[1]] ]
-        # print([ [row[0]] + [row[1]] ])
+        logging.info("Covering " + " / ".join(Filters.flatten([ [row[0]] + [row[1]] ])))
     def view_paths(self,dataset,path="", max_depth=0):
         self.cover_data(dataset,path="", max_depth=0)
         return self.out
@@ -331,11 +330,11 @@ class JtableCli:
 
             parser.print_help(sys.stdout)
             jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
-            jtable_lookups = [name for name, func in inspect.getmembers(Lookup, predicate=inspect.isfunction)]
+            jtable_plugins = [name for name, func in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
             print(f"\njtable core filters:\n   {', '.join(jtable_core_filters)}\n")
             tablulate_formats = next((value for name, value in inspect.getmembers(tabulate) if name == 'tabulate_formats'), None)
             print(f"table formats:\n   {', '.join(tablulate_formats)}\n")
-            print(f"jtable lookups:\n   {', '.join(jtable_lookups)}\n")
+            print(f"jtable plugins:\n   {', '.join(jtable_plugins)}\n")
             exit(1)
 
         if args.json_file:
@@ -428,12 +427,12 @@ class JtableCli:
                         shell_command = query_file['sources'][source_name]['shell']
                         jinja_eval = Templater(template_string=str(shell_command), static_context=self.dataset).render({},eval_str=True)
                         logging.info(f"Launch shell, cmd: {jinja_eval}")
-                        shell_output = Lookup.shell(jinja_eval)
+                        shell_output = Plugin.shell(jinja_eval)
                         self.dataset = {**self.dataset, **{ source_name: shell_output } }
 
                     if 'env' in query_file['sources'][source_name]:
                         env_var = query_file['sources'][source_name]['env']
-                        env_value = Lookup.env(env_var)
+                        env_value = Plugin.env(env_var)
                         self.dataset = {**self.dataset, **{ source_name: env_value } }
             if 'vars' in query_file:
                 vars = {}
@@ -838,7 +837,7 @@ class JtableCls:
             logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
             exit(2)
 
-class Lookup:
+class Plugin:
     def env(var_name,**kwargs):
         if var_name not in os.environ:
             if 'default' in kwargs:
@@ -1032,28 +1031,28 @@ class Templater:
         for filter_name in jtable_core_filters:
             env.filters[filter_name] = getattr(Filters, filter_name)
 
-        ####################  Add lookup function ####################
-        jtable_core_lookups = [name[0] for name in inspect.getmembers(Lookup, predicate=inspect.isfunction)]
-        logging.info(f"jtable_core_lookups: {jtable_core_lookups}")
-        class lookup_fct(object):
-            def process_lookup(self,*args, **kwargs):
+        ####################  Add plugin function ####################
+        jtable_core_plugins = [name[0] for name in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
+        logging.info(f"jtable_core_plugins: {jtable_core_plugins}")
+        class plugin_fct(object):
+            def process_plugin(self,*args, **kwargs):
                 if len(args) == 0 and len(kwargs) == 0:
-                    logging.error("lookup function must have at least one argument in:")
+                    logging.error("plugin function must have at least one argument in:")
                     exit(3)
-                if args[0] not in jtable_core_lookups:
-                    logging.error(f"lookup function {args[0]} not found in {', '.join(jtable_core_lookups)}")
+                if args[0] not in jtable_core_plugins:
+                    logging.error(f"plugin function {args[0]} not found in {', '.join(jtable_core_plugins)}")
                     exit(3)
-                method_to_call = getattr(Lookup, args[0], None)
+                method_to_call = getattr(Plugin, args[0], None)
                 try:
                     res = method_to_call(*args[1:],**kwargs)
                 except Exception as error:
-                    logging.error(f"Failed to call lookup function {args[0]}, error was:\n  {str(error)}")
+                    logging.error(f"Failed to call plugin function {args[0]}, error was:\n  {str(error)}")
                     exit(3)
                 return res
 
             
-        lookup = lambda: lookup_fct().process_lookup
-        static_context = {**static_context, **{"lookup": lookup()}}
+        plugin = lambda: plugin_fct().process_plugin
+        static_context = {**static_context, **{"plugin": plugin()}}
 
         ##############################################################
         try:
