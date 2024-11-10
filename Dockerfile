@@ -8,7 +8,7 @@ USER jtable
 ENV PATH="${PATH}:/home/jtable/.local/bin"
 RUN sudo apt-get update
 RUN sudo apt-get install -y pip curl less git
-RUN pip install ansible-core==2.13.13
+RUN pip install ansible-core
 RUN pip install jmespath
 RUN ansible-galaxy collection install community.general ansible.posix
 WORKDIR /project/jtable

@@ -2,7 +2,7 @@ services:
   jtable:
     # hostname: jtable
     container_name: jtable
-    # image: jtable
+    image: jtable
     privileged: true
     working_dir: /project/jtable
     build:

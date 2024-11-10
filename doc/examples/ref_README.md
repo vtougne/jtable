@@ -420,7 +420,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-13:41:45 cls.cross_path      | ERROR .dc was not found in dataset l...
+16:10:34 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -505,7 +505,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-13:41:45 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+16:10:34 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -621,8 +621,6 @@ ansible-playbook ansible_playbook_example.yml
 output:
 
 ```bash
-[WARNING]: Collection community.general does not support Ansible version
-2.13.13
 
 PLAY [localhost] ***************************************************************
 
