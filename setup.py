@@ -9,12 +9,14 @@ setup(
     name="jtable",
     version=__version__,
     packages=find_packages(),
-    install_requires=[
-        'tabulate',
-        'PyYAML',
-        'Jinja2'
-    ],
-    # include_package_data=True,
+    # install_requires=[
+    #     'tabulate',
+    #     'PyYAML',
+    #     'Jinja2'
+    # ],
+    include_package_data=True,
+    package_data={'': ['resources/*','tabulate/*','jinja2/*','yaml/*']},
+
     entry_points={
             'console_scripts': [
                 'jtable=jtable.jtable:main',

@@ -3,12 +3,17 @@ import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.c
 from os import isatty
 from sys import exit
 # from tabulate import tabulate
-import tabulate
+# import tabulate
 from typing import Any, Dict, Optional
 try:
     from . import version
 except:
     import version
+
+try:
+    from . import tabulate
+except:
+    import tabulate
 
 running_platform = platform.system()
 
@@ -113,24 +118,15 @@ class Filters:
         return yaml.safe_load_all(data)
     def intersect(a, b):
         return list(set(a).intersection(b))
-    def js_wrap(data):
+    def wrap_html(data):
         resources_path = '/'.join(__file__.split('/')[:-1]) + "/resources"
-        # js_wrapper_css =  "##replace_tag##js_wrapper.css"
-        # js_wrapper_script = "##replace_tag##js_wrapper.js"
-        js_wrapper_script =  "Ly8gdmFyIHRhYmxlcyA9IGRvY3VtZW50LmdldEVsZW1lbnRzQnlUYWdOYW1lKCd0YWJsZScpOwpjb25zdCB0YWJsZXMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJ0YWJsZSIpOwp0b3Bfc2VhcmNoX2JveCA9ICI8aW5wdXQgdHlwZT0ndGV4dCcgaWQ9J3RvcC1zZWFyY2gtY29udGFpbmVyJyBvbmtleXVwPSdmaWx0ZXJBbGxUYWJsZXMoKScgcGxhY2Vob2xkZXI9J2ZpbHRlciBvbiBhbGwgdGFibGVzJz5cbiIKCmxldCBzZWxlY3RlZFRhYmxlID0gbnVsbDsgLy8gVmFyaWFibGUgcG91ciBzdG9ja2VyIGxhIHRhYmxlIHPDqWxlY3Rpb25uw6llCgovLyDDiWNvdXRldXIgcG91ciBkw6l0ZWN0ZXIgbGUgY2xpYyBzdXIgdW5lIHRhYmxlCnRhYmxlcy5mb3JFYWNoKHRhYmxlID0+IHsKICB0YWJsZS5hZGRFdmVudExpc3RlbmVyKCJjbGljayIsIGZ1bmN0aW9uICgpIHsKICAgIHNlbGVjdGVkVGFibGUgPSB0YWJsZTsgLy8gTWV0IMOgIGpvdXIgbGEgdGFibGUgYWN0dWVsbGVtZW50IHPDqWxlY3Rpb25uw6llCiAgfSk7Cn0pOwoKLy8gw4ljb3V0ZXVyIGQnw6l2w6luZW1lbnQgcG91ciBpbnRlcmNlcHRlciBDdHJsICsgQQpkb2N1bWVudC5hZGRFdmVudExpc3RlbmVyKCJrZXlkb3duIiwgZnVuY3Rpb24gKGV2ZW50KSB7CiAgaWYgKGV2ZW50LmN0cmxLZXkgJiYgZXZlbnQua2V5ID09PSAiYSIgJiYgc2VsZWN0ZWRUYWJsZSkgewogICAgZXZlbnQucHJldmVudERlZmF1bHQoKTsgLy8gRW1ww6pjaGUgbGEgc8OpbGVjdGlvbiBkZSB0b3V0ZSBsYSBwYWdlCgogICAgLy8gQ3LDqWF0aW9uIGQndW5lIHPDqWxlY3Rpb24gcG91ciBsYSB0YWJsZSBzw6lsZWN0aW9ubsOpZSBlbiBleGNsdWFudCBsZSBoZWFkZXIKICAgIGNvbnN0IHNlbGVjdGlvbiA9IHdpbmRvdy5nZXRTZWxlY3Rpb24oKTsKICAgIHNlbGVjdGlvbi5yZW1vdmVBbGxSYW5nZXMoKTsgLy8gVmlkYWdlIGRlIGxhIHPDqWxlY3Rpb24gYWN0dWVsbGUKCiAgICBjb25zdCByYW5nZSA9IGRvY3VtZW50LmNyZWF0ZVJhbmdlKCk7CgogICAgLy8gVsOpcmlmaWUgcydpbCB5IGEgYXUgbW9pbnMgdW5lIGxpZ25lIGRhbnMgbGUgdGJvZHkKICAgIGlmIChzZWxlY3RlZFRhYmxlLnRCb2RpZXNbMF0/LnJvd3MubGVuZ3RoID4gMSkgewogICAgICAvLyBTw6lsZWN0aW9uIGRlIHRvdXRlcyBsZXMgbGlnbmVzIHNhdWYgbGEgcHJlbWnDqHJlCiAgICAgIHJhbmdlLnNldFN0YXJ0QmVmb3JlKHNlbGVjdGVkVGFibGUudEhlYWQucm93c1sxXSk7CiAgICAgIHJhbmdlLnNldEVuZEFmdGVyKHNlbGVjdGVkVGFibGUudEJvZGllc1swXS5yb3dzW3NlbGVjdGVkVGFibGUudEJvZGllc1swXS5yb3dzLmxlbmd0aCAtIDFdKTsKCiAgICAgIHNlbGVjdGlvbi5hZGRSYW5nZShyYW5nZSk7IC8vIEFqb3V0IGRlIGxhIHPDqWxlY3Rpb24gZHUgY29udGVudSBkZSBsYSB0YWJsZSBzw6lsZWN0aW9ubsOpZQogICAgfQogIH0KfSk7CgoKJCh0b3Bfc2VhcmNoX2JveCkucHJlcGVuZFRvKCJib2R5Iik7Ci8vIGNvbnNvbGUubG9nKHRvcF9zZWFyY2hfYm94KTsKbGV0IHRhYmxlX2lkID0gMDsKZm9yIChjb25zdCB0YWJsZSBvZiB0YWJsZXMpIHsKICBsZXQgcHJlcGFfc2VhcmNoX2JveGVzID0gIjx0cj5cbiI7CiAgbGV0IGNvbHVtbl9pZCA9IDA7CiAgdGFibGUuaWQgPSB0YWJsZV9pZDsKCiAgZm9yIChjb25zdCBjZWxsIG9mIHRhYmxlLnRIZWFkLnJvd3MuaXRlbSgwKS5jZWxscykgewogICAgY2VsbC5vbmNsaWNrID0gKGZ1bmN0aW9uICh0YWJsZV9pZCwgY29sdW1uX2lkKSB7CiAgICAgIHJldHVybiBmdW5jdGlvbiAoKSB7CiAgICAgICAgc29ydFRhYmxlKHRhYmxlX2lkLCBjb2x1bW5faWQpOwogICAgICB9OwogICAgfSkodGFibGVfaWQsIGNvbHVtbl9pZCk7CiAgICBwcmVwYV9zZWFyY2hfYm94ZXMgPSBwcmVwYV9zZWFyY2hfYm94ZXMgKyAiPHRoPjxpbnB1dCB0eXBlPSd0ZXh0JyBjbGFzcz0nc2VhcmNoLWNvbnRhaW5lcicgb25rZXl1cD0nZmlsdGVyVGFibGUoIiArCiAgICAgIHRhYmxlX2lkICsgIiwiICsgY29sdW1uX2lkICsgIiknIHBsYWNlaG9sZGVyPSdmaWx0ZXIgYnkgIiArIGNlbGwuaW5uZXJUZXh0ICsgIic+PC90aD5cbiI7CiAgICBjb2x1bW5faWQrKzsKICB9CiAgcHJlcGFfc2VhcmNoX2JveGVzID0gcHJlcGFfc2VhcmNoX2JveGVzICsgIjwvdHI+IjsKICAkKHRhYmxlLnRIZWFkKS5wcmVwZW5kKHByZXBhX3NlYXJjaF9ib3hlcyk7CiAgdGFibGVfaWQrKzsKCn0KZnVuY3Rpb24gZmlsdGVyQWxsVGFibGVzKCkgewogIHZhciBzZWFyY2hfaW5wdXQgPSAkKCIjdG9wLXNlYXJjaC1jb250YWluZXIiKS52YWwoKS50b1VwcGVyQ2FzZSgpOwogIHRhYmxlSWQgPSAwOwogIGZvciAoY29uc3QgdGFibGUgb2YgdGFibGVzKSB7CiAgICBmaWx0ZXJUYWJsZSh0YWJsZUlkKTsKICAgIHRhYmxlSWQrKzsKICB9Cn0KCmZ1bmN0aW9uIGZpbHRlclRhYmxlKHRhYmxlX2lkLCBjb2x1bW4gPSAwKSB7CiAgLy8gZmlsdGVyQWxsVGFibGVzKCkKICB2YXIgdG9wX3NlYXJjaF9pbnB1dCA9ICQoIiN0b3Atc2VhcmNoLWNvbnRhaW5lciIpLnZhbCgpLnRvVXBwZXJDYXNlKCk7CgogIHZhciB0YWJsZSA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKHRhYmxlX2lkKTsKICB2YXIgcm93cyA9IEFycmF5LnByb3RvdHlwZS5zbGljZS5jYWxsKHRhYmxlLnRCb2RpZXNbMF0ucm93cyk7CgogIHJvd3MuZm9yRWFjaChmdW5jdGlvbiAocm93KSB7CiAgICB2YXIgY2VsbFRleHQgPSByb3cudGV4dENvbnRlbnQudG9VcHBlckNhc2UoKTsKICAgIGlmIChjZWxsVGV4dC5pbmRleE9mKHRvcF9zZWFyY2hfaW5wdXQpID4gLTEpIHsKICAgICAgcm93LnN0eWxlLmRpc3BsYXkgPSAiIjsKICAgIH0gZWxzZSB7CiAgICAgIHJvdy5zdHlsZS5kaXNwbGF5ID0gIm5vbmUiOwogICAgfQogIH0pOwoKICBsZXQgY29sdW1uSWQgPSAwOwogIGZvciAoY29uc3QgY29sdW1uIG9mIHRhYmxlLnJvd3NbMF0uY2VsbHMpIHsKICAgIGlucHV0ID0gY29sdW1uLnF1ZXJ5U2VsZWN0b3IoImlucHV0IikudmFsdWU7CiAgICBmaWx0ZXJDb2x1bW4odGFibGVfaWQsIGNvbHVtbklkKTsKICAgIGNvbHVtbklkKys7CiAgfQp9CgoKZnVuY3Rpb24gZmlsdGVyQ29sdW1uKHRhYmxlX2lkLCBjb2x1bW4pIHsKICB2YXIgdGFibGUgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0YWJsZV9pZCk7CiAgLy8gdmFyIGlucHV0ID0gdGFibGUucm93c1swXS5jZWxsc1tjb2x1bW5dLnF1ZXJ5U2VsZWN0b3IoImlucHV0Iik7CiAgdmFyIGlucHV0ID0gdGFibGUucm93c1swXS5jZWxsc1tjb2x1bW5dLnF1ZXJ5U2VsZWN0b3IoImlucHV0Iik7CiAgdmFyIGZpbHRlclRleHQgPSBpbnB1dC52YWx1ZS50b1VwcGVyQ2FzZSgpOwogIHZhciByb3dzID0gQXJyYXkucHJvdG90eXBlLnNsaWNlLmNhbGwodGFibGUudEJvZGllc1swXS5yb3dzKS5maWx0ZXIocm93ID0+IHJvdy5zdHlsZS5kaXNwbGF5ICE9PSAibm9uZSIpOwogIHJvd3MuZm9yRWFjaChmdW5jdGlvbiAocm93KSB7CiAgICB2YXIgY2VsbFRleHQgPSByb3cuY2VsbHNbY29sdW1uXS50ZXh0Q29udGVudC50b1VwcGVyQ2FzZSgpOwogICAgaWYgKGNlbGxUZXh0LmluZGV4T2YoZmlsdGVyVGV4dCkgPiAtMSkgewogICAgICByb3cuc3R5bGUuZGlzcGxheSA9ICIiOwogICAgfSBlbHNlIHsKICAgICAgcm93LnN0eWxlLmRpc3BsYXkgPSAibm9uZSI7CiAgICB9CiAgfSk7Cn0KCgoKZnVuY3Rpb24gc29ydFRhYmxlKHRhYmxlX2lkLCBjb2x1bW4pIHsKICB2YXIgdGFibGUgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCh0YWJsZV9pZCk7CiAgdmFyIHJvd3MgPSBBcnJheS5wcm90b3R5cGUuc2xpY2UuY2FsbCh0YWJsZS50Qm9kaWVzWzBdLnJvd3MpOwogIHZhciBpc0FzY2VuZGluZyA9IHRhYmxlLnRIZWFkLnJvd3NbMF0uY2VsbHNbY29sdW1uXS5jbGFzc0xpc3QudG9nZ2xlKCJhc2NlbmRpbmciKTsKICB2YXIgbXVsdGlwbGllciA9IGlzQXNjZW5kaW5nID8gMSA6IC0xOwogIHJvd3Muc29ydChmdW5jdGlvbiAoYSwgYikgewogICAgdmFyIGFWYWwgPSBhLmNlbGxzW2NvbHVtbl0udGV4dENvbnRlbnQ7CiAgICB2YXIgYlZhbCA9IGIuY2VsbHNbY29sdW1uXS50ZXh0Q29udGVudDsKICAgIGlmICghaXNOYU4oYVZhbCkgJiYgIWlzTmFOKGJWYWwpKSB7CiAgICAgIGFWYWwgPSBOdW1iZXIoYVZhbCk7CiAgICAgIGJWYWwgPSBOdW1iZXIoYlZhbCk7CiAgICAgIHJldHVybiBtdWx0aXBsaWVyICogKGFWYWwgLSBiVmFsKTsKICAgIH0gZWxzZSB7CiAgICAgIHJldHVybiBtdWx0aXBsaWVyICogYVZhbC5sb2NhbGVDb21wYXJlKGJWYWwpOwogICAgfQogIH0pOwogIHRhYmxlLnRCb2RpZXNbMF0uaW5uZXJIVE1MID0gIiI7CiAgcm93cy5mb3JFYWNoKGZ1bmN0aW9uIChyb3cpIHsKICAgIHRhYmxlLnRCb2RpZXNbMF0uYXBwZW5kQ2hpbGQocm93KTsKICB9KTsKfQo="
-        js_wrapper_css = "CnRhYmxlIHsKICAgIGZvbnQtZmFtaWx5OiBhcmlhbCwgc2Fucy1zZXJpZjsKICAgIGJvcmRlci1jb2xsYXBzZTogY29sbGFwc2U7CiAgICAvKiB3aWR0aDogODAlOyAqLwogICAgdGV4dC1hbGlnbjogbGVmdDsKICAgIG1hcmdpbi1sZWZ0OiAyLjUlCiAgfQogIHRoLCB0ZCB7CiAgICBib3JkZXI6IDFweCBzb2xpZCAjZGRkZGRkOwogICAgdGV4dC1hbGlnbjogbGVmdDsKICAgIHBhZGRpbmc6IDhweDsKICB9CiAgdGJvZHkgdHI6bnRoLWNoaWxkKGV2ZW4pIHsKICAgIGJhY2tncm91bmQtY29sb3I6ICNmMmYyZjI7CiAgfQogICN0b3Atc2VhcmNoLWNvbnRhaW5lciB7CiAgICBkaXNwbGF5OiBibG9jazsKICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAgICAvKiBib3JkZXI6IDFweCBzb2xpZCAjNGYxNjE2OyAqLwogICAgLyogcGFkZGluZzogNXB4OyAqLwogICAgbWFyZ2luOiA1cHggYXV0bzsKICAgIGJvcmRlci1yYWRpdXM6IDVweDsKICAgIC8qIHdpZHRoOiAzMDBweDsgKi8KICB9CiAgLnNlYXJjaC1jb250YWluZXIgewogICAgLyogZGlzcGxheTogZmxleDsgKi8KICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAgICBib3JkZXI6IDFweCBzb2xpZCAjNGYxNjE2OwogICAgLyogcGFkZGluZzogNXB4OyAqLwogICAgYm9yZGVyLXJhZGl1czogNXB4OwogICAgLyogd2lkdGg6IDMwMHB4OyAqLwogIH0K"
-        def load_file_or_decrypt(file_string, expected_file_name):
-            # print('coucou')
-            # exit
-            if file_string.replace("##replace_tag##","") == expected_file_name:
-                with open(resources_path + "/" + expected_file_name, 'r') as file:
-                    content = file.read()
-            else:
-                content = Filters.b64decode(file_string)
+        def load_file(expected_file_name):
+            with open(resources_path + "/" + expected_file_name, 'r') as file:
+                content = file.read()
             return content
         
-        js_wrapper_css = load_file_or_decrypt(js_wrapper_css,"js_wrapper.css")
-        js_wrapper_script = load_file_or_decrypt(js_wrapper_script,"js_wrapper.js")
+        js_wrapper_css = load_file("js_wrapper.css")
+        js_wrapper_script = load_file("js_wrapper.js")
 
         return f"""
           <!DOCTYPE html>
@@ -837,6 +833,16 @@ class JtableCls:
             logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
             exit(2)
 
+
+
+
+
+                
+
+
+
+
+
 class Plugin:
     def env(var_name,**kwargs):
         if var_name not in os.environ:
@@ -850,7 +856,45 @@ class Plugin:
     def shell(cmd,default=None):
         shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
         return shell_output
-    
+
+    def load_files(search_string, format=json, ignore_errors=True):
+        """
+        Load multiple files from a search string
+        formats in text,json,yaml
+        """
+        if running_os == "Windows":
+            cmd = f"dir /s /b {search_string}"
+            logging.info(f"cmd: {cmd}")
+            files_str = os.popen("dir /s /b " + search_string).read()
+        else:
+            files_str = os.popen("ls -1 " + search_string).read()
+
+        file_list_dataset = []
+        for file_name_full_path in files_str.split('\n'):
+            if file_name_full_path != '':
+                with open(file_name_full_path, 'r') as input_yaml:
+                    try:
+                        file_content =  yaml.safe_load(input_yaml)
+                        if running_os == "Windows":
+                            sep = "\\"
+                            file_path = sep.join(file_name_full_path.split('\\')[:-1])
+                            file_name = file_name_full_path.split('\\')[-1]
+                        else:
+                            file_path = "/".join(file_name_full_path.split('/')[:-1])
+                            file_name = file_name_full_path.split('/')[-1]
+                        file = { 
+                                "name": file_name,
+                                "path": file_path,
+                                "content": file_content
+                                }
+                        file_list_dataset = file_list_dataset + [{ **file }]
+                    except Exception as error:
+                        logging.warning(f"fail loading file {file_name_full_path}, skipping")
+        return file_list_dataset
+
+
+
+
 class path_auto_discover:
     def __init__(self):
         self.paths = []
