@@ -10,10 +10,10 @@ services:
       dockerfile: Dockerfile
     user: jtable
     # user: "1000:1001"
-    # environment:
+    environment:
     #   - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/project/jtable/jtable
     #   - ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg
-    #   - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONDONTWRITEBYTECODE=1
     command: ["tail","-f"]
     volumes:
       - ../jtable:/project/jtable

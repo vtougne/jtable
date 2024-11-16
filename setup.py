@@ -1,31 +1,54 @@
 #!/usr/bin/env python3
-
+import os
+import subprocess
 from setuptools import setup, find_packages
-
+from setuptools.command.install import install
 from jtable.version import __version__
 
+# class CustomInstallCommand(install):
+#     """Installation personnalisée pour inclure les dépendances locales."""
+#     def run(self):
+#         # Installer les dépendances locales
+#         dependencies_dir = os.path.join(os.path.dirname(__file__), "dependencies")
+#         if os.path.exists(dependencies_dir):
+#             for dep in os.listdir(dependencies_dir):
+#                 if dep.endswith(".whl") or dep.endswith(".tar.gz"):
+#                     dep_path = os.path.abspath(os.path.join(dependencies_dir, dep))
+#                     print(f"Installing dependency: {dep_path}")
+#                     subprocess.check_call(["pip", "install", "--no-index", dep_path])
+        
+#         # Continuer avec l'installation normale
+#         install.run(self)
+
+class CustomInstallCommand(install):
+    def run(self):
+        dependencies_dir = os.path.join(os.path.dirname(__file__), "dependencies")
+        requirements_file = os.path.join(dependencies_dir, "requirements.txt")
+        if os.path.exists(requirements_file):
+            print(f"Installing dependencies from {requirements_file}")
+            subprocess.check_call(["pip", "install", "--no-index", "--find-links", dependencies_dir, "-r", requirements_file])
+        
+        # Continuer avec l'installation normale
+        install.run(self)
 
 setup(
     name="jtable",
     version=__version__,
     packages=find_packages(),
-    install_requires=[
-        'tabulate',
-        'PyYAML',
-        'Jinja2'
-    ],
+    # Supprimé install_requires car les dépendances sont gérées localement
     include_package_data=True,
-    package_data={'': ['resources/*','tabulate/*','jinja2/*','yaml/*']},
-
+    package_data={'': ['resources/*']},
     entry_points={
-            'console_scripts': [
-                'jtable=jtable.jtable:main',
-            ],
-        },
-
+        'console_scripts': [
+            'jtable=jtable.jtable:main',
+        ],
+    },
+    cmdclass={
+        'install': CustomInstallCommand,  # Utilisation de la classe personnalisée
+    },
     author="Vincent Tougne",
     author_email="vtougne@gmail.com",
-    description="tabulate json data and transform them using jinja",
+    description="Tabulate JSON data and transform them using Jinja templates.",
     license="MIT",
     license_files=["LICENSE.txt"],
     classifiers=[
