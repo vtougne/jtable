@@ -1,4 +1,9 @@
 
+# local install without connection to any external service PyPI or others
+
+```bash
+pip install --no-index --find-links=dependencies
+```
 
 
 # create wheel

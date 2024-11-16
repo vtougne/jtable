@@ -5,12 +5,14 @@ RUN useradd -m -g jtable jtable
 RUN usermod -aG sudo jtable
 RUN echo "jtable ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 USER jtable
-ENV PATH="${PATH}:/home/jtable/.local/bin"
 RUN sudo apt-get update
 RUN sudo apt-get install -y pip curl less git
-RUN pip install ansible-core
-RUN pip install jmespath
-RUN ansible-galaxy collection install community.general ansible.posix
+
 WORKDIR /project/jtable
 RUN echo 'set -o vi' >> /home/jtable/.bashrc
 RUN echo 'alias ll="ls -lrt"' >> /home/jtable/.bashrc
+ENV PATH="${PATH}:/home/jtable/.local/bin"
+
+# RUN pip install ansible-core
+# RUN pip install jmespath
+# RUN ansible-galaxy collection install community.general ansible.posix

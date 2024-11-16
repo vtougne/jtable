@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
-import yaml, sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform, subprocess
+import sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform, subprocess
 from os import isatty
 from sys import exit
-# from tabulate import tabulate
-# import tabulate
 from typing import Any, Dict, Optional
-try:
-    from . import version
-except:
-    import version
 
-try:
-    from . import tabulate
-except:
-    import tabulate
+jtable_path = os.path.dirname(os.path.abspath(__file__))
+
+if jtable_path not in sys.path:
+    sys.path.insert(0, jtable_path)
+
+import version
+import tabulate
+import yaml
 
 running_platform = platform.system()
 
@@ -239,6 +237,7 @@ class JtableCli:
         
         global BaseLoader,Environment
         from jinja2 import Environment, BaseLoader
+
         
     def parse_args(self):
 
