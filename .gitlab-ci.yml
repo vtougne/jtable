@@ -33,6 +33,7 @@ test:
   image: $CI_REGISTRY_IMAGE:latest
   script:
     - pip install .
+    - pip install -r requirements.txt
     - jtable -h || true
     - cd doc/examples
     - ./make_doc.sh --halt
