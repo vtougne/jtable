@@ -13,6 +13,14 @@ RUN echo 'set -o vi' >> /home/jtable/.bashrc
 RUN echo 'alias ll="ls -lrt"' >> /home/jtable/.bashrc
 ENV PATH="${PATH}:/home/jtable/.local/bin"
 
-# RUN pip install ansible-core
-# RUN pip install jmespath
-# RUN ansible-galaxy collection install community.general ansible.posix
+RUN pip install ansible-core
+RUN pip install jmespath
+RUN ansible-galaxy collection install community.general ansible.posix
+
+# CMD ["/bin/echo", “hello”]
+# ENTRYPOINT ["/bin/sh"]
+# ENTRYPOINT ["/bin/sh"]
+
+
+
+# RUN pip install -r /project/jtable/requirements.txt

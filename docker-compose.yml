@@ -14,7 +14,14 @@ services:
     #   - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/project/jtable/jtable
     #   - ANSIBLE_CONFIG=/project/jtable/testings/ansible.cfg
       - PYTHONDONTWRITEBYTECODE=1
-    command: ["tail","-f"]
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "/project/jtable/jtable/jtable \"\$@\"" | sudo tee /usr/bin/jtable > /dev/null
+        sudo chmod +x /usr/bin/jtable
+        tail -f
+
     volumes:
       - ../jtable:/project/jtable
       - ../../sample/python:/project/testings

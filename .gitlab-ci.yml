@@ -88,6 +88,8 @@ make_windows_setup:
   tags:
     - windows
   script:
+    - echo "coucou"
+    - exit 0
     - if (-not (Test-Path C:\temp\build)) {New-Item -Path C:\temp\build -ItemType Directory }
     - cd C:\temp\build
     - if ( (Test-Path .\jtable )) {Remove-Item .\jtable -Recurse -Force}
