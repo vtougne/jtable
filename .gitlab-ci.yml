@@ -139,7 +139,7 @@ deploy:
       -H "Authorization: Bearer $GITHUB_TOKEN" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
       https://api.github.com/repos/vtougne/jtable/releases \
-      -d '{"tag_name":"$new_version","target_commitish":"main","name":"$new_version","body":"$CI_COMMIT_MESSAGE","draft":false,"prerelease":false,"generate_release_notes":false}'
+      -d "{\"tag_name\":\"$new_version\",\"target_commitish\":\"main\",\"name\":\"$new_version\",\"body\":\"$CI_COMMIT_MESSAGE\",\"draft\":false,\"prerelease\":false,\"generate_release_notes\":false}"
 
   # rules:
   # - if: '$CI_COMMIT_MESSAGE =~ /make_release/'
