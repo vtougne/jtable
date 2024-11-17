@@ -1,4 +1,4 @@
-OutFile "jtable_setup.exe"
+OutFile ".\dist\jtable_setup.exe"
 InstallDir "$LOCALAPPDATA\Microsoft\WindowsApps"
 RequestExecutionLevel user
 
