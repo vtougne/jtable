@@ -14,15 +14,15 @@ except:
 def jtable_filter(dataset,select=[],path="{}",format="simple",views={}, when=[],queryset={}):
     return jtable.JtableCls(render="jinja_ansible").render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)
 
-def js_wrap(body):
+def wrap_html(body):
     # print('coucou')
-    return jtable.Filters.js_wrap(body)
+    return jtable.Filters.wrap_html(body)
 
 class FilterModule(object):
 
   def filters(self):
     return {
       'jtable': jtable_filter,
-      'js_wrap': js_wrap
+      'wrap_html': wrap_html
     }
   
