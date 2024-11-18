@@ -6,6 +6,7 @@ stages:
   - test
   - make_release
   - deploy
+  - cleanup
 
 workflow:
   rules: 
@@ -32,6 +33,8 @@ test:
   stage: test
   image: $CI_REGISTRY_IMAGE:latest
   script:
+    - pwd
+    - ls -lrta
     - pip install .
     - pip install -r requirements.txt
     - jtable -h || true
@@ -78,8 +81,8 @@ make_release:
     - git push origin main
     - git tag -f $new_version
     - git push origin $new_version
-  rules:
-    - when: manual
+  # rules:
+  #   - when: manual
 
 
 make_windows_setup:
@@ -108,6 +111,8 @@ make_windows_setup:
     - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
   rules:
     - when: manual
+  allow_failure: true
+
 
 
 deploy:
@@ -127,13 +132,28 @@ deploy:
     - cd $CI_BUILDS_DIR/root/release/$CI_PROJECT_NAME
     - new_version=$(cat jtable/version.py  | awk '{print $3'} | xargs echo)
     - echo $new_version
-    - git push -d origin ${CI_COMMIT_BRANCH}
     - git remote set-url origin git@github.com:vtougne/${CI_PROJECT_NAME}.git
     # - sleep 2000
     - git push origin $new_version
     - git push -f origin main
-  # rules:
-  # - if: '$CI_COMMIT_MESSAGE =~ /make_release/'
-  #   when: manual
-  rules:
-    - when: manual
+    - echo $CI_COMMIT_MESSAGE
+    - release_name="${CI_COMMIT_MESSAGE//$'\n'/}"
+    - |
+      curl -f -L \
+        -X POST \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        https://api.github.com/repos/vtougne/jtable/releases \
+        -d '{"tag_name":"'"$new_version"'","target_commitish":"main","name":"'"$new_version"'","body":"'"${release_name}"'","draft":false,"prerelease":false,"generate_release_notes":false}'
+
+
+cleanup:
+  # variables:
+  #   SECURE_FILES_DOWNLOAD_PATH: '.ssh'
+  stage: cleanup
+  image: $CI_REGISTRY_IMAGE:latest
+  script:
+    - cd $CI_BUILDS_DIR/$CI_PROJECT_ROOT_NAMESPACE/release/jtable
+    - git remote set-url origin http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git
+    - git push -d origin ${CI_COMMIT_BRANCH}
