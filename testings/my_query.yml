@@ -1,14 +1,17 @@
 vars:
   queryset:
-    path: simple{}
+    path: city{}
     select:
-    - as: hostname
-      expr: hostname
-    - as: os
-      expr: os
-    - as: cost
-      expr: cost
-    format: json
-  prepa_stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
-stdout: '{{ prepa_stdout | from_json|to_nice_yaml }}'
+    - as: name
+      expr: name
+    - as: hosts[0].hostname
+      expr: hosts[0].hostname
+    - as: hosts[0].os
+      expr: hosts[0].os
+    - as: hosts[0].cost
+      expr: hosts[0].cost
+    - as: hosts[0].state
+      expr: hosts[0].state
+    format: simple
+stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
 

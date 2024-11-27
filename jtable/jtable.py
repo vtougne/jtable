@@ -833,15 +833,6 @@ class JtableCls:
             exit(2)
 
 
-
-
-
-                
-
-
-
-
-
 class Plugin:
     def env(var_name,**kwargs):
         if var_name not in os.environ:
@@ -893,7 +884,6 @@ class Plugin:
 
 
 
-
 class path_auto_discover:
     def __init__(self):
         self.paths = []
@@ -908,9 +898,10 @@ class path_auto_discover:
         elif type(dataset) is list:
             # pass
             if len(dataset) > 0:
-                index=0
-                for item in dataset:
-                    self.cover_paths(item,path)
+                the_path = path[:-1] + [str(path[-1]) + "[0]"]
+                logging.info(f"path: {path[-1]}")
+                logging.info(f"the_path: {the_path}")
+                self.cover_paths(dataset[0], the_path)
             else:
                 if path[1:] not in self.fields:
                     self.fields = self.fields + [path[1:]]
@@ -939,8 +930,13 @@ class path_auto_discover:
             logging.error(f"Something wrong with your dataset, error was:")
             logging.error(f"    {error}")
             exit(1)
-
+        logging.info(f"fields: {self.fields}")
         return self.fields
+
+
+
+
+
 
 class JinjaPathSplitter:
 
@@ -1000,7 +996,7 @@ class JinjaPathSplitter:
                     pass
                 else:
                     logging.info(path[0:2])
-                    logging.info('Error what know to do with ' + path)
+                    logging.info('Error don''t know to do with ' + path)
                     logging.info('Error hapenned there ' + ''.join(self.path_list))
                     exit(1)
                 
