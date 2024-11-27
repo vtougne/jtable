@@ -112,8 +112,8 @@ cat host_list_of_dict_in_key.yml | jtable
 output:
 
 ```text
-key    value.hostname    value.os    value.cost    value.state    value.env
------  ----------------  ----------  ------------  -------------  -----------
+key    value[0].hostname    value[0].os    value[0].cost    value[0].state    value[0].env
+-----  -------------------  -------------  ---------------  ----------------  --------------
 hosts
 
 ```
@@ -420,7 +420,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-09:42:51 cls.cross_path      | ERROR .dc was not found in dataset l...
+11:01:37 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -505,7 +505,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-09:42:52 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+11:01:37 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -627,14 +627,14 @@ PLAY [localhost] ***************************************************************
 TASK [debug] *******************************************************************
 ok: [localhost] => 
   msg: |-
-    hostname    os         cost  state    service.name    ips
-    ----------  -------  ------  -------  --------------  ------------------------------
+    hostname    os         cost  state    service.name    ips[0]    ips
+    ----------  -------  ------  -------  --------------  --------  ------------------------------
     host_1      linux      5000  alive    service1
                                           service_3
     host_2      linux1      200  alive
     host_3      windows     200  alive
-    host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
-    host_5      windows    5000  decom                    []
+    host_4      windows    5000  decom                              ['192.168.1.1', '192.168.1.2']
+    host_5      windows    5000  decom                              []
 
 PLAY RECAP *********************************************************************
 localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

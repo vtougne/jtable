@@ -896,15 +896,17 @@ class path_auto_discover:
                 the_path = path + [ key ]
                 self.cover_paths(value,the_path )
         elif type(dataset) is list:
-            # pass
-            if len(dataset) > 0:
-                the_path = path[:-1] + [str(path[-1]) + "[0]"]
-                logging.info(f"path: {path[-1]}")
-                logging.info(f"the_path: {the_path}")
-                self.cover_paths(dataset[0], the_path)
-            else:
-                if path[1:] not in self.fields:
-                    self.fields = self.fields + [path[1:]]
+            if path[1:] not in self.fields:
+                self.fields = self.fields + [path[1:]]
+            # if len(dataset) > 0:
+            #     the_path = path[:-1] + [str(path[-1]) + "[0]"]
+            #     logging.info(f"path: {path[-1]}")
+            #     logging.info(f"the_path: {the_path}")
+            #     self.cover_paths(dataset[0], the_path)
+            # else:
+            #     # pass
+            #     if path[1:] not in self.fields:
+            #         self.fields = self.fields + [path[1:]]
         else:
             self.paths = self.paths + [ path + [dataset] ]
             if path[1:] not in self.fields:
