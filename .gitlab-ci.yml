@@ -157,3 +157,5 @@ cleanup:
     - cd $CI_BUILDS_DIR/$CI_PROJECT_ROOT_NAMESPACE/release/jtable
     - git remote set-url origin http://oauth2:${vince_bot_pat}@${CI_SERVER_FQDN}/${CI_PROJECT_PATH}.git
     - git push -d origin ${CI_COMMIT_BRANCH}
+  rules:
+    - when: manual
