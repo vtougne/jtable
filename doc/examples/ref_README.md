@@ -112,9 +112,9 @@ cat host_list_of_dict_in_key.yml | jtable
 output:
 
 ```text
-key    value.hostname    value.os    value.cost    value.state    value.env
------  ----------------  ----------  ------------  -------------  -----------
-hosts
+key    value
+-----  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+hosts  [{'hostname': 'host_1', 'os': 'linux', 'cost': 5000, 'state': 'alive', 'env': 'qua'}, {'hostname': 'host_2', 'os': 'windows', 'cost': 5000, 'state': 'alive', 'env': 'qua'}, {'hostname': 'host_3', 'os': 'linux', 'state': 'unreachable', 'env': 'qua'}]
 
 ```
 It looks to nothing... :)  
@@ -420,7 +420,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-16:10:34 cls.cross_path      | ERROR .dc was not found in dataset l...
+11:12:01 cls.cross_path      | ERROR .dc was not found in dataset l...
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -505,7 +505,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-16:10:34 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
+11:12:02 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_...
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
