@@ -120,7 +120,7 @@ class Filters:
         base_path = getattr(sys, '_MEIPASS', os.path.abspath('/'.join(__file__.split('/')[:-1])))
         logging.info(f"base_path: {base_path}")
         # resources_path = '/'.join(__file__.split('/')[:-1]) + "/resources"
-        if running_os == "Windows":
+        if running_platform == "Windows":
             path_sep = "\\"
         else:
             path_sep = "/"
