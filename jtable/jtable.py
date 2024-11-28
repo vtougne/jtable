@@ -120,7 +120,10 @@ class Filters:
         base_path = getattr(sys, '_MEIPASS', os.path.abspath('/'.join(__file__.split('/')[:-1])))
         logging.info(f"base_path: {base_path}")
         # resources_path = '/'.join(__file__.split('/')[:-1]) + "/resources"
-        resources_path = f"{base_path}/resources"
+        if running_os == "Windows":
+            resources_path = f"{base_path}\\resources"
+        else:
+            resources_path = f"{base_path}/resources"
         def load_file(expected_file_name):
             with open(resources_path + "/" + expected_file_name, 'r') as file:
                 content = file.read()
