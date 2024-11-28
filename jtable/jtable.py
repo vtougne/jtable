@@ -117,13 +117,12 @@ class Filters:
     def intersect(a, b):
         return list(set(a).intersection(b))
     def wrap_html(data):
-        base_path = getattr(sys, '_MEIPASS', os.path.abspath('/'.join(__file__.split('/')[:-1])))
-        logging.info(f"base_path: {base_path}")
-        # resources_path = '/'.join(__file__.split('/')[:-1]) + "/resources"
         if running_platform == "Windows":
             path_sep = "\\"
         else:
             path_sep = "/"
+        base_path = getattr(sys, '_MEIPASS', os.path.abspath(path_sep.join(__file__.split(path_sep)[:-1])))
+        logging.info(f"base_path: {base_path}")
         resources_path = f"{base_path}{path_sep}resources"
         def load_file(expected_file_name):
             with open(resources_path + path_sep + expected_file_name, 'r') as file:
