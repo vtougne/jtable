@@ -104,6 +104,17 @@ class Filters:
     def b64encode(value):
         import base64
         return base64.b64encode(value.encode('utf-8')).decode('utf-8')
+    def escape(value,format="html"):
+        if format == "html":
+            return html.escape(value)
+        elif format == "quote":
+            return value.replace('\\', '\\\\').replace('"', '\\"')
+    def unescape(value,format="html"):
+        if format == "html":
+            return html.unescape(value)
+        elif format == "quote":
+            return value.replace('\\"', '"').replace('\\\\', '\\')
+
     def flatten(matrix):
         return [item for row in matrix for item in row]
     def from_json(str):
@@ -334,7 +345,9 @@ class JtableCli:
             jtable_plugins = [name for name, func in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
             print(f"\njtable core filters:\n   {', '.join(jtable_core_filters)}\n")
             tablulate_formats = next((value for name, value in inspect.getmembers(tabulate) if name == 'tabulate_formats'), None)
-            print(f"table formats:\n   {', '.join(tablulate_formats)}\n")
+            jtable_formats = ['json','th','td']
+            print(f"jtable formats:\n   {', '.join(sorted(jtable_formats))}\n")
+            print(f"tabulate table formats:\n   {', '.join(sorted(tablulate_formats))}\n")
             print(f"jtable plugins:\n   {', '.join(jtable_plugins)}\n")
             exit(1)
 
