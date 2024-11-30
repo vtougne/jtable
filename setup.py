@@ -19,10 +19,10 @@ class CustomInstallCommand(install):
 setup(
     name="jtable",
     version=__version__,
-    packages=find_packages(),
+    packages=find_packages(include=["jtable", "jtable.*"]),
     # Supprimé install_requires car les dépendances sont gérées localement
     include_package_data=True,
-    package_data={'': ['resources/*','logger.py']},
+    package_data={'': ['resources/*']},
     entry_points={
         'console_scripts': [
             'jtable=jtable.jtable:main',
