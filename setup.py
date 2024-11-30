@@ -5,21 +5,6 @@ from setuptools import setup, find_packages
 from setuptools.command.install import install
 from jtable.version import __version__
 
-# class CustomInstallCommand(install):
-#     """Installation personnalisée pour inclure les dépendances locales."""
-#     def run(self):
-#         # Installer les dépendances locales
-#         dependencies_dir = os.path.join(os.path.dirname(__file__), "dependencies")
-#         if os.path.exists(dependencies_dir):
-#             for dep in os.listdir(dependencies_dir):
-#                 if dep.endswith(".whl") or dep.endswith(".tar.gz"):
-#                     dep_path = os.path.abspath(os.path.join(dependencies_dir, dep))
-#                     print(f"Installing dependency: {dep_path}")
-#                     subprocess.check_call(["pip", "install", "--no-index", dep_path])
-        
-#         # Continuer avec l'installation normale
-#         install.run(self)
-
 class CustomInstallCommand(install):
     def run(self):
         dependencies_dir = os.path.join(os.path.dirname(__file__), "dependencies")
@@ -37,7 +22,7 @@ setup(
     packages=find_packages(),
     # Supprimé install_requires car les dépendances sont gérées localement
     include_package_data=True,
-    package_data={'': ['resources/*']},
+    package_data={'': ['resources/*','logger.py']},
     entry_points={
         'console_scripts': [
             'jtable=jtable.jtable:main',
