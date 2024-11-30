@@ -3,4 +3,5 @@ include LICENSE.txt
 include dependencies/requirements.txt
 include dependencies/*.whl
 include dependencies/*.tar.gz
+include jtable/logger.py
 recursive-include jtable/resources *
