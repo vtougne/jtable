@@ -3,13 +3,13 @@ import sys, json, re, os, ast, inspect, datetime, time, logging, logging.config,
 from os import isatty
 from sys import exit
 from typing import Any, Dict, Optional
-from logger import CustomFormatter, CustomFilter, _ExcludeErrorsFilter, logging_config
 # import filters as Filters
 
 jtable_path = os.path.dirname(os.path.abspath(__file__))
 
 if jtable_path not in sys.path:
     sys.path.insert(0, jtable_path)
+from logger import CustomFormatter, CustomFilter, _ExcludeErrorsFilter, logging_config
 
 import version
 import tabulate
