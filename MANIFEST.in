@@ -4,5 +4,3 @@ include dependencies/requirements.txt
 include dependencies/*.whl
 include dependencies/*.tar.gz
 recursive-include jtable/resources *
-recursive-include jtable *.py
-include jtable/logger.py

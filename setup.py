@@ -21,7 +21,7 @@ setup(
     version=__version__,
     packages=find_packages(),
     # packages=find_packages(include=["jtable", "jtable.*","logger"]),
-    py_modules=["logger"],
+    # py_modules=["logger"],
     include_package_data=True,
     package_data={'': ['resources/*']},
     entry_points={
