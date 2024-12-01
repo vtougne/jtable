@@ -1022,7 +1022,7 @@ class Templater:
         jtable_core_filters = [name[0] for name in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
             env.filters[filter_name] = getattr(Filters, filter_name)
-        logging.info(f"jtable_core_filters: {jtable_core_filters}")
+        # logging.info(f"jtable_core_filters: {jtable_core_filters}")
 
         ####################  Add plugin function ####################
         jtable_core_plugins = [name[0] for name in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
