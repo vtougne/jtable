@@ -9,6 +9,9 @@ vars:
       expr: key
     - as: env
       expr: value.environment
+      styling:
+      - when: ["value.environment == 'dev'"]
+        style: "background-color: lightblue"
     - as: dc_name
       expr: value.dc_name
     - as: os
@@ -21,18 +24,19 @@ vars:
         - when: ["value.state == 'alive'"]
           style: "color: green"
         - when: ["value.state == 'unreachable'"]
-          style: "color: red"
+          style: "color: orange"
           formating: "underlined"
     - as: uptime
       expr: days
       styling:
-        - when:
-          - "uptime_in_day | int < 30"
+        - when: ["uptime_in_day | int < 30"]
           style: "color: green"
-        - when: 
-          - "uptime_in_day | int >= 30"
+        - when: ["uptime_in_day | int >= 30","uptime_in_day | int < 60"]
+          style: "color: orange"
+        - when: ["uptime_in_day | int >= 60"]
           style: "color: red"
-          formating: "underlined"
+
+          # formating: "underlined"
     - as: location
       expr: dc_location[value.dc_name]
     - as: ip_address

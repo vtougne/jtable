@@ -714,7 +714,7 @@ class JtableCls:
                 condition_test_result = "True"
                 for condition in when:
                     jinja_expr = '{{ ' + condition  + ' }}'
-                    logging.info(f"item_name: {item_name}")
+                    # logging.info(f"item_name: {item_name}")
                     logging.info(f"when: {when}")
                     # loop_condition_context = item
                     # loop_condition_context = { item_name: item } if item_name != '' else item
@@ -773,6 +773,7 @@ class JtableCls:
                             condition_color = when(when = color_conditions, when_context = {**context,**view_context})
                             if condition_color == "True":
                                 value = Styling().apply(value = value,format=self.format, styling_attributes = styling_attributes)
+                                # logging.info(f"condition_color value: {value}")
 
                     row = row + [ value ]
                     del value
@@ -984,15 +985,31 @@ class Styling:
     def view_all_colors(self):
         return self.color_table
     def get_color(self,color_name="",format=""):
-        return [color for color in self.color_table if color['name'].lower() == color_name.lower() ][0][format]
+        color_match=[color for color in self.color_table if color['name'].lower() == color_name.lower() ]
+        # logging.info(f"color_match: {color_match}")
+        # logging.info(f"color_match: {format}")
+        if color_match == []:
+            return ""
+        else:
+            if format == "html":
+                color_pallet = "hex"
+            elif format == "simple":
+                color_pallet = "ansi_code"
+            elif format == "github":
+                return color_name
+            else:
+                return ""
+        # logging.info(f"color_match: {color_match[0]}")
+        return color_match[0][color_pallet]
+
 
     def apply(self,value="",format="",styling_attributes={}):
         # if format == "simple":
-            logging.info(f"style: {styling_attributes['style']}")
+            # logging.info(f"style: {styling_attributes['style']}")
             if "style" in styling_attributes:
-                style_value = styling_attributes['style'].split(": ")[1]
+                color_label = styling_attributes['style'].split(": ")[1]
             else:
-                style_value = "white"
+                color_label = "white"
             text_formating = 0
             formating = ""
             if "formating" in styling_attributes:
@@ -1010,20 +1027,29 @@ class Styling:
             else:
                 logging.error(f"Unknown formating: {formating}")
                 exit(1)
-            logging.info(f"style_value: {style_value}")
-            color_value = self.get_color(style_value,"ansi_code")
-            if format == "simple":
-                value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
-            elif format == "github":
-                # value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
-                # value_colorized = f"$`\textcolor{{red}}{{\text{{Smith}}`$"
-                value_colorized = r"$`\textcolor{"+ style_value + r"}{\text{" + value + "}}`$"
-            elif format == "html":
-                value_colorized = r'<span style="' + styling_attributes['style'] + r';">' + value + r"</span>"
-            else:
-                value_colorized = f"\x1b[{text_formating};{color_value}m{value}\x1b[0m"
+            # color_corresp = self.get_color(color_label,"ansi_code")
+            color_corresp = self.get_color(color_label,format)
 
-            logging.info(f"format: {format}")   
+            if color_corresp == "":
+                if format == "html":
+                    value_colorized  = r'<span style="' + styling_attributes['style'] + ';">' + value + r"</span>"
+                else:
+                    logging.info(f"style '{styling_attributes['style']}' not found, using default")
+                    value_colorized = value
+
+            else:
+                if format == "simple":
+                    value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
+                elif format == "github":
+                    # value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
+                    # value_colorized = f"$`\textcolor{{red}}{{\text{{Smith}}`$"
+                    value_colorized = r"$`\textcolor{"+ color_label + r"}{\text{" + value + "}}`$"
+                elif format == "html":
+                    value_colorized  = r'<span style="' + styling_attributes['style'] + r';">' + value + r"</span>"
+                else:
+                    value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
+
+                logging.info(f"format: {format}")   
             return value_colorized
 
 class Templater:
