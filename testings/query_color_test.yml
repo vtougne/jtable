@@ -18,9 +18,9 @@ vars:
         expr: state
         styling:
           - when: ["state == 'alive'"]
-            style: "color: green"
+            style: "background-color: green"
           - when: ["state == 'unreachable'"]
-            style: "color: red"
+            style: "background-color: LightRed"
             formating: "underlined"
       - as: "cost"
         expr: cost

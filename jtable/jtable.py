@@ -202,7 +202,7 @@ class JtableCli:
 
         parser = argparse.ArgumentParser(description='Tabulate your JSON/Yaml data and transform it using Jinja',add_help=False)
 
-        parser.add_argument("-h", "--help",action="store_true", help = "Show this help")
+        parser.add_argument("-h", "--help",nargs="*", help = "Show this help")
         parser.add_argument("-p", "--json_path", help = "json path")
         parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
         parser.add_argument("-w", "--when", help = "key_1 == 'value'")
@@ -270,6 +270,16 @@ class JtableCli:
                 stdin = stdin + line
             self.dataset = { self.tabulate_var_name: stdin }
 
+        if args.help:
+            if args.help == ['color']:
+                jtable_color = [name for name, func in inspect.getmembers(Styling().__init__())]
+                print(Styling().view_all_colors())
+                exit(1)
+            else:
+                print(f"Error: No help available for '{args.help[0]}'")
+                exit(1)
+
+
         if not is_pipe and not args.json_file and not args.json_files and not args.query_file and not args.yaml_files and not args.stdout:
 
             parser.print_help(sys.stdout)
@@ -278,9 +288,11 @@ class JtableCli:
             print(f"\njtable core filters:\n   {', '.join(jtable_core_filters)}\n")
             tablulate_formats = next((value for name, value in inspect.getmembers(tabulate) if name == 'tabulate_formats'), None)
             jtable_formats = ['json','th','td']
-            print(f"jtable formats:\n   {', '.join(sorted(jtable_formats))}\n")
-            print(f"tabulate table formats:\n   {', '.join(sorted(tablulate_formats))}\n")
+            print(f"tabulate formats:\n   {', '.join(sorted(tablulate_formats))}\n")
+            print(f"jtable additional formats:\n   {', '.join(sorted(jtable_formats))}\n")
             print(f"jtable plugins:\n   {', '.join(jtable_plugins)}\n")
+            print(f"More help with jtable -h <help topic>")
+            print(f"  colors:\n    type jtable -h color | jtable\n")
             exit(1)
 
         if args.json_file:
@@ -969,7 +981,8 @@ class JinjaPathSplitter:
 class Styling:
     def __init__(self):
         self.color_table = [{"name":"Black","ansi_code":30,"hex":"#000000"},{"name":"Red","ansi_code":31,"hex":"#FF0000"},{"name":"Green","ansi_code":32,"hex":"#008000"},{"name":"Yellow","ansi_code":33,"hex":"#FFFF00"},{"name":"Blue","ansi_code":34,"hex":"#0000FF"},{"name":"Magenta","ansi_code":35,"hex":"#FF00FF"},{"name":"Cyan","ansi_code":36,"hex":"#00FFFF"},{"name":"White","ansi_code":37,"hex":"#FFFFFF"},{"name":"Gray","ansi_code":90,"hex":"#808080"},{"name":"LightRed","ansi_code":91,"hex":"#FF8080"},{"name":"LightGreen","ansi_code":92,"hex":"#80FF80"},{"name":"LightYellow","ansi_code":93,"hex":"#FFFF80"},{"name":"LightBlue","ansi_code":94,"hex":"#8080FF"},{"name":"LightMagenta","ansi_code":95,"hex":"#FF80FF"},{"name":"LightCyan","ansi_code":96,"hex":"#80FFFF"},{"name":"LightWhite","ansi_code":97,"hex":"#F0F0F0"}]
-    
+    def view_all_colors(self):
+        return self.color_table
     def get_color(self,color_name="",format=""):
         return [color for color in self.color_table if color['name'].lower() == color_name.lower() ][0][format]
 

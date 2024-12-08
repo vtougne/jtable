@@ -6,7 +6,7 @@ RUN usermod -aG sudo jtable
 RUN echo "jtable ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 USER jtable
 RUN sudo apt-get update
-RUN sudo apt-get install -y pip curl less git
+RUN sudo apt-get install -y pip curl less git iputils-ping
 
 WORKDIR /project/jtable
 RUN echo 'set -o vi' >> /home/jtable/.bashrc

@@ -25,3 +25,6 @@ services:
     volumes:
       - ../jtable:/project/jtable
       - ../../sample/python:/project/testings
+      - ../gitlab_admin:/project/gitlab_admin
+      - ../../../../local:/project/local
+
