@@ -57,6 +57,7 @@ vars:
 
 stdout: |
   {% if queryset.format == 'html' %}
+  <h1>Infra view</h1>
   {{ hosts | jtable(queryset=queryset) | wrap_html }}
   {% else %}
   {{ hosts | jtable(queryset=queryset) }}

@@ -1,6 +1,6 @@
 // var tables = document.getElementsByTagName('table');
 const tables = document.querySelectorAll("table");
-top_search_box = "<input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'>\n"
+top_search_box = "<header><input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'></header>\n"
 
 let selectedTable = null; // Variable pour stocker la table sélectionnée
 
@@ -33,7 +33,7 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
-
+add_toc()
 $(top_search_box).prependTo("body");
 // console.log(top_search_box);
 let table_id = 0;
@@ -57,6 +57,8 @@ for (const table of tables) {
   table_id++;
 
 }
+
+
 function filterAllTables() {
   var search_input = $("#top-search-container").val().toUpperCase();
   tableId = 0;
@@ -129,4 +131,34 @@ function sortTable(table_id, column) {
   rows.forEach(function (row) {
     table.tBodies[0].appendChild(row);
   });
+}
+
+function add_toc() {
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const tocContainer = document.getElementById("toc");
+    const headers = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+
+    if (!tocContainer || headers.length === 0) return;
+
+    const tocList = document.createElement("ul");
+
+    headers.forEach(header => {
+        const level = parseInt(header.tagName.substring(1), 10); // e.g., 1 for <h1>, 2 for <h2>
+        const listItem = document.createElement("li");
+        listItem.style.marginLeft = `${(level - 1) * 15}px`; // Indentation based on header level
+        
+        const anchor = document.createElement("a");
+        const headerID = header.id || header.textContent.trim().replace(/\s+/g, "-").toLowerCase();
+        header.id = headerID; // Assign an ID if it doesn't exist
+        
+        anchor.href = `#${headerID}`;
+        anchor.textContent = header.textContent;
+
+        listItem.appendChild(anchor);
+        tocList.appendChild(listItem);
+    });
+
+    tocContainer.appendChild(tocList);
+});
 }

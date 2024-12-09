@@ -85,6 +85,7 @@ class Filters:
                   {js_wrapper_css}
                 </style>
                 <body>
+                  <div id="toc"></div>
                   {data}
                 <script>
                   {js_wrapper_script}
