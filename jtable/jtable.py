@@ -89,7 +89,7 @@ class Filters:
     <body>
     <div id="toc"></div>
     {data}
-    <button id="scrollTopButton" onclick="scrollToTop()">⬆</button>
+    <button id="scrollTopButton" onclick="scrollToTop()">Top</button>
     <script>
       {js_wrapper_script}
     </script>
