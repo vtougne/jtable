@@ -1,8 +1,9 @@
 // var tables = document.getElementsByTagName('table');
 const tables = document.querySelectorAll("table");
-top_search_box = "<header><input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'></header>\n"
+top_search_box = "<header><input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'></header>"
 
 let selectedTable = null; // Variable pour stocker la table sélectionnée
+add_toc()
 
 // Écouteur pour détecter le clic sur une table
 tables.forEach(table => {
@@ -33,7 +34,6 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
-add_toc()
 $(top_search_box).prependTo("body");
 // console.log(top_search_box);
 let table_id = 0;
@@ -162,3 +162,32 @@ function add_toc() {
     tocContainer.appendChild(tocList);
 });
 }
+
+
+
+const button = document.getElementById('scrollTopButton');
+
+// Afficher ou masquer le bouton en fonction du défilement
+window.onscroll = function() {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight;
+  const clientHeight = document.documentElement.clientHeight;
+
+  // Vérifie si l'utilisateur est au bas de la page
+  if (scrollTop + clientHeight >= scrollHeight - 10) {
+    button.style.display = "none";
+  } else if (scrollTop > 200) {
+    button.style.display = "block";
+  } else {
+    button.style.display = "none";
+  }
+};
+
+// Fonction pour revenir en haut de la page
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+

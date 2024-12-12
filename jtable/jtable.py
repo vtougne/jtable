@@ -75,23 +75,26 @@ class Filters:
         js_wrapper_css = load_file("js_wrapper.css")
         js_wrapper_script = load_file("js_wrapper.js")
 
-        return f"""
-          <!DOCTYPE html>
-            <html>
-              <head>
-                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-                
-                <style>
-                  {js_wrapper_css}
-                </style>
-                <body>
-                  <div id="toc"></div>
-                  {data}
-                <script>
-                  {js_wrapper_script}
-                </script>
-                </body>
-            </html>
+        return f"""<!DOCTYPE html>
+<html lang="fr">
+<html>
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <style>
+          {js_wrapper_css}
+        </style>
+    <body>
+    <div id="toc"></div>
+    {data}
+    top_search_box = "<header><input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'></header>"
+    <button id="scrollTopButton" onclick="scrollToTop()">⬆</button>
+    <script>
+      {js_wrapper_script}
+    </script>
+    </body>
+</html>
           """
     def jtable(dataset,select=[], unselect=[],path="{}",format="",views={}, when=[],context = {}, queryset={}):
         return JtableCls().render_object( dataset,path=path, select=select, unselect=unselect,views=views, when=when, format=format, context = context, queryset=queryset)

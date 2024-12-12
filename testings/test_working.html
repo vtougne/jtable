@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <html>
+              <head>
+
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+                <style>
+                  header {
+  position: sticky;
+  top: 0;
+  /* Position de l'en-tête par rapport au haut */
+  background-color: rgb(200, 232, 242);
+  padding: 10px;
+  border-bottom: 2px solid gray;
+  z-index: 10;
+  /* S'assurer qu'il est au-dessus du reste */
+}
+
+/* section {
+  height: 2000px; 
+  padding: 10px;
+} */
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  /* width: 80%; */
+  text-align: left;
+  margin-left: 2.5%
+}
+
+th,
+td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#top-search-container {
+  display: block;
+  align-items: center;
+  /* border: 1px solid #4f1616; */
+  /* padding: 5px; */
+  margin: 5px auto;
+  border-radius: 5px;
+  /* width: 300px; */
+}
+
+.search-container {
+  /* display: flex; */
+  align-items: center;
+  border: 1px solid #4f1616;
+  /* padding: 5px; */
+  border-radius: 5px;
+  /* width: 300px; */
+}
+
+#toc {
+  border: 1px solid #ccc;
+  /* padding: 10px; */
+  max-width: 300px;
+  background: #f9f9f9;
+}
+
+#toc ul {
+  list-style: none;
+  padding-left: 10px;
+}
+
+#toc li {
+  margin: 5px 0;
+}
+
+
+
+#scrollTopButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: none;
+  background-color: #b9c9dd;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  text-align: center;
+  line-height: 60px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#scrollTopButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+
+
+                </style>
+                <body>
+                  <div id="toc"></div>
+                  <!-- <div style="height: 2000px; padding: 20px;">
+                    <p>Faites défiler pour voir le bouton apparaître.</p>
+                  </div> -->
+
+                  <table>
+<thead>
+<tr><th>ap_code  </th><th>hostname   </th><th>env                                                  </th><th>dc_name  </th><th>os     </th><th style="text-align: right;">  os_level</th><th>state                                          </th><th>uptime                                     </th><th>location  </th><th>ip_address     </th></tr>
+</thead>
+<tbody>
+<tr><td>AP148    </td><td>host-gma206</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-2     </td><td>Linux  </td><td style="text-align: right;">       5.2</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">2 days</span>  </td><td>North     </td><td>99.50.142.247  </td></tr>
+<tr><td>AP520    </td><td>host-mpd403</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-4     </td><td>Linux  </td><td style="text-align: right;">       2.4</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">88 days</span>   </td><td>South     </td><td>5.214.201.213  </td></tr>
+<tr><td>AP124    </td><td>host-ows650</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-6     </td><td>Linux  </td><td style="text-align: right;">       6.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">77 days</span>   </td><td>West      </td><td>228.240.104.0  </td></tr>
+<tr><td>AP184    </td><td>host-gss970</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       8.6</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">69 days</span>   </td><td>          </td><td>105.182.196.155</td></tr>
+<tr><td>AP184    </td><td>host-scb505</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-4     </td><td>Linux  </td><td style="text-align: right;">       3.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">62 days</span>   </td><td>South     </td><td>41.154.16.61   </td></tr>
+<tr><td>AP124    </td><td>host-vwh529</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       7.5</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: red;">81 days</span>   </td><td>          </td><td>91.34.38.169   </td></tr>
+<tr><td>AP148    </td><td>host-bdy315</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Windows</td><td style="text-align: right;">       9.6</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">50 days</span></td><td>          </td><td>126.14.12.62   </td></tr>
+<tr><td>AP520    </td><td>host-wiv286</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-6     </td><td>Linux  </td><td style="text-align: right;">      10  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">7 days</span>  </td><td>West      </td><td>206.67.119.131 </td></tr>
+<tr><td>AP124    </td><td>host-bfp283</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       2.6</td><td>                                               </td><td><span style="color: orange;">58 days</span></td><td>West      </td><td>159.224.229.63 </td></tr>
+<tr><td>AP184    </td><td>host-odg934</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-6     </td><td>Linux  </td><td style="text-align: right;">       9.6</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: red;">63 days</span>   </td><td>West      </td><td>165.147.230.109</td></tr>
+<tr><td>AP148    </td><td>host-tds022</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-6     </td><td>Linux  </td><td style="text-align: right;">       7.3</td><td>                                               </td><td><span style="color: red;">63 days</span>   </td><td>West      </td><td>9.45.206.164   </td></tr>
+<tr><td>AP520    </td><td>host-gya158</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-3     </td><td>Windows</td><td style="text-align: right;">       8.2</td><td>                                               </td><td><span style="color: red;">63 days</span>   </td><td>North     </td><td>208.27.222.227 </td></tr>
+<tr><td>AP184    </td><td>host-fyr850</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-4     </td><td>Windows</td><td style="text-align: right;">       5.6</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: red;">76 days</span>   </td><td>South     </td><td>181.155.203.110</td></tr>
+<tr><td>AP148    </td><td>host-tcp166</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       9.4</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">19 days</span> </td><td>          </td><td>182.160.12.169 </td></tr>
+<tr><td>AP184    </td><td>host-grc952</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-9     </td><td>Linux  </td><td style="text-align: right;">       7  </td><td>                                               </td><td><span style="color: green;">10 days</span> </td><td>          </td><td>249.23.29.61   </td></tr>
+<tr><td>AP148    </td><td>host-wuz415</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-9     </td><td>Linux  </td><td style="text-align: right;">       9.5</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: green;">19 days</span> </td><td>          </td><td>40.250.245.138 </td></tr>
+<tr><td>AP148    </td><td>host-cri540</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-1     </td><td>Windows</td><td style="text-align: right;">       8.6</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: orange;">50 days</span></td><td>East      </td><td>27.247.181.148 </td></tr>
+<tr><td>AP124    </td><td>host-ecj593</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       8.8</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: green;">28 days</span> </td><td>West      </td><td>217.124.92.14  </td></tr>
+<tr><td>AP520    </td><td>host-lig121</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       5.4</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">60 days</span>   </td><td>          </td><td>69.178.15.76   </td></tr>
+<tr><td>AP124    </td><td>host-gwo589</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-9     </td><td>Linux  </td><td style="text-align: right;">       8.3</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">10 days</span> </td><td>          </td><td>4.253.190.196  </td></tr>
+<tr><td>AP124    </td><td>host-jal943</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">      10  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">5 days</span>  </td><td>          </td><td>72.231.18.213  </td></tr>
+<tr><td>AP520    </td><td>host-egu824</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-6     </td><td>Windows</td><td style="text-align: right;">       3.2</td><td>                                               </td><td><span style="color: orange;">55 days</span></td><td>West      </td><td>121.38.220.93  </td></tr>
+<tr><td>AP184    </td><td>host-jbr844</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       7.1</td><td>                                               </td><td><span style="color: green;">1</span>       </td><td>West      </td><td>126.69.97.75   </td></tr>
+<tr><td>AP520    </td><td>host-yuu939</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-3     </td><td>Linux  </td><td style="text-align: right;">       2  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">89 days</span>   </td><td>North     </td><td>93.69.86.8     </td></tr>
+<tr><td>AP520    </td><td>host-xan846</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-9     </td><td>Linux  </td><td style="text-align: right;">       8.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">43 days</span></td><td>          </td><td>129.57.91.198  </td></tr>
+<tr><td>AP148    </td><td>host-wmx794</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">       7.6</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">52 days</span></td><td>East      </td><td>56.78.37.20    </td></tr>
+<tr><td>AP124    </td><td>host-atv208</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       2  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">53 days</span></td><td>West      </td><td>132.173.1.97   </td></tr>
+<tr><td>AP148    </td><td>host-zte200</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-8     </td><td>Linux  </td><td style="text-align: right;">       8.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">17 days</span> </td><td>          </td><td>72.184.30.26   </td></tr>
+<tr><td>AP184    </td><td>host-jcj310</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-9     </td><td>Windows</td><td style="text-align: right;">       8.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">75 days</span>   </td><td>          </td><td>2.226.7.84     </td></tr>
+<tr><td>AP148    </td><td>host-kys225</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-9     </td><td>Linux  </td><td style="text-align: right;">       1  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">78 days</span>   </td><td>          </td><td>148.106.75.152 </td></tr>
+<tr><td>AP124    </td><td>host-iqq927</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       9.2</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">50 days</span></td><td>          </td><td>80.165.61.48   </td></tr>
+<tr><td>AP148    </td><td>host-qpl169</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       1.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">54 days</span></td><td>West      </td><td>119.204.6.169  </td></tr>
+<tr><td>AP148    </td><td>host-uce497</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       3.4</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">47 days</span></td><td>          </td><td>73.11.8.19     </td></tr>
+<tr><td>AP148    </td><td>host-yzz287</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-8     </td><td>Linux  </td><td style="text-align: right;">       1.8</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">43 days</span></td><td>          </td><td>134.158.172.54 </td></tr>
+<tr><td>AP184    </td><td>host-nar853</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       6.3</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">31 days</span></td><td>West      </td><td>129.151.234.58 </td></tr>
+<tr><td>AP184    </td><td>host-vtc086</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-3     </td><td>Windows</td><td style="text-align: right;">       8.3</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">11 days</span> </td><td>North     </td><td>15.179.191.168 </td></tr>
+<tr><td>AP184    </td><td>host-otw933</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       6.3</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">30 days</span></td><td>West      </td><td>9.217.249.205  </td></tr>
+<tr><td>AP184    </td><td>host-lct340</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       5.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">4 days</span>  </td><td>          </td><td>129.152.99.52  </td></tr>
+<tr><td>AP124    </td><td>host-trg513</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">      10.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">31 days</span></td><td>East      </td><td>254.83.225.94  </td></tr>
+<tr><td>AP148    </td><td>host-ehc010</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-4     </td><td>Windows</td><td style="text-align: right;">       1.2</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">66 days</span>   </td><td>South     </td><td>228.140.88.235 </td></tr>
+<tr><td>AP124    </td><td>host-njw194</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       8.8</td><td>                                               </td><td><span style="color: orange;">47 days</span></td><td>West      </td><td>116.79.164.52  </td></tr>
+<tr><td>AP184    </td><td>host-fca451</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       1.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">23 days</span> </td><td>          </td><td>208.244.19.236 </td></tr>
+<tr><td>AP520    </td><td>host-aif141</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-4     </td><td>Linux  </td><td style="text-align: right;">       6.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">83 days</span>   </td><td>South     </td><td>208.14.234.99  </td></tr>
+<tr><td>AP184    </td><td>host-dmb669</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       7.3</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">75 days</span>   </td><td>West      </td><td>143.228.233.44 </td></tr>
+<tr><td>AP520    </td><td>host-ybr080</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       4.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">41 days</span></td><td>West      </td><td>31.156.251.131 </td></tr>
+<tr><td>AP520    </td><td>host-lnp231</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-2     </td><td>Linux  </td><td style="text-align: right;">       7.6</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">67 days</span>   </td><td>North     </td><td>229.177.239.67 </td></tr>
+<tr><td>AP184    </td><td>host-pmr034</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       8.1</td><td>                                               </td><td><span style="color: orange;">43 days</span></td><td>          </td><td>200.183.62.85  </td></tr>
+<tr><td>AP184    </td><td>host-sph357</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-1     </td><td>Windows</td><td style="text-align: right;">       9.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">31 days</span></td><td>East      </td><td>164.210.37.155 </td></tr>
+<tr><td>AP184    </td><td>host-nnl363</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-2     </td><td>Linux  </td><td style="text-align: right;">       5  </td><td><span style="color: orange;">unreachable</span></td><td><span style="color: red;">70 days</span>   </td><td>North     </td><td>225.255.173.198</td></tr>
+<tr><td>AP520    </td><td>host-xah450</td><td><span style="background-color: lightblue;">dev</span></td><td>dc-8     </td><td>Linux  </td><td style="text-align: right;">       5.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">41 days</span></td><td>          </td><td>62.202.157.112 </td></tr>
+<tr><td>AP148    </td><td>host-ial199</td><td>qua                                                  </td><td>dc-9     </td><td>Linux  </td><td style="text-align: right;">       8.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">27 days</span> </td><td>          </td><td>62.203.153.144 </td></tr>
+<tr><td>AP520    </td><td>host-bch697</td><td>qua                                                  </td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       2.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">34 days</span></td><td>          </td><td>102.52.43.108  </td></tr>
+<tr><td>AP148    </td><td>host-gzp313</td><td>qua                                                  </td><td>dc-5     </td><td>Windows</td><td style="text-align: right;">       8.3</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">8 days</span>  </td><td>West      </td><td>116.130.19.249 </td></tr>
+<tr><td>AP184    </td><td>host-ymo116</td><td>qua                                                  </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       5.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">23 days</span> </td><td>West      </td><td>224.204.114.238</td></tr>
+<tr><td>AP148    </td><td>host-hck620</td><td>qua                                                  </td><td>dc-6     </td><td>Linux  </td><td style="text-align: right;">       6.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">6 days</span>  </td><td>West      </td><td>205.181.253.16 </td></tr>
+<tr><td>AP520    </td><td>host-hdm289</td><td>qua                                                  </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">      10.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">46 days</span></td><td>West      </td><td>124.229.219.123</td></tr>
+<tr><td>AP520    </td><td>host-ylo131</td><td>qua                                                  </td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">       1  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">87 days</span>   </td><td>East      </td><td>68.64.82.197   </td></tr>
+<tr><td>AP124    </td><td>host-gcq677</td><td>qua                                                  </td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">       6.4</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: green;">29 days</span> </td><td>East      </td><td>60.10.177.222  </td></tr>
+<tr><td>AP520    </td><td>host-egz750</td><td>qua                                                  </td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       6.9</td><td>                                               </td><td><span style="color: red;">61 days</span>   </td><td>          </td><td>224.173.54.177 </td></tr>
+<tr><td>AP124    </td><td>host-kis802</td><td>qua                                                  </td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       3.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">16 days</span> </td><td>West      </td><td>187.39.160.246 </td></tr>
+<tr><td>AP124    </td><td>host-prz875</td><td>qua                                                  </td><td>dc-1     </td><td>Windows</td><td style="text-align: right;">       6.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">18 days</span> </td><td>East      </td><td>144.106.7.147  </td></tr>
+<tr><td>AP184    </td><td>host-jed763</td><td>qua                                                  </td><td>dc-8     </td><td>Linux  </td><td style="text-align: right;">       4.4</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">55 days</span></td><td>          </td><td>61.54.176.220  </td></tr>
+<tr><td>AP184    </td><td>host-ohj959</td><td>qua                                                  </td><td>dc-8     </td><td>Linux  </td><td style="text-align: right;">       4.5</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: green;">21 days</span> </td><td>          </td><td>50.239.41.161  </td></tr>
+<tr><td>AP520    </td><td>host-yoj208</td><td>qua                                                  </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">      10.7</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: orange;">42 days</span></td><td>West      </td><td>142.107.123.45 </td></tr>
+<tr><td>AP148    </td><td>host-uxz086</td><td>qua                                                  </td><td>dc-3     </td><td>Linux  </td><td style="text-align: right;">       6.3</td><td>                                               </td><td><span style="color: red;">63 days</span>   </td><td>North     </td><td>145.67.21.135  </td></tr>
+<tr><td>AP148    </td><td>host-rvh410</td><td>qua                                                  </td><td>dc-2     </td><td>Windows</td><td style="text-align: right;">       2.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">14 days</span> </td><td>North     </td><td>114.12.90.190  </td></tr>
+<tr><td>AP520    </td><td>host-iad391</td><td>qua                                                  </td><td>dc-5     </td><td>Windows</td><td style="text-align: right;">      10.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">54 days</span></td><td>West      </td><td>43.62.69.239   </td></tr>
+<tr><td>AP184    </td><td>host-eeg459</td><td>qua                                                  </td><td>dc-6     </td><td>Windows</td><td style="text-align: right;">       6.5</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: green;">21 days</span> </td><td>West      </td><td>41.88.144.40   </td></tr>
+<tr><td>AP124    </td><td>host-bpf405</td><td>qua                                                  </td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       6.2</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">49 days</span></td><td>West      </td><td>45.62.43.95    </td></tr>
+<tr><td>AP184    </td><td>host-qll633</td><td>qua                                                  </td><td>dc-6     </td><td>Linux  </td><td style="text-align: right;">       7.2</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">44 days</span></td><td>West      </td><td>241.111.87.128 </td></tr>
+<tr><td>AP184    </td><td>host-wyy716</td><td>qua                                                  </td><td>dc-4     </td><td>Linux  </td><td style="text-align: right;">      10.3</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">75 days</span>   </td><td>South     </td><td>186.218.198.206</td></tr>
+<tr><td>AP520    </td><td>host-bbk946</td><td>qua                                                  </td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">       9.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">7 days</span>  </td><td>East      </td><td>79.154.80.131  </td></tr>
+<tr><td>AP520    </td><td>host-tml592</td><td>qua                                                  </td><td>dc-3     </td><td>Windows</td><td style="text-align: right;">       7.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">34 days</span></td><td>North     </td><td>42.72.70.213   </td></tr>
+<tr><td>AP148    </td><td>host-gir413</td><td>qua                                                  </td><td>dc-6     </td><td>Linux  </td><td style="text-align: right;">       2.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">39 days</span></td><td>West      </td><td>47.33.249.97   </td></tr>
+<tr><td>AP184    </td><td>host-kpp549</td><td>qua                                                  </td><td>dc-4     </td><td>Linux  </td><td style="text-align: right;">       6.1</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: green;">14 days</span> </td><td>South     </td><td>220.13.138.184 </td></tr>
+<tr><td>AP124    </td><td>host-ggi615</td><td>qua                                                  </td><td>dc-8     </td><td>Windows</td><td style="text-align: right;">       1.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">52 days</span></td><td>          </td><td>187.148.41.6   </td></tr>
+<tr><td>AP148    </td><td>host-cax694</td><td>qua                                                  </td><td>dc-5     </td><td>Windows</td><td style="text-align: right;">       3  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">26 days</span> </td><td>West      </td><td>220.84.40.61   </td></tr>
+<tr><td>AP184    </td><td>host-zqt202</td><td>qua                                                  </td><td>dc-3     </td><td>Linux  </td><td style="text-align: right;">       1  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">27 days</span> </td><td>North     </td><td>238.8.74.185   </td></tr>
+<tr><td>AP124    </td><td>host-zzx003</td><td>qua                                                  </td><td>dc-8     </td><td>Windows</td><td style="text-align: right;">       8  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">62 days</span>   </td><td>          </td><td>51.5.172.22    </td></tr>
+<tr><td>AP124    </td><td>host-tqv147</td><td>qua                                                  </td><td>dc-8     </td><td>Linux  </td><td style="text-align: right;">       3.8</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">61 days</span>   </td><td>          </td><td>57.240.114.57  </td></tr>
+<tr><td>AP184    </td><td>host-lul687</td><td>prod                                                 </td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       3.7</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: red;">75 days</span>   </td><td>          </td><td>49.55.7.238    </td></tr>
+<tr><td>AP124    </td><td>host-nsp748</td><td>prod                                                 </td><td>dc-3     </td><td>Linux  </td><td style="text-align: right;">       4.7</td><td>                                               </td><td><span style="color: green;">7 days</span>  </td><td>North     </td><td>1.253.95.16    </td></tr>
+<tr><td>AP124    </td><td>host-opc637</td><td>prod                                                 </td><td>dc-9     </td><td>Windows</td><td style="text-align: right;">       3.6</td><td>                                               </td><td><span style="color: orange;">34 days</span></td><td>          </td><td>201.211.178.201</td></tr>
+<tr><td>AP184    </td><td>host-yol168</td><td>prod                                                 </td><td>dc-1     </td><td>Windows</td><td style="text-align: right;">       3.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">48 days</span></td><td>East      </td><td>181.245.184.101</td></tr>
+<tr><td>AP148    </td><td>host-wfb119</td><td>prod                                                 </td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">      10.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">42 days</span></td><td>          </td><td>73.81.91.160   </td></tr>
+<tr><td>AP184    </td><td>host-aua137</td><td>prod                                                 </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       1.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">45 days</span></td><td>West      </td><td>164.248.179.181</td></tr>
+<tr><td>AP124    </td><td>host-guj170</td><td>prod                                                 </td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       8.2</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">31 days</span></td><td>West      </td><td>122.22.49.28   </td></tr>
+<tr><td>AP520    </td><td>host-xpd593</td><td>prod                                                 </td><td>dc-10    </td><td>Windows</td><td style="text-align: right;">       5  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">64 days</span>   </td><td>          </td><td>244.250.195.95 </td></tr>
+<tr><td>AP124    </td><td>host-yfi596</td><td>prod                                                 </td><td>dc-5     </td><td>Linux  </td><td style="text-align: right;">       3.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">28 days</span> </td><td>West      </td><td>4.193.187.46   </td></tr>
+<tr><td>AP520    </td><td>host-dyq853</td><td>prod                                                 </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       1.6</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">86 days</span>   </td><td>West      </td><td>202.22.152.10  </td></tr>
+<tr><td>AP520    </td><td>host-vbw349</td><td>prod                                                 </td><td>dc-3     </td><td>Linux  </td><td style="text-align: right;">       7.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">39 days</span></td><td>North     </td><td>104.227.187.105</td></tr>
+<tr><td>AP148    </td><td>host-xhi094</td><td>prod                                                 </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       8.5</td><td>                                               </td><td><span style="color: orange;">53 days</span></td><td>West      </td><td>240.16.15.215  </td></tr>
+<tr><td>AP124    </td><td>host-keq844</td><td>prod                                                 </td><td>dc-9     </td><td>Linux  </td><td style="text-align: right;">       2.4</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">14 days</span> </td><td>          </td><td>197.222.136.90 </td></tr>
+<tr><td>AP148    </td><td>host-xaz637</td><td>prod                                                 </td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       5.2</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: green;">17 days</span> </td><td>          </td><td>13.119.241.39  </td></tr>
+<tr><td>AP148    </td><td>host-bgf595</td><td>prod                                                 </td><td>dc-8     </td><td>Linux  </td><td style="text-align: right;">       5.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">67 days</span>   </td><td>          </td><td>44.15.98.176   </td></tr>
+<tr><td>AP520    </td><td>host-pxk548</td><td>prod                                                 </td><td>dc-9     </td><td>Windows</td><td style="text-align: right;">       8.1</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">70 days</span>   </td><td>          </td><td>216.72.56.38   </td></tr>
+<tr><td>AP148    </td><td>host-oct340</td><td>prod                                                 </td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">       5.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">20 days</span> </td><td>East      </td><td>163.86.220.145 </td></tr>
+<tr><td>AP148    </td><td>host-ubz504</td><td>prod                                                 </td><td>dc-7     </td><td>Windows</td><td style="text-align: right;">       8.5</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">21 days</span> </td><td>West      </td><td>249.253.173.14 </td></tr>
+<tr><td>AP184    </td><td>host-bwt981</td><td>prod                                                 </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       2.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">29 days</span> </td><td>West      </td><td>10.7.157.101   </td></tr>
+<tr><td>AP184    </td><td>host-mbt714</td><td>prod                                                 </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       9.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">16 days</span> </td><td>West      </td><td>249.140.239.174</td></tr>
+<tr><td>AP148    </td><td>host-htc801</td><td>prod                                                 </td><td>dc-2     </td><td>Linux  </td><td style="text-align: right;">      10  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">19 days</span> </td><td>North     </td><td>10.15.241.25   </td></tr>
+<tr><td>AP124    </td><td>host-dbs339</td><td>prod                                                 </td><td>dc-4     </td><td>Linux  </td><td style="text-align: right;">      10.7</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">88 days</span>   </td><td>South     </td><td>26.187.69.236  </td></tr>
+<tr><td>AP520    </td><td>host-tut358</td><td>prod                                                 </td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">       7.9</td><td><span style="color: green;">alive</span>       </td><td><span style="color: orange;">33 days</span></td><td>East      </td><td>28.75.254.22   </td></tr>
+<tr><td>AP520    </td><td>host-inc267</td><td>prod                                                 </td><td>dc-4     </td><td>Linux  </td><td style="text-align: right;">       2  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">12 days</span> </td><td>South     </td><td>233.33.199.201 </td></tr>
+<tr><td>AP124    </td><td>host-abz120</td><td>prod                                                 </td><td>dc-5     </td><td>Windows</td><td style="text-align: right;">       8.6</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">13 days</span> </td><td>West      </td><td>101.169.38.206 </td></tr>
+<tr><td>AP124    </td><td>host-ijh025</td><td>prod                                                 </td><td>dc-4     </td><td>Linux  </td><td style="text-align: right;">       9  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">11 days</span> </td><td>South     </td><td>187.7.218.76   </td></tr>
+<tr><td>AP520    </td><td>host-xht947</td><td>prod                                                 </td><td>dc-10    </td><td>Linux  </td><td style="text-align: right;">       4.8</td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">72 days</span>   </td><td>          </td><td>191.75.136.127 </td></tr>
+<tr><td>AP184    </td><td>host-dtv086</td><td>prod                                                 </td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">       2.8</td><td><span style="color: green;">alive</span>       </td><td><span style="color: green;">16 days</span> </td><td>East      </td><td>61.97.189.51   </td></tr>
+<tr><td>AP148    </td><td>host-wpt139</td><td>prod                                                 </td><td>dc-1     </td><td>Linux  </td><td style="text-align: right;">       9.7</td><td><span style="color: orange;">unreachable</span></td><td><span style="color: red;">75 days</span>   </td><td>East      </td><td>37.188.36.156  </td></tr>
+<tr><td>AP124    </td><td>host-kjz548</td><td>prod                                                 </td><td>dc-7     </td><td>Linux  </td><td style="text-align: right;">       8  </td><td><span style="color: green;">alive</span>       </td><td><span style="color: red;">87 days</span>   </td><td>West      </td><td>157.43.17.102  </td></tr>
+</tbody>
+</table>
+<button id="scrollTopButton" onclick="scrollToTop()">⬆</button>
+
+<script>
+                  // var tables = document.getElementsByTagName('table');
+const tables = document.querySelectorAll("table");
+const button = document.getElementById('scrollTopButton');
+
+top_search_box = "<header><input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'></header>\n"
+
+let selectedTable = null; // Variable pour stocker la table sélectionnée
+
+// Écouteur pour détecter le clic sur une table
+tables.forEach(table => {
+  table.addEventListener("click", function () {
+    selectedTable = table; // Met à jour la table actuellement sélectionnée
+  });
+});
+
+// Écouteur d'événement pour intercepter Ctrl + A
+document.addEventListener("keydown", function (event) {
+  if (event.ctrlKey && event.key === "a" && selectedTable) {
+    event.preventDefault(); // Empêche la sélection de toute la page
+
+    // Création d'une sélection pour la table sélectionnée en excluant le header
+    const selection = window.getSelection();
+    selection.removeAllRanges(); // Vidage de la sélection actuelle
+
+    const range = document.createRange();
+
+    // Vérifie s'il y a au moins une ligne dans le tbody
+    if (selectedTable.tBodies[0]?.rows.length > 1) {
+      // Sélection de toutes les lignes sauf la première
+      range.setStartBefore(selectedTable.tHead.rows[1]);
+      range.setEndAfter(selectedTable.tBodies[0].rows[selectedTable.tBodies[0].rows.length - 1]);
+
+      selection.addRange(range); // Ajout de la sélection du contenu de la table sélectionnée
+    }
+  }
+});
+
+$(top_search_box).prependTo("body");
+// console.log(top_search_box);
+let table_id = 0;
+for (const table of tables) {
+  let prepa_search_boxes = "<tr>\n";
+  let column_id = 0;
+  table.id = table_id;
+
+  for (const cell of table.tHead.rows.item(0).cells) {
+    cell.onclick = (function (table_id, column_id) {
+      return function () {
+        sortTable(table_id, column_id);
+      };
+    })(table_id, column_id);
+    prepa_search_boxes = prepa_search_boxes + "<th><input type='text' class='search-container' onkeyup='filterTable(" +
+      table_id + "," + column_id + ")' placeholder='filter by " + cell.innerText + "'></th>\n";
+    column_id++;
+  }
+  prepa_search_boxes = prepa_search_boxes + "</tr>";
+  $(table.tHead).prepend(prepa_search_boxes);
+  table_id++;
+
+}
+
+
+function filterAllTables() {
+  var search_input = $("#top-search-container").val().toUpperCase();
+  tableId = 0;
+  for (const table of tables) {
+    filterTable(tableId);
+    tableId++;
+  }
+}
+
+function filterTable(table_id, column = 0) {
+  // filterAllTables()
+  var top_search_input = $("#top-search-container").val().toUpperCase();
+
+  var table = document.getElementById(table_id);
+  var rows = Array.prototype.slice.call(table.tBodies[0].rows);
+
+  rows.forEach(function (row) {
+    var cellText = row.textContent.toUpperCase();
+    if (cellText.indexOf(top_search_input) > -1) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
+
+  let columnId = 0;
+  for (const column of table.rows[0].cells) {
+    input = column.querySelector("input").value;
+    filterColumn(table_id, columnId);
+    columnId++;
+  }
+}
+
+
+function filterColumn(table_id, column) {
+  var table = document.getElementById(table_id);
+  // var input = table.rows[0].cells[column].querySelector("input");
+  var input = table.rows[0].cells[column].querySelector("input");
+  var filterText = input.value.toUpperCase();
+  var rows = Array.prototype.slice.call(table.tBodies[0].rows).filter(row => row.style.display !== "none");
+  rows.forEach(function (row) {
+    var cellText = row.cells[column].textContent.toUpperCase();
+    if (cellText.indexOf(filterText) > -1) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
+}
+
+
+
+function sortTable(table_id, column) {
+  var table = document.getElementById(table_id);
+  var rows = Array.prototype.slice.call(table.tBodies[0].rows);
+  var isAscending = table.tHead.rows[0].cells[column].classList.toggle("ascending");
+  var multiplier = isAscending ? 1 : -1;
+  rows.sort(function (a, b) {
+    var aVal = a.cells[column].textContent;
+    var bVal = b.cells[column].textContent;
+    if (!isNaN(aVal) && !isNaN(bVal)) {
+      aVal = Number(aVal);
+      bVal = Number(bVal);
+      return multiplier * (aVal - bVal);
+    } else {
+      return multiplier * aVal.localeCompare(bVal);
+    }
+  });
+  table.tBodies[0].innerHTML = "";
+  rows.forEach(function (row) {
+    table.tBodies[0].appendChild(row);
+  });
+}
+
+function add_toc() {
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const tocContainer = document.getElementById("toc");
+    const headers = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+
+    if (!tocContainer || headers.length === 0) return;
+
+    const tocList = document.createElement("ul");
+
+    headers.forEach(header => {
+        const level = parseInt(header.tagName.substring(1), 10); // e.g., 1 for <h1>, 2 for <h2>
+        const listItem = document.createElement("li");
+        listItem.style.marginLeft = `${(level - 1) * 15}px`; // Indentation based on header level
+        
+        const anchor = document.createElement("a");
+        const headerID = header.id || header.textContent.trim().replace(/\s+/g, "-").toLowerCase();
+        header.id = headerID; // Assign an ID if it doesn't exist
+        
+        anchor.href = `#${headerID}`;
+        anchor.textContent = header.textContent;
+
+        listItem.appendChild(anchor);
+        tocList.appendChild(listItem);
+    });
+
+    tocContainer.appendChild(tocList);
+});
+}
+
+
+
+
+// Afficher ou masquer le bouton en fonction du défilement
+window.onscroll = function() {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight;
+  const clientHeight = document.documentElement.clientHeight;
+
+  // Vérifie si l'utilisateur est au bas de la page
+  if (scrollTop + clientHeight >= scrollHeight - 10) {
+    button.style.display = "none";
+    console.log("bottom");
+  } else if (scrollTop > 200) {
+    button.style.display = "block";
+    console.log("block");
+  } else {
+    button.style.display = "none";
+    console.log("none");
+  }
+};
+
+// Fonction pour revenir en haut de la page
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+add_toc()
+
+
+                </script>
+                </body>
+            </html>
+          
+
