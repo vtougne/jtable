@@ -22,6 +22,27 @@ table {
   margin-left: 2.5%
 }
 
+label {
+  display: flex; /* Flexbox pour alignement */
+  justify-content: center; /* Centre horizontalement */
+  align-items: center; /* Centre verticalement */
+  /* border: 1px solid #dddddd; */
+  color: rgb(95, 19, 19);
+  margin: 5px auto; /* Centre horizontalement le bloc dans son conteneur parent */
+  /* border-radius: 5px; */
+  /* padding: 10px; Ajoute de l'espace interne */
+  /* width: 300px; Définir une largeur fixe ou proportionnelle */
+  text-align: center; /* Centre le texte dans le label */
+  font-size: 1.5em; /* Augmente la taille de la police */
+
+}
+
+h1,h2 {
+
+  color: rgb(95, 19, 19);
+  
+}
+
 th,
 td {
   border: 1px solid #dddddd;

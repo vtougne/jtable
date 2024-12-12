@@ -59,7 +59,7 @@ class Filters:
         return yaml.safe_load_all(data)
     def intersect(a, b):
         return list(set(a).intersection(b))
-    def wrap_html(data):
+    def wrap_html(data,title=""):
         if running_platform == "Windows":
             path_sep = "\\"
         else:
@@ -81,6 +81,7 @@ class Filters:
     <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
         <style>
           {js_wrapper_css}
@@ -88,7 +89,6 @@ class Filters:
     <body>
     <div id="toc"></div>
     {data}
-    top_search_box = "<header><input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'></header>"
     <button id="scrollTopButton" onclick="scrollToTop()">⬆</button>
     <script>
       {js_wrapper_script}

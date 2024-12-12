@@ -1,6 +1,15 @@
 // var tables = document.getElementsByTagName('table');
 const tables = document.querySelectorAll("table");
-top_search_box = "<header><input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'></header>"
+const pageTitle = $('title').text();
+console.log(pageTitle);
+const top_search_box = `
+<header>
+  <label>${pageTitle}</label>
+  <input type="text" id="top-search-container" onkeyup="filterAllTables()" placeholder="Filter on all tables">
+</header>
+`;
+
+// top_search_box = "<header><label>$('title').text()</label><input type='text' id='top-search-container' onkeyup='filterAllTables()' placeholder='filter on all tables'></header>"
 
 let selectedTable = null; // Variable pour stocker la table sélectionnée
 add_toc()
@@ -57,6 +66,8 @@ for (const table of tables) {
   table_id++;
 
 }
+
+// $("<h1>The Super title</h1>").prependTo("top_search_box");
 
 
 function filterAllTables() {
