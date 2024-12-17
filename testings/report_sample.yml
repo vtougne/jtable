@@ -24,7 +24,7 @@ vars:
         - when: ["value.state == 'alive'"]
           style: "color: green"
         - when: ["value.state == 'unreachable'"]
-          style: "color: orange"
+          style: "color: red"
           formating: "underlined"
     - as: uptime
       expr: days
@@ -32,7 +32,7 @@ vars:
         - when: ["uptime_in_day | int < 30"]
           style: "color: green"
         - when: ["uptime_in_day | int >= 30","uptime_in_day | int < 60"]
-          style: "color: orange"
+          style: "color: yellow"
         - when: ["uptime_in_day | int >= 60"]
           style: "color: red"
 

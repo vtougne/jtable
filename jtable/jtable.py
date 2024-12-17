@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform, subprocess
+import sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform
 from os import isatty
 from sys import exit
 from typing import Any, Dict, Optional
@@ -17,8 +17,10 @@ import yaml
 
 running_platform = platform.system()
 
+def ms_system():
+    return os.environ.get('MSYSTEM', '')
+
 if running_platform == "Windows":
-    ms_system = os.environ.get('MSYSTEM', '')
     if ms_system == "MINGW64" or ms_system == "CLANGARM64":
         running_os = "Linux"
     elif os.environ.get('TERM', '')  == "xterm":
@@ -210,7 +212,7 @@ class JtableCli:
         parser.add_argument("-p", "--json_path", help = "json path")
         parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
         parser.add_argument("-w", "--when", help = "key_1 == 'value'")
-        parser.add_argument("-f", "--format", help = "Table format applyed in simple,json,th,td... list below")
+        parser.add_argument("-f", "--format", help = "Table format applied in simple,json,th,td... list below")
         parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
         parser.add_argument("-q", "--query_file", help = "Load jtbale query file")
         parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
@@ -221,7 +223,7 @@ class JtableCli:
         parser.add_argument('--version', action='version', version=version.__version__)
         parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
         parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
-        parser.add_argument('-o', '--stdout', help='Ovewrite applyed ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
+        parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
         parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
 
         args = parser.parse_args()
@@ -800,7 +802,6 @@ class JtableCls:
             logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
             exit(2)
 
-
 class Plugin:
     def env(var_name,**kwargs):
         if var_name not in os.environ:
@@ -812,8 +813,32 @@ class Plugin:
             return os.environ[var_name]
 
     def shell(cmd,default=None):
+        import subprocess
+        
         shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
         return shell_output
+    
+        # if ms_system() == "MINGW64" or ms_system() == "CLANGARM64":
+        #     bash_path = shutil.which("bash.exe")
+        #     if bash_path is None:
+        #         raise FileNotFoundError("bash.exe not found in PATH.")
+        #     try:
+        #         return subprocess.run([bash_path, "-c", cmd], check=True,universal_newlines=True)
+        #         # output = subprocess.run(
+        #         #     [bash_path, "-c", cmd],
+        #         #     check=True,
+        #         #     capture_output=True,  # Capture stdout et stderr
+        #         #     text=True  # Retourne les résultats en tant que chaîne de caractères
+        #         # )
+        #         # return output.stdout
+
+        #     except subprocess.CalledProcessError as error:
+        #         logging.error(f"Error while running shell command: {cmd}")
+        #         logging.error(f"Error was: {error}")
+        #         exit(1)
+        # else:
+        #     shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
+        #     return shell_output
 
     def load_files(search_string, format=json, ignore_errors=True):
         """
@@ -849,8 +874,6 @@ class Plugin:
                     except Exception as error:
                         logging.warning(f"fail loading file {file_name_full_path}, skipping")
         return file_list_dataset
-
-
 
 class path_auto_discover:
     def __init__(self):
@@ -902,11 +925,6 @@ class path_auto_discover:
             exit(1)
         logging.info(f"fields: {self.fields}")
         return self.fields
-
-
-
-
-
 
 class JinjaPathSplitter:
 

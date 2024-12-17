@@ -40,3 +40,11 @@ python -m PyInstaller --workpath ../build --specpath ../build --name jtable.exe 
 ```bash
 "C:\Program Files (x86)\NSIS\makensis.exe" jtable.nsi
 ```
+
+
+# No install run as function
+
+
+```bash
+jtable() { python ${PWD}/jtable "$@" ; }
+```
