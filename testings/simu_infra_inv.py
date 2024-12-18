@@ -3,6 +3,7 @@
 import random
 import string
 import json
+import sys
 
 def generate_random_hostname():
     """Génère un hostname aléatoire."""
@@ -46,10 +47,12 @@ def generate_hosts(scope):
     return hosts
 
 # Exemple d'entrée
-scope = {'dev': 50, 'qua': 30, 'prod': 30}
+scope = {'dev': 0, 'qua': 0, 'prod': 10}
 
 # Génération des hosts
 hosts_dict = generate_hosts(scope)
 
 # Sortie JSON
 print(json.dumps(hosts_dict, indent=4))
+
+print('debug something in stderr',file=sys.stderr)

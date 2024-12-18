@@ -15,20 +15,23 @@ import version
 import tabulate
 import yaml
 
-running_platform = platform.system()
+import functions
+running_context = functions.running_context()
 
-def ms_system():
-    return os.environ.get('MSYSTEM', '')
+# running_platform = platform.system()
 
-if running_platform == "Windows":
-    if ms_system == "MINGW64" or ms_system == "CLANGARM64":
-        running_os = "Linux"
-    elif os.environ.get('TERM', '')  == "xterm":
-            running_os = "Linux"
-    else:
-        running_os = "Windows"
-else:
-    running_os = running_platform
+# def ms_system():
+#     return os.environ.get('MSYSTEM', '')
+
+# if running_platform == "Windows":
+#     if ms_system == "MINGW64" or ms_system == "CLANGARM64":
+#         running_os = "Linux"
+#     elif os.environ.get('TERM', '')  == "xterm":
+#             running_os = "Linux"
+#     else:
+#         running_os = "Windows"
+# else:
+#     running_os = running_platform
 
 
 class Filters:
@@ -244,7 +247,8 @@ class JtableCli:
         elif args.verbose == 2:
             logging_config['handlers']['console_stderr']['level'] = 'DEBUG'
         logging.config.dictConfig(logging_config)
-        logging.info(f"running_os: {running_os}")
+        logging.info(f"running_context: {running_context}")
+        # exit(0)
         
         # global logging_format
         # logging_format = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
@@ -275,7 +279,6 @@ class JtableCli:
             for line in sys.stdin:
                 stdin = stdin + line
             self.dataset = { self.tabulate_var_name: stdin }
-
         if args.help:
             if args.help == ['color']:
                 jtable_color = [name for name, func in inspect.getmembers(Styling().__init__())]
@@ -331,7 +334,7 @@ class JtableCli:
             logging.info(f"var_name: {self.tabulate_var_name}, path: {path}")
             logging.info(f"path: {path}")
             
-            if running_os == "Windows":
+            if running_context['platform']['system'] == "Windows":
                 cmd = f"dir /s /b {path}"
                 logging.info(f"cmd: {cmd}")
                 files_str = os.popen("dir /s /b " + path).read()
@@ -344,7 +347,7 @@ class JtableCli:
                     with open(file_name_full_path, 'r') as input_yaml:
                         try:
                             file_content =  yaml.safe_load(input_yaml)
-                            if running_os == "Windows":
+                            if running_context['platform']['system'] == "Windows":
                                 sep = "\\"
                                 file_path = sep.join(file_name_full_path.split('\\')[:-1])
                                 file_name = file_name_full_path.split('\\')[-1]
@@ -815,8 +818,25 @@ class Plugin:
     def shell(cmd,default=None):
         import subprocess
         
-        shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
-        return shell_output
+        # shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
+
+        if running_context['shell_type'] == "git_bash" or running_context['shell_type'] == "cygwin":
+            bash_path = shutil.which("bash.exe")
+        else:
+            bash_path = shutil.which("bash")
+
+        if bash_path is None:
+            raise FileNotFoundError(f"bash_path {bash_path} was not found in PATH")
+        output = subprocess.run(
+            [bash_path, "-c", cmd],
+            check=True,
+            stdout=subprocess.PIPE,  # Capture stdout et stderr
+            stderr=sys.stderr,
+            text=True  # Retourne les résultats en tant que chaîne de caractères
+        )
+
+
+        return output.stdout
     
         # if ms_system() == "MINGW64" or ms_system() == "CLANGARM64":
         #     bash_path = shutil.which("bash.exe")
@@ -845,7 +865,7 @@ class Plugin:
         Load multiple files from a search string
         formats in text,json,yaml
         """
-        if running_os == "Windows":
+        if running_context['platform']['system'] == "Windows":
             cmd = f"dir /s /b {search_string}"
             logging.info(f"cmd: {cmd}")
             files_str = os.popen("dir /s /b " + search_string).read()
@@ -858,7 +878,7 @@ class Plugin:
                 with open(file_name_full_path, 'r') as input_yaml:
                     try:
                         file_content =  yaml.safe_load(input_yaml)
-                        if running_os == "Windows":
+                        if running_context['platform']['system'] == "Windows":
                             sep = "\\"
                             file_path = sep.join(file_name_full_path.split('\\')[:-1])
                             file_name = file_name_full_path.split('\\')[-1]
@@ -1103,7 +1123,6 @@ class Templater:
                     logging.error(f"Failed to call plugin function {args[0]}, error was:\n  {str(error)}")
                     exit(3)
                 return res
-
             
         plugin = lambda: plugin_fct().process_plugin
         static_context = {**static_context, **{"plugin": plugin()}}

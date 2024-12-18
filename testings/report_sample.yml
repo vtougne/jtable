@@ -1,5 +1,5 @@
 vars:
-  hosts: "{{ plugin('shell','python3 simu_infra_inv.py') }}"
+  hosts: "{{ plugin('shell','python simu_infra_inv.py') }}"
   queryset:
     path: '{}'
     select:
@@ -56,6 +56,7 @@ vars:
   # out: "{{ hosts | jtable(queryset=queryset) }}"
   
 # stdout: "{{ hosts | jtable(queryset=queryset) }}"
+# stdout: "{{ hosts }}"
 stdout: |
   {% set out = hosts | jtable(queryset=queryset)  %}
   {% if queryset.format == 'html' %}
