@@ -18,3 +18,4 @@ Using the power of Jinja
     3.2 [Sort](#features)  
     3.3 [Styling](#troubleshooting)  
     3.4 [ouputs formats](#license)  
+4. [Troubleshooting]()

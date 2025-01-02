@@ -1170,8 +1170,14 @@ class Templater:
         return out
 
 def main():
-    JtableCli().parse_args()
-    return
+    try:
+        JtableCli().parse_args()
+    except KeyboardInterrupt:
+        exit(1)
+    except Exception as error:
+        print("Une erreur est survenue :", error)
+        exit(1)
+
 
 if __name__ == '__main__':
     main()

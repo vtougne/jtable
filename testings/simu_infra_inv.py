@@ -47,7 +47,7 @@ def generate_hosts(scope):
     return hosts
 
 # Exemple d'entrée
-scope = {'dev': 0, 'qua': 0, 'prod': 10}
+scope = {'dev': 1000, 'qua': 1000, 'prod': 2000}
 
 # Génération des hosts
 hosts_dict = generate_hosts(scope)
