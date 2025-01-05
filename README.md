@@ -3,7 +3,7 @@
 
 # Jtable  
 jtable helps you to render table from key / values sources like json, yaml, and Python key / values.  
-It works as a cli ina shell and Jinja filter that may be integrated in a Python framework like Ansible, Django, Flask and others  
+It works as a cli in a shell, as Jinja filter in Ansible or Python module
 
 
 ```yaml
