@@ -125,8 +125,8 @@ deploy:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     # - sleep 2000
     - cd $HOME/.ssh
-    - mv vince_bot_ssh.pub id_rsa.pub
-    - mv vince_bot_ssh.priv id_rsa
+    # - mv vince_bot_ssh.pub id_rsa.pub
+    # - mv vince_bot_ssh.priv id_rsa
     - chmod -R 700 $HOME/.ssh
     - ssh-keyscan github.com >> /home/jtable/.ssh/known_hosts
     - cd $CI_BUILDS_DIR/root/release/$CI_PROJECT_NAME
