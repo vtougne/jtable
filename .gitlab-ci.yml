@@ -100,10 +100,13 @@ make_windows_setup:
     - $Env:LOCALAPPDATA
     # - $env:Path += ";C:\Users\$env:USERNAME\AppData\Local\Microsoft\WindowsApps"
     - |
-      if (!(python --version)) {
-        echo "Python not found, installing...";
-        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe" -OutFile "python-installer.exe";
-        .\python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0;
+      if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+          Write-Host "Python not found. Installing Python..."
+          Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe" -OutFile "python-installer.exe"
+          .\python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+          Write-Host "Python installation complete."
+      } else {
+          Write-Host "Python is already installed."
       }
     - python -m venv jtable_env
     - .\jtable_env\Scripts\activate
