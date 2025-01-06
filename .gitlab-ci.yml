@@ -98,6 +98,7 @@ make_windows_setup:
     - cd c:\temp
     - $Env:USERNAME
     - $Env:LOCALAPPDATA
+    - $env:Path += ";C:\Users\$env:USERNAME\AppData\Local\Microsoft\WindowsApps"
     - python -m venv jtable_env
     - .\jtable_env\Scripts\activate
     - cd C:\temp\build\jtable
