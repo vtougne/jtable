@@ -108,7 +108,7 @@ make_windows_setup:
     #   } else {
     #       Write-Host "Python is already installed."
     #   }
-    - python -m venv jtable_env
+    - python3 -m venv jtable_env
     - .\jtable_env\Scripts\activate
     - cd C:\temp\build\jtable
     - git pull

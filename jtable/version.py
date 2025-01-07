@@ -1,1 +1,1 @@
-__version__ = '0.10.80'
+__version__ = 'current'
