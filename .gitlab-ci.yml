@@ -108,17 +108,17 @@ make_windows_setup:
     #   } else {
     #       Write-Host "Python is already installed."
     #   }
-    - python3 -m venv jtable_env
-    - .\jtable_env\Scripts\activate
-    - cd C:\temp\build\jtable
-    - git pull
-    - git switch ${CI_COMMIT_BRANCH}
-    - pip install .
-    - pip install PyInstaller
-    - cd jtable
-    - python -m PyInstaller --add-data "C:\temp\build\jtable\jtable\resources\*:resources" --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
-    - cd C:\temp\build\jtable\dist
-    - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
+    - python -m venv jtable_env
+    # - .\jtable_env\Scripts\activate
+    # - cd C:\temp\build\jtable
+    # - git pull
+    # - git switch ${CI_COMMIT_BRANCH}
+    # - pip install .
+    # - pip install PyInstaller
+    # - cd jtable
+    # - python -m PyInstaller --add-data "C:\temp\build\jtable\jtable\resources\*:resources" --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
+    # - cd C:\temp\build\jtable\dist
+    # - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
   rules:
     - when: manual
   allow_failure: true
