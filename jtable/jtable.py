@@ -18,22 +18,6 @@ import yaml
 import functions
 running_context = functions.running_context()
 
-# running_platform = platform.system()
-
-# def ms_system():
-#     return os.environ.get('MSYSTEM', '')
-
-# if running_platform == "Windows":
-#     if ms_system == "MINGW64" or ms_system == "CLANGARM64":
-#         running_os = "Linux"
-#     elif os.environ.get('TERM', '')  == "xterm":
-#             running_os = "Linux"
-#     else:
-#         running_os = "Windows"
-# else:
-#     running_os = running_platform
-
-
 class Filters:
     def b64decode(value):
         import base64
@@ -193,8 +177,8 @@ class JtableCli:
         self.path = ""
         self.dataset = {}
         
-        global BaseLoader,Environment
-        from jinja2 import Environment, BaseLoader
+        # global BaseLoader,Environment
+        # from jinja2 import Environment, BaseLoader
 
         
     def parse_args(self):
@@ -380,32 +364,37 @@ class JtableCli:
             queryset['path'] = new_path
 
         if args.query_file:
-            if 'sources' in query_file:
-                for source_name in query_file['sources']: 
-                    if 'json_files' in query_file['sources'][source_name]:
-                        expr = query_file['sources'][source_name]['json_files']
-                        expr_with_name = f"{{{source_name}}}:{expr}"
-                        load_multiple_inputs(expr_with_name,"json")
-                    if 'yaml_files' in query_file['sources'][source_name]:
-                        expr = query_file['sources'][source_name]['yaml_files']
-                        expr_with_name = f"{{{source_name}}}:{expr}"
-                        load_multiple_inputs(expr_with_name,"yaml")
-                    if 'shell' in query_file['sources'][source_name]:
-                        shell_command = query_file['sources'][source_name]['shell']
-                        jinja_eval = Templater(template_string=str(shell_command), static_context=self.dataset).render({},eval_str=True)
-                        logging.info(f"Launch shell, cmd: {jinja_eval}")
-                        shell_output = Plugin.shell(jinja_eval)
-                        self.dataset = {**self.dataset, **{ source_name: shell_output } }
+            # if 'sources' in query_file:
+            #     for source_name in query_file['sources']: 
+            #         if 'json_files' in query_file['sources'][source_name]:
+            #             expr = query_file['sources'][source_name]['json_files']
+            #             expr_with_name = f"{{{source_name}}}:{expr}"
+            #             load_multiple_inputs(expr_with_name,"json")
+            #         if 'yaml_files' in query_file['sources'][source_name]:
+            #             expr = query_file['sources'][source_name]['yaml_files']
+            #             expr_with_name = f"{{{source_name}}}:{expr}"
+            #             load_multiple_inputs(expr_with_name,"yaml")
+            #         if 'shell' in query_file['sources'][source_name]:
+            #             shell_command = query_file['sources'][source_name]['shell']
+            #             jinja_eval = Templater(template_string=str(shell_command), static_context=self.dataset).render({},eval_str=True,strict_undefined=True)
+            #             logging.info(f"Launch shell, cmd: {jinja_eval}")
+            #             shell_output = Plugin.shell(jinja_eval)
+            #             self.dataset = {**self.dataset, **{ source_name: shell_output } }
 
-                    if 'env' in query_file['sources'][source_name]:
-                        env_var = query_file['sources'][source_name]['env']
-                        env_value = Plugin.env(env_var)
-                        self.dataset = {**self.dataset, **{ source_name: env_value } }
+            #         if 'env' in query_file['sources'][source_name]:
+            #             env_var = query_file['sources'][source_name]['env']
+            #             env_value = Plugin.env(env_var)
+            #             self.dataset = {**self.dataset, **{ source_name: env_value } }
             if 'vars' in query_file:
                 vars = {}
                 for key,value in query_file['vars'].items():
                     logging.info(f"Covering vars, key: {key}")
+                    # jinja_eval = Templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
+                    # str_unicode_string = UnicodeString(value)
+                    # logging.info(f"str_unicode_string: {type(str_unicode_string)}")
+                    # exit(0)
                     jinja_eval = Templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
+                    # jinja_eval = Templater(template_string=str_unicode_string, static_context=self.dataset).render({},eval_str=True)
                     vars.update({key: jinja_eval})
                     self.dataset = {**self.dataset,**vars, **{"vars": vars}}
 
@@ -489,6 +478,9 @@ class JtableCli:
             print(yaml_query_out)
         else:
             logging.info(f"queryset: {queryset}")
+            logging.info(f"out_expr: {out_expr}")
+            # logging.info(str({**self.dataset,**{"queryset": queryset}}))
+            # exit(0)
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
 
@@ -508,22 +500,23 @@ class JtableCls:
         self.path = "{}"
         self.format = ""
 
-        if self.render == "jinja_ansible":
-            global Templar,AnsibleContext,AnsibleEnvironment
-            from ansible.template import Templar,AnsibleContext,AnsibleEnvironment
-            from ansible.parsing.dataloader import DataLoader
-            self.loader = DataLoader()
-        elif self.render == "jinja_native":
-            self.loader=BaseLoader()
-            self.tenv = Environment(loader=self.loader)
-            jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
-            for filter_name in jtable_core_filters:
-                self.tenv.filters[filter_name] = getattr(Filters, filter_name)
-        elif self.render == "jinja_ansible_extensions":
-            self.tenv = Environment(extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'])
-        else:
-            logging.error("Unknown render option")
-            exit(1)
+        # if self.render == "jinja_ansible":
+        #     global Templar,AnsibleContext,AnsibleEnvironment
+        #     from ansible.template import Templar,AnsibleContext,AnsibleEnvironment
+        #     from ansible.parsing.dataloader import DataLoader
+        #     self.loader = DataLoader()
+        # elif self.render == "jinja_native":
+        #     from jinja2 import Environment, BaseLoader
+        #     self.loader=BaseLoader()
+        #     self.tenv = MyEnvironment(loader=self.loader)
+        #     jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
+        #     for filter_name in jtable_core_filters:
+        #         self.tenv.filters[filter_name] = getattr(Filters, filter_name)
+        # elif self.render == "jinja_ansible_extensions":
+        #     self.tenv = Environment(extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'])
+        # else:
+        #     logging.error("Unknown render option")
+        #     exit(1)
     
     def cross_path(self, dataset, path, cross_path_context = {} ):
         level = len(path)
@@ -703,15 +696,15 @@ class JtableCls:
         column_templates = []
         for expr in expressions:
             jinja_expr = '{{ ' + expr  + ' }}'
-            column_templates = column_templates + [Templater(template_string=jinja_expr, static_context={**context,**self.context})]
+            column_templates = column_templates + [Templater(template_string=jinja_expr, static_context={**context,**self.context},strict_undefined=False)]
 
         view_templates = []
         for var_name,var_data in self.views.items():
-            view_templates = view_templates + [Templater(template_string=str(var_data), static_context={**context,**self.context})]
+            view_templates = view_templates + [Templater(template_string=str(var_data), static_context={**context,**self.context},strict_undefined=False)]
 
         when_templates = []
         for condition in self.when:
-            when_templates = when_templates + [Templater(template_string=condition, static_context={**context,**self.context})]
+            when_templates = when_templates + [Templater(template_string=condition, static_context={**context,**self.context},strict_undefined=False)]
 
 
 
@@ -720,7 +713,7 @@ class JtableCls:
             json_dict = {}
 
             def when(when=[],when_context={}):
-                condition_test_result = "True"
+                condition_test_result = True
                 for condition in when:
                     jinja_expr = '{{ ' + condition  + ' }}'
                     # logging.info(f"item_name: {item_name}")
@@ -729,10 +722,12 @@ class JtableCls:
                     # loop_condition_context = { item_name: item } if item_name != '' else item
                     loop_condition_context = { item_name: item } if (item_name != '' and item_name != 'item' ) else item
                     logging.info(f"loop_condition_context: {loop_condition_context}")
+                    logging.info(f"when_context: {when_context}")
                     # loop_condition_context = { item_name: item }
-                    condition_template = Templater(template_string=jinja_expr, static_context= {**when_context,**loop_condition_context})
-                    condition_test_result = condition_template.render({},eval_str=True,strict_undefined=False)
-                    if condition_test_result == "False":
+                    condition_template = Templater(template_string=jinja_expr, static_context= {**when_context,**loop_condition_context},strict_undefined=False)
+                    condition_test_result = condition_template.render({},eval_str=True)
+                    logging.info(f"condition_test_result: {condition_test_result}, type: {type(condition_test_result)}")
+                    if condition_test_result == "False" or condition_test_result == False:
                         break
                 return condition_test_result
 
@@ -740,27 +735,29 @@ class JtableCls:
                 loop_context = { item_name: item } if item_name != '' else item
                 view_context = {}
                 view_index = 0
-                for var_name,var_data in self.views.items():
+                for exp_key,exp_val in self.views.items():
                     try:
-                        templated_var = view_templates[view_index].render({**loop_context,**view_context},eval_str=True,strict_undefined=False)
-                    except:
-                        logging.error(f"Error while rendering var_name: {var_name}, var_data: {var_data}")
+                        templated_var = view_templates[view_index].render({**loop_context,**view_context},eval_str=True)
+                    except Exception as error:
+                        logging.error(f"Error while rendering var_name: {exp_key}, exp_val: {exp_val}, error was:\n{error}")
                         exit(1)
-                    view_context.update({ var_name: templated_var })
+                    view_context.update({ exp_key: templated_var })
                     view_index += 1
 
             if self.when != []:
                 condition_test_result = when(when = self.when, when_context = {**self.context,**context,**view_context})
+                # logging.warning(f"condition_test_result: {condition_test_result}, type: {type(condition_test_result)}")
             else:
-                condition_test_result = "True"
+                condition_test_result = True
             
                 
-            if condition_test_result == "True":
+            if condition_test_result  == True or condition_test_result == "True":
+
                 column_index = 0
                 for expr in expressions:
                     loop_context = { item_name: item } if item_name != '' else item
                     try:
-                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context},eval_str=True,strict_undefined=False)
+                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context},eval_str=True)
                     except:
                         break
                     del loop_context
@@ -774,13 +771,14 @@ class JtableCls:
                         del value_for_json
                     if stylings != []:
                         styling = stylings[column_index]
-                        condition_color = "True"
+                        condition_color = True
                         # if styling != []:
                         for styling_attributes in styling:
                             color_conditions = [color_conditions for color_conditions in  styling_attributes['when'] ]
                             # logging.info(color_conditions)
                             condition_color = when(when = color_conditions, when_context = {**context,**view_context})
-                            if condition_color == "True":
+                            logging.info(f"condition_color: {condition_color}")
+                            if condition_color == True or condition_color == "True":
                                 value = Styling().apply(value = value,format=self.format, styling_attributes = styling_attributes)
                                 # logging.info(f"condition_color value: {value}")
 
@@ -1046,59 +1044,67 @@ class Styling:
 
 
     def apply(self,value="",format="",styling_attributes={}):
-        # if format == "simple":
-            # logging.info(f"style: {styling_attributes['style']}")
-            if "style" in styling_attributes:
-                color_label = styling_attributes['style'].split(": ")[1]
-            else:
-                color_label = "white"
+        logging.info(f"value: {value} / format: {format} / styling_attributes: {styling_attributes}")
+        value_colorized = ""
+        if "style" in styling_attributes:
+            color_label = styling_attributes['style'].split(": ")[1]
+        else:
+            color_label = "white"
+        text_formating = 0
+        formating = ""
+        if "formating" in styling_attributes:
+            formating = styling_attributes['formating']
+        if formating == "normal" or formating == "":
             text_formating = 0
-            formating = ""
-            if "formating" in styling_attributes:
-                formating = styling_attributes['formating']
-            if formating == "normal" or formating == "":
-                text_formating = 0
-            elif formating == "bold":
-                text_formating = 1
-            elif formating == "dim":
-                text_formating = 2
-            elif formating == "italic":
-                text_formating = 3
-            elif formating == "underlined":
-                text_formating = 4
+        elif formating == "bold":
+            text_formating = 1
+        elif formating == "dim":
+            text_formating = 2
+        elif formating == "italic":
+            text_formating = 3
+        elif formating == "underlined":
+            text_formating = 4
+        else:
+            logging.error(f"Unknown formating: {formating}")
+            exit(1)
+        # color_corresp = self.get_color(color_label,"ansi_code")
+        color_corresp = self.get_color(color_label,format)
+
+        if color_corresp == "":
+            if format == "html":
+                value_colorized  = r'<span style="' + styling_attributes['style'] + ';">' + value + r"</span>"
             else:
-                logging.error(f"Unknown formating: {formating}")
-                exit(1)
-            # color_corresp = self.get_color(color_label,"ansi_code")
-            color_corresp = self.get_color(color_label,format)
+                logging.info(f"style '{styling_attributes['style']}' not found, using default")
+                # value_colorized = value
+                return value
 
-            if color_corresp == "":
-                if format == "html":
-                    value_colorized  = r'<span style="' + styling_attributes['style'] + ';">' + value + r"</span>"
-                else:
-                    logging.info(f"style '{styling_attributes['style']}' not found, using default")
-                    value_colorized = value
-
+        else:
+            if format == "simple":
+                value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
+            elif format == "github":
+                # value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
+                # value_colorized = f"$`\textcolor{{red}}{{\text{{Smith}}`$"
+                logging.info(f"color_label: {color_label}")
+                return r"$`\textcolor{"+ color_label + r"}{\text{" + value + "}}`$"
+            elif format == "html":
+                value_colorized  = r'<span style="' + styling_attributes['style'] + r';">' + value + r"</span>"
             else:
-                if format == "simple":
-                    value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
-                elif format == "github":
-                    # value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
-                    # value_colorized = f"$`\textcolor{{red}}{{\text{{Smith}}`$"
-                    value_colorized = r"$`\textcolor{"+ color_label + r"}{\text{" + value + "}}`$"
-                elif format == "html":
-                    value_colorized  = r'<span style="' + styling_attributes['style'] + r';">' + value + r"</span>"
-                else:
-                    value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
+                value_colorized = f"\x1b[{text_formating};{color_corresp}m{value}\x1b[0m"
 
-                logging.info(f"format: {format}")   
-            return value_colorized
+            logging.info(f"format: {format}")   
+        return value_colorized
 
+# from jinja2 import nativetypes,StrictUndefined,Undefined,Environment
+# from jinja2.sandbox import SandboxedEnvironment
+
+        
 class Templater:
-    def __init__(self, template_string = "", static_context = {}):
-        if 'Environment' not in sys.modules:
-            from jinja2 import Environment, StrictUndefined
-        env = Environment(undefined=StrictUndefined)
+    def __init__(self, template_string = "", static_context = {},strict_undefined = True):
+        from jinja2 import Environment
+        env = Environment()
+        self.strict_undefined = strict_undefined
+        import random
+        self.id = random.randint(0,1000000)
 
         jtable_core_filters = [name[0] for name in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
@@ -1125,32 +1131,41 @@ class Templater:
                 return res
             
         plugin = lambda: plugin_fct().process_plugin
+        logging.debug(f"({self.id}) strict_undefined: {strict_undefined}, static_context: {static_context}")
         static_context = {**static_context, **{"plugin": plugin()}}
 
         ##############################################################
+        logging.info(f"({self.id}) compiling template_string: {template_string}")
+        logging.info(f"({self.id}) template_string type  {type(template_string)}")
         try:
             self.template = env.from_string(template_string, globals=static_context)
         except Exception as error:
-            logging.error(f"Failed to compile template, error was:\n  {str(error)}")
+            logging.error(f"({self.id}) Failed to compile template, error was:\n  {str(error)}")
             exit(3)
     
-    def render(self, vars, eval_str = False, strict_undefined = True):
+    def render(self, vars, eval_str = False):
 
+        logging.debug(f"({self.id}) Rendering template, self.strict_undefined: {self.strict_undefined}, vars: {vars}")
+        
         try:
             out_str = self.template.render(vars)
         except Exception as error:
             if str(error)[0:30] == "'dict object' has no attribute" \
                 or str(error)[0:30] == "'list object' has no attribute"\
                 or str(error).__contains__("is undefined"):
-                if strict_undefined == True:
-                    logging.error(f"Failed while rendering context, error was:\n  {str(error)}")
-                    raise error
-                else:
-                    out = out_str =""
+                    if self.strict_undefined == True:
+                        logging.error(f"({self.id}) Failed while rendering context, error was:\n  {str(error)}")
+                        logging.error(f"({self.id}) debug strict_undefined: {self.strict_undefined}")
+                        logging.error(f"({self.id}) debug vars: {vars}")
+                        raise error
+                        # out = out_str =""
+                    else:
+                        out = out_str =""
             else:
                 out = out_str = error
                 logging.error(f"Failed while rendering context, error was:\n  {str(error)}")
                 raise out
+                # out = out_str =""
             
         if eval_str == True:
             try:
@@ -1168,6 +1183,28 @@ class Templater:
             out = out_str
                     
         return out
+    
+class UnicodeString:
+    def __init__(self, value):
+        self.value = value
+    
+    def __str__(self):
+        return self.value
+
+    def __repr__(self):
+        return f"UnicodeString({repr(self.value)})"
+
+    def __add__(self, other):
+        if isinstance(other, (str, UnicodeString)):
+            # Convertir en chaîne si `other` est un UnicodeString
+            return UnicodeString(self.value + str(other))
+        raise TypeError(f"Unsupported operand type(s) for +: 'UnicodeString' and '{type(other).__name__}'")
+
+    def __radd__(self, other):
+        # Pour prendre en charge str + UnicodeString
+        if isinstance(other, str):
+            return UnicodeString(other + self.value)
+        raise TypeError(f"Unsupported operand type(s) for +: '{type(other).__name__}' and 'UnicodeString'")
 
 def main():
     try:
@@ -1175,7 +1212,7 @@ def main():
     except KeyboardInterrupt:
         exit(1)
     except Exception as error:
-        print("Une erreur est survenue :", error)
+        print(f"Unexpected failure: {error}", file=sys.stderr)
         exit(1)
 
 

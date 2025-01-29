@@ -1,0 +1,96 @@
+
+stdout: '{{ hosts | jtable(queryset=queryset) }}'
+
+
+vars:
+  queryset:
+    path: '{}'
+    select:
+    - as: key
+      expr: key
+    - as: value.ap_code
+      expr: value.ap_code
+    - as: value.dc_name
+      expr: value.dc_name
+    - as: value.environment
+      expr: value.environment
+    - as: value.ip_address
+      expr: value.ip_address
+    - as: value.os
+      expr: value.os
+    - as: value.os_level
+      expr: value.os_level
+    - as: value.state
+      expr: value.state
+      styling:
+      - when:
+        - value.state == 'alive'
+        style: 'color: green'
+    - as: value.uptime
+      expr: value.uptime
+    format: simple
+
+  hosts:
+    host-zyc872:
+      ap_code: AP330
+      dc_name: dc-10
+      environment: prod
+      ip_address: 82.249.70.130
+      os: Linux
+      os_level: '5.6'
+      state: unreachable
+      uptime: '7516800'
+    # host-zyh733:
+    #   ap_code: AP051
+    #   dc_name: dc-5
+    #   environment: prod
+    #   ip_address: 191.53.19.136
+    #   os: Linux
+    #   os_level: '6.5'
+    #   state: alive
+    #   uptime: '2246400'
+    # host-zym832:
+    #   ap_code: AP158
+    #   dc_name: dc-9
+    #   environment: dev
+    #   ip_address: 119.229.241.152
+    #   os: Linux
+    #   os_level: '3.2'
+    #   state: ''
+    #   uptime: '172800'
+    # host-zzf844:
+    #   ap_code: AP330
+    #   dc_name: dc-3
+    #   environment: qua
+    #   ip_address: 17.33.192.118
+    #   os: Linux
+    #   os_level: '3.2'
+    #   state: alive
+    #   uptime: '6566400'
+    # host-zzo344:
+    #   ap_code: AP561
+    #   dc_name: dc-10
+    #   environment: qua
+    #   ip_address: 172.51.83.1
+    #   os: Windows
+    #   os_level: '8.8'
+    #   state: alive
+    #   uptime: '5788800'
+    # host-zzr583:
+    #   ap_code: AP561
+    #   dc_name: dc-6
+    #   environment: prod
+    #   ip_address: 227.83.108.173
+    #   os: Windows
+    #   os_level: '10.7'
+    #   state: alive
+    #   uptime: '7776000'
+    # host-zzy403:
+    #   ap_code: AP158
+    #   dc_name: dc-5
+    #   environment: prod
+    #   ip_address: 168.55.182.199
+    #   os: Linux
+    #   os_level: '3.4'
+    #   state: ''
+    #   uptime: '6048000'
