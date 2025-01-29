@@ -3,9 +3,9 @@ truc_qui_fait_planter: john
 
 simple:
   - { hostname: host_2, os: windows, cost: 300 }
-  - { hostname: host_1, os: linux }
   - { hostname: host_3, os: linux, cost: 200 }
   - { hostname: host_4, os: aix, cost: 600 }
+  - { hostname: host_1, os: linux }
   - { hostname: host_5, os: linux, cost: 200 }
 
 host_list:
@@ -16,14 +16,14 @@ host_list:
   - { hostname: host_5, os: linux, cost: 200, state: unreachable, env: '{ "env": "dev" }'  , order_date: "2017-02-13 20:00:12" }
 
 host_list_testing:
-  - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_3"}  }
+  - { hostname: host_1, os: linux, cost: 5000, state: alive, service: {name: "service1\nservice_3"}  }
   - { hostname: host_2, os: linux1, cost: 200, state: alive }
   - { hostname: host_3, os: windows, cost: 200, state: alive }
   - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }
   - { hostname: host_5, os: windows, cost: 5000, state: decom, ips: [] }
 
 host_list_debug:
-  - { hostname: host_1, os: linux, cost: 5000, state: alive,service: {name: "service1\nservice_3"}  }
+  - { hostname: host_1, os: linux, cost: 5000, state: alive, service: {name: "service1\nservice_3"}  }
   - { hostname: host_2, os: linux1, cost: 200, state: alive }
   - { hostname: host_3, os: windows, cost: 200, state: alive }
   - { hostname: host_4, os: windows, cost: 5000, state: decom, ips: ['192.168.1.1','192.168.1.2'] }

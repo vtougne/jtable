@@ -6,12 +6,8 @@ vars:
       expr: hostname
     - as: os
       expr: os
-
     - as: cost
       expr: cost
-      styling:
-        - when: ["cost >= 300"]
-          style: "color: red"
-    
-stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset)}}'
+    format: simple
+stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
 
