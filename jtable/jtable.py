@@ -25,6 +25,9 @@ class Filters:
     def b64encode(value):
         import base64
         return base64.b64encode(value.encode('utf-8')).decode('utf-8')
+    def dict2items(value):
+        for k,v in value.items():
+            yield {"key": k, "value": v}
     def escape(value,format="html"):
         if format == "html":
             return html.escape(value)
@@ -49,7 +52,10 @@ class Filters:
     def intersect(a, b):
         return list(set(a).intersection(b))
     def wrap_html(data,title=""):
-        if running_platform == "Windows":
+        # print(running_context)
+        # exit(0)
+        
+        if running_context['platform']['system'] == "Windows":
             path_sep = "\\"
         else:
             path_sep = "/"
@@ -98,6 +104,41 @@ class Filters:
             flags = 0
         _re = re.compile(pattern, flags=flags)
         return _re.sub(replacement, value)
+        
+    def regex_search(value, regex, *args, **kwargs):
+        ''' Perform re.search and return the list of matches or a backref '''
+
+        value = str(value)
+
+        groups = list()
+        for arg in args:
+            if arg.startswith('\\g'):
+                match = re.match(r'\\g<(\S+)>', arg).group(1)
+                groups.append(match)
+            elif arg.startswith('\\'):
+                match = int(re.match(r'\\(\d+)', arg).group(1))
+                groups.append(match)
+            else:
+                raise 'Unknown argument'
+
+        flags = 0
+        if kwargs.get('ignorecase'):
+            flags |= re.I
+        if kwargs.get('multiline'):
+            flags |= re.M
+
+        match = re.search(regex, value, flags)
+        if match:
+            if not groups:
+                return match.group()
+            else:
+                items = list()
+                for item in groups:
+                    items.append(match.group(item))
+                return items
+
+
+    
     def strftime(string_format, second=None):
         """ return a date string using string.
         See https://docs.python.org/2/library/time.html#time.strftime for format

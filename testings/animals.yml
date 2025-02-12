@@ -1,0 +1,18 @@
+stdout: '{{ (stdin | from_json) | jtable(queryset=queryset,context={"animals": animals}) }}'
+# stdout: '{{ (stdin | from_json) | flatten }}'
+# stdout: '{{ animals}}'
+
+vars:
+  animals: "{{ plugin('shell','cat /project/jtable/testings/animals.json') | lower | from_json }}"
+  queryset:
+    path: '{}'
+    select:
+    - as: key
+      expr: key
+    - as: value
+      expr: value | truncate(80)
+    # - as: animals
+    #   expr: animals | type_debug
+    format: simple
+    when:
+      - key in animals
