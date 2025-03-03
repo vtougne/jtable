@@ -157,7 +157,8 @@ class Filters:
         Args:
             date_str (str): Date string format: %Y-%m-%d %H:%M:%S !!! only !!!
         """
-        if running_platform == "Windows":
+        if running_context['platform']['system'] == "Windows":
+        # if running_platform == "Windows":
             return int(Plugin.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\""))
         else:
             return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").timetuple()))

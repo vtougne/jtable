@@ -1,8 +1,9 @@
-stdout: '{{ (stdin | from_json) | jtable(queryset=queryset,context={"animals": animals}) }}'
+stdout: '{{ en_dict | jtable(queryset=queryset,context={"animals": animals}) }}'
 # stdout: '{{ (stdin | from_json) | flatten }}'
 # stdout: '{{ animals}}'
 
 vars:
+  en_dict: "{{ plugin('shell','cat /project/local/WebstersEnglishDictionary/dictionary.json') | from_json }}"
   animals: "{{ plugin('shell','cat /project/jtable/testings/animals.json') | lower | from_json }}"
   queryset:
     path: '{}'
