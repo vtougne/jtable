@@ -47,7 +47,11 @@ def generate_hosts(scope):
     return hosts
 
 # Exemple d'entrée
-scope = {'dev': 1000, 'qua': 1000, 'prod': 2000}
+# scope = {'dev': 500, 'qua': 500, 'prod': 1000}
+# scope = {'dev': 1000, 'qua': 1000, 'prod': 2000}
+# scope = {'dev': 2000, 'qua': 2000, 'prod': 4000}
+# scope = {'dev': 4000, 'qua': 4000, 'prod': 8000}
+scope = {'dev': 8000, 'qua': 8000, 'prod': 16000}
 
 # Génération des hosts
 hosts_dict = generate_hosts(scope)
@@ -55,4 +59,4 @@ hosts_dict = generate_hosts(scope)
 # Sortie JSON
 print(json.dumps(hosts_dict, indent=4))
 
-print('debug something in stderr',file=sys.stderr)
+# print('debug something in stderr',file=sys.stderr)

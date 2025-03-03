@@ -1,0 +1,27 @@
+vars:
+  infra_data: "{{ plugin('shell','/project/jtable/testings/infra_simulator.py')  }}"
+  queryset:
+    path: '{}'
+    select:
+    - as: key
+      expr: key
+    - as: value.environment
+      expr: value.environment
+    - as: value.dc_name
+      expr: value.dc_name
+    - as: value.ip_address
+      expr: value.ip_address
+    - as: value.state
+      expr: value.state
+    - as: value.os
+      expr: value.os
+    - as: value.os_level
+      expr: value.os_level
+    - as: value.uptime
+      expr: value.uptime
+    - as: value.ap_code
+      expr: value.ap_code
+    format: simple
+stdout: '{{ infra_data | jtable(queryset=queryset) }}'
+# stdout: '{{ stdin | from_json | jtable(queryset=queryset) }}'
+
