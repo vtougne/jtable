@@ -1,0 +1,38 @@
+<WORKFLOW>
+    <VERSION>10.5</VERSION>
+    <NAME>ExampleWorkflow</NAME>
+    <DESCRIPTION>This is an example workflow in Informatica PowerCenter.</DESCRIPTION>
+    <TASKS>
+        <TASK>
+            <TYPE>Session</TYPE>
+            <NAME>SessionTask1</NAME>
+            <DESCRIPTION>This task runs a session to load data from a source to a target.</DESCRIPTION>
+            <MAPPING>Mapping1</MAPPING>
+            <SCHEDULE>Daily</SCHEDULE>
+        </TASK>
+        <TASK>
+            <TYPE>EventWait</TYPE>
+            <NAME>EventWaitTask1</NAME>
+            <DESCRIPTION>This task waits for a specific event before proceeding.</DESCRIPTION>
+            <EVENT>FileArrival</EVENT>
+        </TASK>
+        <TASK>
+            <TYPE>Command</TYPE>
+            <NAME>CommandTask1</NAME>
+            <DESCRIPTION>This task executes a command-line script.</DESCRIPTION>
+            <COMMAND>echo "Command executed"</COMMAND>
+        </TASK>
+    </TASKS>
+    <CONNECTIONS>
+        <CONNECTION>
+            <SOURCE>SessionTask1</SOURCE>
+            <TARGET>EventWaitTask1</TARGET>
+            <TYPE>Success</TYPE>
+        </CONNECTION>
+        <CONNECTION>
+            <SOURCE>EventWaitTask1</SOURCE>
+            <TARGET>CommandTask1</TARGET>
+            <TYPE>Success</TYPE>
+        </CONNECTION>
+    </CONNECTIONS>
+</WORKFLOW>
