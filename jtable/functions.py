@@ -35,6 +35,10 @@ def from_yaml(data):
 def from_json_or_yaml(data):
     return yaml.safe_load(data)
 
+def from_xml(data):
+    import xmltodict
+    return xmltodict.parse(data)
+
 def from_yaml_all(data):
     return yaml.safe_load_all(data)
 
