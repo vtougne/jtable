@@ -43,4 +43,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     url="https://github.com/vtougne/jtable",
+    extras_require={
+        "xmltodict": ["xmltodict"]  # Dépendances optionnelles pour les bases de données
+    },
 )
