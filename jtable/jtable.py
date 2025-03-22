@@ -93,7 +93,6 @@ class JtableCli:
         args = parser.parse_args()
         global terminal_size
         terminal_size = shutil.get_terminal_size((80, 20))  # Largeur par défaut 80, hauteur 20
-        # logging.warning(f"terminal_size: {terminal_size}")  
 
         if os.environ.get('JTABLE_LOGGING') == "DEBUG" or args.debug:
             logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)-16s | %(levelname)s %(message)s'
@@ -109,9 +108,6 @@ class JtableCli:
             logging_config['handlers']['console_stderr']['level'] = 'DEBUG'
         logging.config.dictConfig(logging_config)
         logging.info(f"running_context: {running_context}")
-        # exit(0)
-        
-        # global logging_format
         # logging_format = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
         
         if args.query_file:
@@ -241,37 +237,12 @@ class JtableCli:
             queryset['path'] = new_path
 
         if args.query_file:
-            # if 'sources' in query_file:
-            #     for source_name in query_file['sources']: 
-            #         if 'json_files' in query_file['sources'][source_name]:
-            #             expr = query_file['sources'][source_name]['json_files']
-            #             expr_with_name = f"{{{source_name}}}:{expr}"
-            #             load_multiple_inputs(expr_with_name,"json")
-            #         if 'yaml_files' in query_file['sources'][source_name]:
-            #             expr = query_file['sources'][source_name]['yaml_files']
-            #             expr_with_name = f"{{{source_name}}}:{expr}"
-            #             load_multiple_inputs(expr_with_name,"yaml")
-            #         if 'shell' in query_file['sources'][source_name]:
-            #             shell_command = query_file['sources'][source_name]['shell']
-            #             jinja_eval = Templater(template_string=str(shell_command), static_context=self.dataset).render({},eval_str=True,strict_undefined=True)
-            #             logging.info(f"Launch shell, cmd: {jinja_eval}")
-            #             shell_output = Plugin.shell(jinja_eval)
-            #             self.dataset = {**self.dataset, **{ source_name: shell_output } }
 
-            #         if 'env' in query_file['sources'][source_name]:
-            #             env_var = query_file['sources'][source_name]['env']
-            #             env_value = Plugin.env(env_var)
-            #             self.dataset = {**self.dataset, **{ source_name: env_value } }
             if 'vars' in query_file:
                 vars = {}
                 for key,value in query_file['vars'].items():
                     logging.info(f"Covering vars, key: {key}")
-                    # jinja_eval = Templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
-                    # str_unicode_string = UnicodeString(value)
-                    # logging.info(f"str_unicode_string: {type(str_unicode_string)}")
-                    # exit(0)
                     jinja_eval = Templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
-                    # jinja_eval = Templater(template_string=str_unicode_string, static_context=self.dataset).render({},eval_str=True)
                     vars.update({key: jinja_eval})
                     self.dataset = {**self.dataset,**vars, **{"vars": vars}}
 
@@ -377,24 +348,6 @@ class JtableCls:
         self.path = "{}"
         self.format = ""
 
-        # if self.render == "jinja_ansible":
-        #     global Templar,AnsibleContext,AnsibleEnvironment
-        #     from ansible.template import Templar,AnsibleContext,AnsibleEnvironment
-        #     from ansible.parsing.dataloader import DataLoader
-        #     self.loader = DataLoader()
-        # elif self.render == "jinja_native":
-        #     from jinja2 import Environment, BaseLoader
-        #     self.loader=BaseLoader()
-        #     self.tenv = MyEnvironment(loader=self.loader)
-        #     jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
-        #     for filter_name in jtable_core_filters:
-        #         self.tenv.filters[filter_name] = getattr(Filters, filter_name)
-        # elif self.render == "jinja_ansible_extensions":
-        #     self.tenv = Environment(extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'])
-        # else:
-        #     logging.error("Unknown render option")
-        #     exit(1)
-    
     def cross_path(self, dataset, path, cross_path_context = {} ):
         level = len(path)
         if level > 1:
@@ -406,11 +359,6 @@ class JtableCls:
                 current_path_value = current_path[2:-2]
                 if current_path_value in list(dataset):
                     self.cross_path(dataset[current_path_value], next_path, cross_path_context = cross_path_context)
-                    # try:
-                    #     self.cross_path(dataset[current_path_value], next_path, cross_path_context = cross_path_context)
-                    # except:
-                    #     logging.error(f"Failed while crossing path: {current_path_value}")
-                    #     exit(1)
                 else:
                     logging.error('keys dataset were:')
                     logging.error(list(dataset))
@@ -713,28 +661,6 @@ class Plugin:
 
         return output.stdout
     
-        # if ms_system() == "MINGW64" or ms_system() == "CLANGARM64":
-        #     bash_path = shutil.which("bash.exe")
-        #     if bash_path is None:
-        #         raise FileNotFoundError("bash.exe not found in PATH.")
-        #     try:
-        #         return subprocess.run([bash_path, "-c", cmd], check=True,universal_newlines=True)
-        #         # output = subprocess.run(
-        #         #     [bash_path, "-c", cmd],
-        #         #     check=True,
-        #         #     capture_output=True,  # Capture stdout et stderr
-        #         #     text=True  # Retourne les résultats en tant que chaîne de caractères
-        #         # )
-        #         # return output.stdout
-
-        #     except subprocess.CalledProcessError as error:
-        #         logging.error(f"Error while running shell command: {cmd}")
-        #         logging.error(f"Error was: {error}")
-        #         exit(1)
-        # else:
-        #     shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
-        #     return shell_output
-
     def load_files(search_string, format=json, ignore_errors=True):
         """
         Load multiple files from a search string
@@ -784,15 +710,6 @@ class path_auto_discover:
         elif type(dataset) is list:
             if path[1:] not in self.fields:
                 self.fields = self.fields + [path[1:]]
-            # if len(dataset) > 0:
-            #     the_path = path[:-1] + [str(path[-1]) + "[0]"]
-            #     logging.info(f"path: {path[-1]}")
-            #     logging.info(f"the_path: {the_path}")
-            #     self.cover_paths(dataset[0], the_path)
-            # else:
-            #     # pass
-            #     if path[1:] not in self.fields:
-            #         self.fields = self.fields + [path[1:]]
         else:
             self.paths = self.paths + [ path + [dataset] ]
             if path[1:] not in self.fields:
