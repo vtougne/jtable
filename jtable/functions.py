@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+import yaml, datetime
+# from jtable import JtableCls
 
 def b64decode(value):
     import base64
@@ -120,8 +121,8 @@ def wrap_html(data,title=""):
 </body>
 </html>
         """
-def jtable(dataset,select=[], unselect=[],path="{}",format="",views={}, when=[],context = {}, queryset={}):
-    return JtableCls().render_object( dataset,path=path, select=select, unselect=unselect,views=views, when=when, format=format, context = context, queryset=queryset)
+# def jtable(dataset,select=[], unselect=[],path="{}",format="",views={}, when=[],context = {}, queryset={}):
+#     return JtableCls().render_object( dataset,path=path, select=select, unselect=unselect,views=views, when=when, format=format, context = context, queryset=queryset)
 
 def m5(data):
     import hashlib
