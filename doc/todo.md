@@ -5,9 +5,9 @@
  1 | feature    | data caching, optioon: cached_vars = var_1, var_2
  1 | feature    | custom filter / plugin /functions
  1 | feature    | encryption
- 1 | feature    | data caching
  1 | feature    | limit rendering / preview / pagination
  2 | feature    | from_flatten: convert text as list of dict [ "value": "row1","value": "row2",... ]
+ 2 | feature    | from_xml
  2 | feature    | optional output formats: pdf, xls
  2 | feature    | optional input formats: xml, html
  2 | feature    | limit inspect to 1000 values found, 0 for unlimited, q0 for no pagination
