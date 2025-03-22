@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-import yaml, datetime
-# from jtable import JtableCls
+import yaml
 
 def b64decode(value):
     import base64
@@ -25,9 +24,36 @@ def unescape(value,format="html"):
 def flatten(matrix):
     return [item for row in matrix for item in row]
 
+def from_flat_file(data, format="csv"):
+    import csv
+    import io
+    if format == "csv":
+        list_object =  list(csv.reader(io.StringIO(data)))
+    elif format == "tsv":
+        list_object =   list(csv.reader(io.StringIO(data), delimiter='\t'))
+    elif format == "psv":
+        list_object =   list(csv.reader(io.StringIO(data), delimiter='|'))
+    elif format == "ssv":
+        list_object =   list(csv.reader(io.StringIO(data), delimiter=';'))
+    elif format == "csv_dict":
+        list_object =   list(csv.DictReader(io.StringIO(data)))
+    elif format == "tsv_dict":
+        list_object =   list(csv.DictReader(io.StringIO(data), delimiter='\t'))
+    elif format == "psv_dict":  
+        list_object =   list(csv.DictReader(io.StringIO(data), delimiter='|'))
+    elif format == "flat":
+        out = []
+        for item in data.split("\n"):
+            out = out + [{"value": item}]
+        return out
+    headers = list_object[0]
+    data = list_object[1:]
+    for i in range(len(data)):
+        data[i] = dict(zip(headers, data[i]))
+    return data
+
 def from_json(str):
     return json.loads(str)
-
 
 def from_yaml(data):
     return yaml.safe_load(data)
@@ -152,6 +178,7 @@ def strftime(string_format, second=None):
             raise "Invalid value for epoch value (%s)" % second
     return time.strftime(string_format, time.localtime(second))
 def to_datetime(_string, format=r"%Y-%m-%d %H:%M:%S"):
+        import datetime
         return datetime.datetime.strptime(_string, format)
 def to_epoch(date_str):
     f"""Convert a date string to epoch
