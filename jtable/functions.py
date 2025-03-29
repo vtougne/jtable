@@ -16,11 +16,7 @@ def escape(value,format="html"):
     elif format == "quote":
         return value.replace('\\', '\\\\').replace('"', '\\"')
     
-def unescape(value,format="html"):
-    if format == "html":
-        return html.unescape(value)
-    elif format == "quote":
-        return value.replace('\\"', '"').replace('\\\\', '\\')
+
 
 def flatten(matrix):
     return [item for row in matrix for item in row]
@@ -52,6 +48,12 @@ def from_flat(data, format="csv"):
     for i in range(len(data)):
         data[i] = dict(zip(headers, data[i]))
     return data
+
+def from_html(html_string):
+    import html_to_json
+    return html_to_json.convert(html_string)
+
+
 
 def from_json(str):
     return json.loads(str)
@@ -114,6 +116,12 @@ def running_context(format="native"):
         return out_dcit
     else:
         return json.dumps(out_dcit)
+    
+def unescape(value,format="html"):
+    if format == "html":
+        return html.unescape(value)
+    elif format == "quote":
+        return value.replace('\\"', '"').replace('\\\\', '\\')
 
 def wrap_html(data,title=""):
     if running_platform == "Windows":

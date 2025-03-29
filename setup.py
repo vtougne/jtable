@@ -46,6 +46,17 @@ setup(
     ],
     url="https://github.com/vtougne/jtable",
     extras_require={
-        "xmltodict": ["xmltodict"]  # Dépendances optionnelles pour les bases de données
+        "all": [
+            # "beautifulsoup4",
+            # "lxml",
+            # "html5lib",
+            # "pandas",
+            # "openpyxl",
+            # "xlsxwriter",
+            "xmltodict",
+            "html-to-json"
+        ],
+        "xmltodict": ["xmltodict"],
+        "html-to-json": ["html-to-json"]
     },
 )
