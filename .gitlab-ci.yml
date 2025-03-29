@@ -115,6 +115,7 @@ make_windows_setup:
     - git switch ${CI_COMMIT_BRANCH}
     - pip install .
     - pip install -r requirements.txt
+    - pip install .[xmltodict]
     - pip install PyInstaller
     - cd jtable
     - python -m PyInstaller --add-data "C:\temp\build\jtable\jtable\resources\*:resources" --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
