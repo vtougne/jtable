@@ -118,9 +118,10 @@ make_windows_setup:
     - cd jtable
     - python -m PyInstaller --add-data "C:\temp\build\jtable\jtable\resources\*:resources" --workpath ..\build --specpath ..\build --name jtable.exe --distpath ..\dist --onefile jtable.py
     - cd C:\temp\build\jtable\dist
-    - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
-  rules:
-    - when: manual
+    # - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
+    - '& "C:\temp\nsis-3.11\makensis.exe" ..\jtable.nsi'
+  # rules:
+  #   - when: manual
   allow_failure: true
 
 
