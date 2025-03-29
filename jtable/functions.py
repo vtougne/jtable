@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-import yaml
+import yaml,json
 
 def b64decode(value):
     import base64
     return base64.b64decode(value).decode('utf-8')
 
 def b64encode(value):
+    '''Encode a string to base64'''
     import base64
     return base64.b64encode(value.encode('utf-8')).decode('utf-8')
 
@@ -24,7 +25,7 @@ def unescape(value,format="html"):
 def flatten(matrix):
     return [item for row in matrix for item in row]
 
-def from_flat_file(data, format="csv"):
+def from_flat(data, format="csv"):
     import csv
     import io
     if format == "csv":
