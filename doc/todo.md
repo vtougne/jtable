@@ -1,7 +1,7 @@
 
 ### Next Power Template
 pt player <template-play.yml> --vars name = vince  --vars ... --data {"location": "Paris"}
-pt free "{{ stdin | from_xml | to_table }}
+pt free "{{ stdin | from_xml | to_table }}"
 cat dataset.json | pt to_table -p hosts -s hostname,location
 cat dataset.xml | pt filter from_xml to_table
 
