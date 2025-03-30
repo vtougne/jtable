@@ -2,9 +2,9 @@ import re
 import logging
 
 class JinjaPathSplitter():
-    def __init__(self):
-        self.path_list = []
-        self.path = ""
+    # def __init__(self):
+    #     self.path_list = []
+    #     self.path = ""
 
     def cover_path(self,path=""):
         if len(path) > 0:

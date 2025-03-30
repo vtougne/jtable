@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import yaml,json
+import yaml,json,logging, sys, os
 
 def b64decode(value):
     import base64
@@ -74,7 +74,7 @@ def from_yaml_all(data):
 def intersect(a, b):
     return list(set(a).intersection(b))
 
-def running_context(format="native"):
+def running_context():
     import platform
     import os
     import shutil
@@ -112,10 +112,11 @@ def running_context(format="native"):
     }
 
     out_dcit = {"platform": running_platform, "shell_type": shell_type, "terminal": terminal}
-    if format == "native":
-        return out_dcit
-    else:
-        return json.dumps(out_dcit)
+    # if format == "native":
+    #     return out_dcit
+    # else:
+    #     return json.dumps(out_dcit)
+    return out_dcit
     
 def unescape(value,format="html"):
     if format == "html":
@@ -124,7 +125,7 @@ def unescape(value,format="html"):
         return value.replace('\\"', '"').replace('\\\\', '\\')
 
 def wrap_html(data,title=""):
-    if running_platform == "Windows":
+    if running_context()['platform']['system'] == "Windows":
         path_sep = "\\"
     else:
         path_sep = "/"
