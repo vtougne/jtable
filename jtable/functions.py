@@ -88,12 +88,16 @@ def running_context():
     if platform_system == "Windows":
         if ms_system == "MINGW64" or ms_system == "CLANGARM64":
             shell_type = "git_bash"
+            shell_family = "linux"
         elif terminal_name  == "xterm":
             shell_type = "cygwin"
+            shell_family = "linux"
         else:
             shell_type = "windows"
+            shell_family = "windows"
     else:
         shell_type = "Linux"
+        shell_family = "linux"
     terminal_size = shutil.get_terminal_size()
     terminal = {
         "columns": terminal_size.columns,
@@ -111,7 +115,7 @@ def running_context():
         "ms_system": ms_system
     }
 
-    out_dcit = {"platform": running_platform, "shell_type": shell_type, "terminal": terminal}
+    out_dcit = {"platform": running_platform, "shell_family": shell_family, "shell_type": shell_type, "terminal": terminal}
     # if format == "native":
     #     return out_dcit
     # else:

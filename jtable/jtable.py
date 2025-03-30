@@ -190,13 +190,17 @@ class JtableCli:
                 path = file_search_string
             logging.info(f"var_name: {self.tabulate_var_name}, path: {path}")
             logging.info(f"path: {path}")
-            
-            if running_context['platform']['system'] == "Windows":
+            # print(f"shell_family: {running_context['shell_family']}")
+            # exit(0)
+            if running_context['shell_family'] == "windows":
                 cmd = f"dir /s /b {path}"
                 logging.info(f"cmd: {cmd}")
                 files_str = os.popen("dir /s /b " + path).read()
             else:
                 files_str = os.popen("ls -1 " + path).read()
+            files_str = os.popen("ls -1 " + path).read()
+            logging.info(f"files_str: {files_str}")
+            # exit(0)
             # for windows syntax will be --> # dir /s /b data\*config.yml
             file_list_dataset = []
             for file_name_full_path in files_str.split('\n'):
@@ -204,7 +208,7 @@ class JtableCli:
                     with open(file_name_full_path, 'r') as input_yaml:
                         try:
                             file_content =  yaml.safe_load(input_yaml)
-                            if running_context['platform']['system'] == "Windows":
+                            if running_context['shell_family'] == "windows":
                                 sep = "\\"
                                 file_path = sep.join(file_name_full_path.split('\\')[:-1])
                                 file_name = file_name_full_path.split('\\')[-1]
