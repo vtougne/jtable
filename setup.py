@@ -28,7 +28,6 @@ setup(
     entry_points={
         'console_scripts': [
             'jtable=jtable.jtable:main',
-            'tp=jtable.templify:main',
             'templify=jtable.templify:main',
         ],
     },
