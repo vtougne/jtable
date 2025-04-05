@@ -420,7 +420,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-23:12:39 cls.cross_path      | ERROR .dc was not found in dataset level: 2
+23:18:05 cls.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -505,8 +505,21 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-Option non valide - "*".
-
+23:18:06 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
+env    dept         hostname          os       cost
+-----  -----------  ----------------  -----  ------
+dev    pay          host_dev_pay_1    linux    5000
+dev    pay          host_dev_pay_2    linux     200
+dev    pay          host_dev_pay_3    win       200
+prod   it_services  host_dev_its_1    linux    5000
+prod   it_services  host_dev_its_2    linux     200
+prod   it_services  host_dev_its_3    win       200
+prod   pay          host_prd_pay_22   linux    5000
+prod   pay          host_prd_pay_44   linux     200
+prod   pay          host_prd_pay_33   win       200
+qua    pay          host_qua_pay_22   linux    5000
+qua    pay          host_qua_pay_444  linux     200
+qua    pay          host_qua_pay_3R3  win       200
 
 ```
 
