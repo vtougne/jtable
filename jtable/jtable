@@ -1,7 +1,3 @@
 #!/usr/bin/env python3
 import jtable
-# jtable.main()
-
-def main():
-    print("Hello from jtable!")
-    jtable.main()
+jtable.main()

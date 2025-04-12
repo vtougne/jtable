@@ -1,6 +1,7 @@
 
 ### Next Power Template
 pt player <template-play.yml> --vars name = vince  --vars ... --data {"location": "Paris"}
+pt load_json json_file.json --as dataset to_table -p dataset.dc_1 -s hostname,ip,state
 pt free "{{ stdin | from_xml | to_table }}"
 cat dataset.json | pt to_table -p hosts -s hostname,location
 cat dataset.xml | pt filter from_xml to_table
@@ -29,3 +30,41 @@ cat dataset.xml | pt filter from_xml to_table
  2 | feature    | select as argument in cli ++ unselect
  2 | feature    | from_xml
  2 | feature    | from_flatten: convert text as list of dict [ "value": "row1","value": "row2",... ]
+
+
+## Explore
+
+https://github.com/aisbergg/python-templer
+
+## New names
+
+| ShortCut	|	Project name                |
+|-----------|-------------------------------|
+|	frog    |	frog
+|	clup    |	close-up
+|	dm 		|	data-mute
+|	dc 		|	data-chemist
+|	sk      |	skiner
+|	tb 		|	tabulable
+|	dp 		|	data-picker
+|	snatch  |	snatcher
+|	burst   |	burster
+|	dp 		|	dtpick
+|	tm 		|	transmutable
+|	tb 		|	tabulon
+|	rd 		|	remodeler
+|	rd 		|	redoer
+|	ft 		|	From2 / FromTo
+|	fl 		|	flavored
+|	mt 		|	metamorphose
+|	rec 	|	recaster
+|	ag 		|	angulate
+|	xm 		|	xmute
+|	dp 		|	data-pumper
+|	cr		|	crabber
+|	crab	|	crab
+|	gr		|	graby
+|	xc		|	xConv
+|	io		|	InputOuput
+|	tg		|	tego
+|	rex		|	rex
