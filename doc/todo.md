@@ -10,6 +10,7 @@ cat dataset.xml | pt filter from_xml to_table
 | #         | category    |   task |
 |------------------|-------|--------|
  1 | bug/fix    | unaccepeted chars in json format input
+ 1 | bug/fix    | printf "2025-04-12 11:19:32" | jtable.exe -o "{{ (stdin | to_epoch) }}"
  1 | feature    | option infile_filters / functions / types
  1 | feature    | option custom filter / plugin /functions
  1 | feature    | option data caching, optioon: cached_vars = var_1, var_2

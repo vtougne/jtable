@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import yaml,json,logging, sys, os
+import yaml,json,logging, sys, os, time, datetime
 
 def b64decode(value):
     import base64
@@ -11,6 +11,7 @@ def b64encode(value):
     return base64.b64encode(value.encode('utf-8')).decode('utf-8')
 
 def escape(value,format="html"):
+    import html
     if format == "html":
         return html.escape(value)
     elif format == "quote":
@@ -199,7 +200,7 @@ def to_epoch(date_str):
     Args:
         date_str (str): Date string format: %Y-%m-%d %H:%M:%S !!! only !!!
     """
-    if running_platform == "Windows":
+    if running_context()['platform']['system']  == "Windows":
         return int(Plugin.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\""))
     else:
         return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").timetuple()))
