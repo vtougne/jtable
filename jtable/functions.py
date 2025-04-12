@@ -270,10 +270,11 @@ def to_epoch(date_str):
     Args:
         date_str (str): Date string format: %Y-%m-%d %H:%M:%S !!! only !!!
     """
-    if running_context()['platform']['system']  == "Windows":
-        return int(Plugin.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\""))
-    else:
-        return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").timetuple()))
+    return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").timetuple()))
+    # if running_context()['platform']['system']  == "Windows":
+    #     return int(Plugin.shell(f"powershell -c \"[math]::Round((Get-Date '{date_str}' -UFormat '%s'))\""))
+    # else:
+    #     return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").timetuple()))
     
 def to_json(a, *args, **kw):
     return json.dumps(a, *args, **kw)
