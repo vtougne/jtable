@@ -17,6 +17,7 @@ import yaml
 
 import functions
 Filters = functions
+Plugin = functions.Plugin
 running_context = functions.running_context()
 
 class Inspect:
@@ -629,74 +630,6 @@ class JtableCls:
             logging.info(tabulate(self.td,self.th))
             logging.error(f"\nSomething wrong with json rendering, Errors was:\n  {error}")
             exit(2)
-
-class Plugin:
-    def env(var_name,**kwargs):
-        if var_name not in os.environ:
-            if 'default' in kwargs:
-                return kwargs['default']
-            else:
-                raise Exception(f"Environment variable {var_name} not found")
-        else:
-            return os.environ[var_name]
-
-    def shell(cmd,default=None):
-        import subprocess
-        
-        # shell_output = subprocess.check_output(cmd, shell=True,universal_newlines=True)
-
-        if running_context['shell_type'] == "git_bash" or running_context['shell_type'] == "cygwin":
-            bash_path = shutil.which("bash.exe")
-        else:
-            bash_path = shutil.which("bash")
-
-        if bash_path is None:
-            raise FileNotFoundError(f"bash_path {bash_path} was not found in PATH")
-        output = subprocess.run(
-            [bash_path, "-c", cmd],
-            check=True,
-            stdout=subprocess.PIPE,  # Capture stdout et stderr
-            stderr=sys.stderr,
-            text=True  # Retourne les résultats en tant que chaîne de caractères
-        )
-
-
-        return output.stdout
-    
-    def load_files(search_string, format=json, ignore_errors=True):
-        """
-        Load multiple files from a search string
-        formats in text,json,yaml
-        """
-        if running_context['platform']['system'] == "Windows":
-            cmd = f"dir /s /b {search_string}"
-            logging.info(f"cmd: {cmd}")
-            files_str = os.popen("dir /s /b " + search_string).read()
-        else:
-            files_str = os.popen("ls -1 " + search_string).read()
-
-        file_list_dataset = []
-        for file_name_full_path in files_str.split('\n'):
-            if file_name_full_path != '':
-                with open(file_name_full_path, 'r') as input_yaml:
-                    try:
-                        file_content =  yaml.safe_load(input_yaml)
-                        if running_context['platform']['system'] == "Windows":
-                            sep = "\\"
-                            file_path = sep.join(file_name_full_path.split('\\')[:-1])
-                            file_name = file_name_full_path.split('\\')[-1]
-                        else:
-                            file_path = "/".join(file_name_full_path.split('/')[:-1])
-                            file_name = file_name_full_path.split('/')[-1]
-                        file = { 
-                                "name": file_name,
-                                "path": file_path,
-                                "content": file_content
-                                }
-                        file_list_dataset = file_list_dataset + [{ **file }]
-                    except Exception as error:
-                        logging.warning(f"fail loading file {file_name_full_path}, skipping")
-        return file_list_dataset
 
 class path_auto_discover:
     def __init__(self):
