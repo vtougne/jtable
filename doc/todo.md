@@ -41,6 +41,7 @@ https://github.com/aisbergg/python-templer
 
 | ShortCut	|	Project name                |
 |-----------|-------------------------------|
+|	ml      |	mylab
 |	frog    |	frog
 |	clup    |	close-up
 |	dm 		|	data-mute
