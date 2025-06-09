@@ -1,8 +1,51 @@
 - text: |
-      ## Overview  
-      - jtable helps you to render table from key / lists / values sources like json, yaml, and Python objects.  
-      - It works as a cli in a shell and as a Jinja filter that may be integrated in a Python framework like Ansible, Django, Flask and others  
-      ## Simple usage
+
+      ## Overview
+      - Jtable helps you render tables from key/list/value sources like JSON, YAML, and Python objects.
+      - Usable as a CLI tool, Jinja filter, or Python module (integrates with Ansible, Django, Flask, etc.)
+
+      ---
+
+      ## Features
+      - Render tables from JSON, YAML, or Python objects
+      - CLI, Jinja filter, or Python import
+      - Conditional coloring and formatting
+      - Advanced selection, filtering, and transformation with query files
+      - Output formats: plain, JSON, HTML, GitHub, LaTeX, etc.
+      - Multi-file loading and aggregation
+      - Integration with Ansible and other Python frameworks
+      - Inspect and explore nested data structures
+
+      ---
+
+      ## Screenshot: Conditional Styling
+
+      ![Colored Table Example](./uptime_view_colored.png)
+
+      ---
+
+      ## CLI Options
+      - `-p, --json_path` : Specify a path in the input data
+      - `-s, --select` : Select columns/fields to display
+      - `-us, --unselect` : Exclude columns/fields
+      - `-w, --when` : Filter rows by condition (e.g. `state == 'alive'`)
+      - `-f, --format` : Output format (simple, json, th, td, html, github, etc.)
+      - `-q, --query_file` : Load a query file (YAML)
+      - `--inspect` : Inspect and display all paths/values in the input
+      - `-jf, --json_file` : Load a JSON file
+      - `-jfs, --json_files` : Load multiple JSON files
+      - `-yfs, --yaml_files` : Load multiple YAML files
+      - `-vq, --view_query` : Show the generated query
+      - `-o, --stdout` : Override output filter
+      - `-pf, --post_filter` : Apply an additional filter to the output
+      - `--version` : Show version
+      - `-v, --verbose` : Verbosity level
+      - `-d, --debug` : Debug mode
+      - `-h, --help` : Show help
+
+      ---
+
+      ## Simple Usage
 
 # - name: "json coming from curl"
 #   play_cmd: curl -s https://samples-files.com/samples/Code/json/sample3.json | jtable -p books
@@ -26,9 +69,10 @@
   box_as: text
   # collapse: command & output
 
+- text: |
+    #### display dictionnaries of dictionnaries as a table
 
-- name: display dictionnaries of dictionnaries as a table
-  play_cmd: cat host_dict_of_dict.yml  | jtable
+- play_cmd: cat host_dict_of_dict.yml  | jtable
   box_as: text
   # collapse: command & output
 
@@ -37,18 +81,17 @@
     This argument allow you accessing  your dataset when located under a key or a list  
     example when datset under a key:  
 
-
 - eval_cmd: cat host_list_of_dict_in_key.yml
   text: "```host_list_of_dict_in_key.yml```"
   box_as: yaml
   # collapse: dataset sample
 
+- text: |
+    #### access to key in path
 
-- name: access to key in path
-  play_cmd: cat host_list_of_dict_in_key.yml  | jtable -p hosts
+- play_cmd: cat host_list_of_dict_in_key.yml  | jtable -p hosts
   box_as: text
   # collapse: command & output
-
 
 - text: |
     ### Inspect Option
@@ -63,8 +106,10 @@
     Here is the way to inspect what is inside your dataset.  
     All paths are covered until meeting a value, the path is display on the lef and the value on the right.
 
-- name: Inspect inputs command
-  play_cmd: cat host_list_of_dict_in_key.yml  | jtable --inspect
+- text: |
+    #### Inspect inputs command
+
+- play_cmd: cat host_list_of_dict_in_key.yml  | jtable --inspect
   box_as: text
   # collapse: command & output
 
@@ -76,17 +121,19 @@
   box_as: text
   # collapse: command & output
 
-- text: "## Use query file"
-- text: "if you want to hide, show a given filter you have to build a query file"
-- text: "You can display the query and redirect it to a given file using the following option:"
+- text: |
+    ## Use query file
+    if you want to hide, show a given filter you have to build a query file
+    You can display the query and redirect it to a given file using the following option:
 
-- name: view_query option
-  play_cmd: "cat key_containing_space.yml | jtable -p \"region.East['Data Center'].dc_1.hosts\" --view_query"
+- text: |
+    #### view_query option
+
+- play_cmd: "cat key_containing_space.yml | jtable -p \"region.East['Data Center'].dc_1.hosts\" --view_query"
   box_as: yaml
   # collapse: command & output
 
 - text: "### Query file sample:"
-
 
 - eval_cmd: cat host_list_of_dict_in_key.yml
   box_as: yaml
@@ -96,21 +143,21 @@
   box_as: text
   # collapse: command & output
 
-
 - text: |
     ## Transform table content using Jinja  
     Your data may not arrived exatcly how you want to represent them.  
     In fact they never arrived as you want.  
     The following example transform the uptime coming in seconds to days
 
-- name: Transform uptime coming in seconds to days
-  eval_cmd: cat uptime_dataset.yml
+- text: |
+    #### Transform uptime coming in seconds to days
+
+- eval_cmd: cat uptime_dataset.yml
   box_as: yaml
   # collapse: the dataset
 
 - eval_cmd: cat uptime_view.yml
   box_as: yaml
-  box_as: text
   # collapse: the query
 
 - play_cmd: cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
@@ -121,8 +168,10 @@
     ## Use variables in your query file
     this will helps to make mapping table, or behalf like view
 
-- name: Use variables mapping table or view
-  eval_cmd: cat uptime_view_with_views.yml
+- text: |
+    #### Use variables mapping table or view
+
+- eval_cmd: cat uptime_view_with_views.yml
   box_as: yaml
   # collapse: the query
 
@@ -135,8 +184,10 @@
     This feature will help you for the suite describe after to add more context in your  
     and avoid your variable coming from your input and the ones present.
 
-- name: Store data in a namespace using path syntaxe stdin.hosts{```item```}
-  text: |
+- text: |
+    #### Store data in a namespace using path syntaxe stdin.hosts{```item```}
+
+- text: |
     ```
     cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
     ```
@@ -146,8 +197,10 @@
   box_as: yaml
   # collapse: the query
 
-- name: 'store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"'
-  eval_cmd: cat region_dataset.yml
+- text: |
+    #### store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"
+
+- eval_cmd: cat region_dataset.yml
   box_as: yaml
   # collapse: the dataset
 
@@ -160,7 +213,7 @@
   # collapse: the query
 
 - text: "## Use jtable with Ansible"
-- text: "The plabybook"
+- text: "The playbook"
 
 - eval_cmd: cat ansible_playbook_example.yml
   box_as: yaml
@@ -189,7 +242,9 @@
 
 - text: "# Embded filters"
 
-- name: strf_time
+- text: |
+    #### strf_time
+
 - box_as: yaml
   eval_cmd: cat strf_time_example.yml
   box_as: bash
@@ -201,8 +256,10 @@
 
 - text: "# Conditional styling"
 
-- name: Styling option
-  play_cmd: "jtable -q uptime_view_colored.yml -f github"
+- text: |
+    #### Styling option
+
+- play_cmd: "jtable -q uptime_view_colored.yml -f github"
   # box_as: bash
   # collapse: dataset & query
 
@@ -211,8 +268,10 @@
 #   box_as: bash
 #   # collapse: dataset & query
 
-- name: Ansible again
-  play_cmd: |
+- text: |
+    #### Ansible again
+
+- play_cmd: |
     export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
     export ANSIBLE_ACTION_WARNINGS=False && \
     export ANSIBLE_STDOUT_CALLBACK=debug && \
@@ -221,8 +280,6 @@
   
   box_as: bash
   # collapse: dataset & query
-
-
 
 - text: "![uptime_view_colored](./uptime_view_colored.png)"
 

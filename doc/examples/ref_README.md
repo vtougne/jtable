@@ -1,8 +1,51 @@
 [[_TOC_]]
-## Overview  
-- jtable helps you to render table from key / lists / values sources like json, yaml, and Python objects.  
-- It works as a cli in a shell and as a Jinja filter that may be integrated in a Python framework like Ansible, Django, Flask and others  
-## Simple usage
+
+## Overview
+- Jtable helps you render tables from key/list/value sources like JSON, YAML, and Python objects.
+- Usable as a CLI tool, Jinja filter, or Python module (integrates with Ansible, Django, Flask, etc.)
+
+---
+
+## Features
+- Render tables from JSON, YAML, or Python objects
+- CLI, Jinja filter, or Python import
+- Conditional coloring and formatting
+- Advanced selection, filtering, and transformation with query files
+- Output formats: plain, JSON, HTML, GitHub, LaTeX, etc.
+- Multi-file loading and aggregation
+- Integration with Ansible and other Python frameworks
+- Inspect and explore nested data structures
+
+---
+
+## Screenshot: Conditional Styling
+
+![Colored Table Example](./uptime_view_colored.png)
+
+---
+
+## CLI Options
+- `-p, --json_path` : Specify a path in the input data
+- `-s, --select` : Select columns/fields to display
+- `-us, --unselect` : Exclude columns/fields
+- `-w, --when` : Filter rows by condition (e.g. `state == 'alive'`)
+- `-f, --format` : Output format (simple, json, th, td, html, github, etc.)
+- `-q, --query_file` : Load a query file (YAML)
+- `--inspect` : Inspect and display all paths/values in the input
+- `-jf, --json_file` : Load a JSON file
+- `-jfs, --json_files` : Load multiple JSON files
+- `-yfs, --yaml_files` : Load multiple YAML files
+- `-vq, --view_query` : Show the generated query
+- `-o, --stdout` : Override output filter
+- `-pf, --post_filter` : Apply an additional filter to the output
+- `--version` : Show version
+- `-v, --verbose` : Verbosity level
+- `-d, --debug` : Debug mode
+- `-h, --help` : Show help
+
+---
+
+## Simple Usage
 
 ### display a list of dictionnaries as a table
 Considering the following dataset you want to display as a table  
@@ -42,8 +85,8 @@ host_2      linux  5000    alive        qua
 host_3      linux          unreachable  qua
 
 ```
-  
 #### display dictionnaries of dictionnaries as a table
+
 
 command: 
 ```bash
@@ -84,8 +127,8 @@ hosts:
 
 
 ```
-  
 #### access to key in path
+
 
 command: 
 ```bash
@@ -121,8 +164,8 @@ It looks to nothing... :)
 Here is the way to inspect what is inside your dataset.  
 All paths are covered until meeting a value, the path is display on the lef and the value on the right.
 
-  
 #### Inspect inputs command
+
 
 command: 
 ```bash
@@ -191,8 +234,9 @@ host_3      linux          unreachable  qua
 ## Use query file
 if you want to hide, show a given filter you have to build a query file
 You can display the query and redirect it to a given file using the following option:
-  
+
 #### view_query option
+
 
 command: 
 ```bash
@@ -261,8 +305,8 @@ Your data may not arrived exatcly how you want to represent them.
 In fact they never arrived as you want.  
 The following example transform the uptime coming in seconds to days
 
-  
 #### Transform uptime coming in seconds to days
+
 
 ```yaml
 hosts:
@@ -287,7 +331,7 @@ hosts:
 
 ```
 
-```text
+```yaml
 vars:
   queryset:
     path: hosts{}
@@ -322,8 +366,8 @@ host_3  linux      0 days
 ## Use variables in your query file
 this will helps to make mapping table, or behalf like view
 
-  
 #### Use variables mapping table or view
+
 
 ```yaml
 vars:
@@ -370,8 +414,8 @@ North     dc_2       host_2                 79 days           🔥 host.uptime e
 This feature will help you for the suite describe after to add more context in your  
 and avoid your variable coming from your input and the ones present.
 
-  
 #### Store data in a namespace using path syntaxe stdin.hosts{```item```}
+
 ```
 cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
 ```
@@ -386,8 +430,8 @@ vars:
       - as: os
         expr: host.os
 ```
-  
 #### store parent key using path syntaxe "stdin.regions{region}.dc{dc_name}{host}"
+
 
 ```yaml
 regions:
@@ -420,7 +464,7 @@ cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view
 output:
 
 ```bash
-15:34:12 cls.cross_path      | ERROR .dc was not found in dataset level: 2
+14:19:57 cls.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -451,7 +495,7 @@ vars:
       expr: host.state
 ```
 ## Use jtable with Ansible
-The plabybook
+The playbook
 
 ```yaml
 - hosts: localhost
@@ -505,7 +549,7 @@ jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_q
 output:
 
 ```bash
-15:34:13 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
+14:19:57 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -539,8 +583,8 @@ vars:
         expr: cost
 ```
 # Embded filters
-  
 #### strf_time
+
 
 ```bash
 vars:
@@ -586,8 +630,8 @@ host_3      linux     200  alive     2.02032e+07          12
 
 ```
 # Conditional styling
-  
 #### Styling option
+
 
 command: 
 ```bash
@@ -605,8 +649,8 @@ output:
 | host_7     | North    | dc_2      | windows | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{61 days}}`$   |
 
 
-  
 #### Ansible again
+
 
 command: 
 ```bash
