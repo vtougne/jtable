@@ -142,6 +142,10 @@ class JtableCli:
                 jtable_color = [name for name, func in inspect.getmembers(Styling().__init__())]
                 print(Styling().view_all_colors())
                 exit(1)
+            elif args.help[0] == 'b64decode':
+                from .functions import b64decode
+                print(b64decode.__doc__)
+                exit(1)
             else:
                 print(f"Error: No help available for '{args.help[0]}'")
                 exit(1)
