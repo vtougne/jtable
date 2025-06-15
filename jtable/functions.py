@@ -114,8 +114,7 @@ class Plugin:
                     except Exception as error:
                         logging.warning(f"fail loading file {file_name_full_path}, skipping")
         return file_list_dataset
-
-
+    
 def b64decode(value):
     """
     Decode a base64 encoded string.

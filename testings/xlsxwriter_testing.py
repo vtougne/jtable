@@ -23,7 +23,7 @@ worksheet.write(2, 0, 123)
 worksheet.write(3, 0, 242)
 
 # Insert an image.
-# worksheet.insert_image('B5', 'logo.png'):
+worksheet.insert_image('B5', 'uptime_view_colored.png')
 
 formatage = workbook.add_format({'bold': True, 'bg_color': 'yellow'})
 

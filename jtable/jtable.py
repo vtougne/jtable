@@ -478,6 +478,13 @@ class JtableCls:
             return self.td
         elif self.format == "github":
             return tabulate.tabulate(self.td,self.th,tablefmt="github")
+        elif self.format == "gitlab_json_table":
+            out_dataset = {
+                "fields": [ { "key": key } for key in self.th ],
+                "items": self.td,
+                "filterable": True
+            }
+            return f"```json:table\n{json.dumps(out_dataset)}\n```"
         elif self.format == "html":
             return tabulate.tabulate(self.td,self.th,tablefmt="unsafehtml")
         else:
