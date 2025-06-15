@@ -158,7 +158,7 @@ class JtableCli:
             jtable_plugins = [name for name, func in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
             print(f"\njtable core filters:\n   {', '.join(jtable_core_filters)}\n")
             tablulate_formats = next((value for name, value in inspect.getmembers(tabulate) if name == 'tabulate_formats'), None)
-            jtable_formats = ['json','th','td']
+            jtable_formats = ['json','gitlab_json_table','td','th']
             print(f"tabulate formats:\n   {', '.join(sorted(tablulate_formats))}\n")
             print(f"jtable additional formats:\n   {', '.join(sorted(jtable_formats))}\n")
             print(f"jtable plugins:\n   {', '.join(jtable_plugins)}\n")

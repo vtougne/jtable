@@ -1,0 +1,64 @@
+vars:
+  queryset:
+    path: '{}'
+    select:
+    - as: name
+      expr: name
+    - as: ansi_code
+      expr: ansi_code
+    - as: hex
+      expr: hex
+      styling:
+      - style: "font-color: black"
+        when: 
+        - color_name == "black"
+      - style: "font-color: Red"
+        when:
+        - color_name == "red"
+      - style: "font-color: Green"
+        when:
+        - color_name == "green"
+      - style: "font-color: Yellow"
+        when:
+        - color_name == "yellow"
+      - style: "font-color: Blue"
+        when:
+        - color_name == "blue"
+      - style: "font-color: Magenta"
+        when:
+        - color_name == "magenta"
+      - style: "font-color: Cyan"
+        when:
+        - color_name == "cyan"
+      - style: "font-color: White"
+        when:
+        - color_name == "white"
+      - style: "font-color: Gray"
+        when:
+        - color_name == "gray"
+      - style: "font-color: LightRed"
+        when:
+        - color_name == "lightred"
+      - style: "font-color: LightGreen"
+        when:
+        - color_name == "lightgreen"
+      - style: "font-color: LightYellow"
+        when:
+        - color_name == "lightyellow"
+      - style: "font-color: LightBlue"
+        when:
+        - color_name == "lightblue"
+      - style: "font-color: LightMagenta"
+        when:
+        - color_name == "lightmagenta"
+      - style: "font-color: LightCyan"
+        when:
+        - color_name == "lightcyan"
+      - style: "font-color: LightWhite"
+        when:
+        - color_name == "lightwhite"
+    format: simple
+    views:
+      color_name: name | lower
+stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
+
