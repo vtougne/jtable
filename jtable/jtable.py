@@ -481,7 +481,7 @@ class JtableCls:
         elif self.format == "gitlab_json_table":
             out_dataset = {
                 "fields": [ { "key": key } for key in self.th ],
-                "items": self.td,
+                "items": self.json,
                 "filterable": True
             }
             return f"```json:table\n{json.dumps(out_dataset)}\n```"
