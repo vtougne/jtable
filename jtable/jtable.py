@@ -482,7 +482,7 @@ class JtableCls:
             out_dataset = {
                 "fields": [ { "key": key } for key in self.th ],
                 "items": self.json,
-                "filterable": True
+                "filter": True
             }
             return f"```json:table\n{json.dumps(out_dataset)}\n```"
         elif self.format == "html":
