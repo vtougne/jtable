@@ -480,11 +480,11 @@ class JtableCls:
             return tabulate.tabulate(self.td,self.th,tablefmt="github")
         elif self.format == "gitlab_json_table":
             out_dataset = {
-                "fields": [ { "key": key } for key in self.th ],
+                "fields": [ { "key": key, "sortable": "true" } for key in self.th ],
                 "items": self.json,
                 "filter": True
             }
-            return f"```json:table\n{json.dumps(out_dataset)}\n```"
+            return f"```json:table\n{json.dumps(out_dataset,indent=2, separators=(',', ': '))}\n```"
         elif self.format == "html":
             return tabulate.tabulate(self.td,self.th,tablefmt="unsafehtml")
         else:
