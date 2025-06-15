@@ -4,7 +4,20 @@ import os
 import subprocess
 from setuptools import setup, find_packages
 from setuptools.command.install import install
-from jtable.version import __version__
+# from jtable.version import __version__
+def get_version():
+    version_file = os.path.join(os.path.dirname(__file__), "jtable", "version.py")
+    with open(version_file, "r") as f:
+        for line in f:
+            if line.startswith("__version__"):
+                delim = '"' if '"' in line else "'"
+                version = line.split(delim)[1]
+                if version == "current":
+                    return "0.0.1"
+                else:
+                    return version
+    raise RuntimeError("Unable to find __version__ in version.py")
+
 
 class CustomInstallCommand(install):
     def run(self):
@@ -19,7 +32,7 @@ class CustomInstallCommand(install):
 
 setup(
     name="jtable",
-    version=__version__,
+    version=get_version(),
     packages=find_packages(),
     # packages=find_packages(include=["jtable", "jtable.*","logger"]),
     # py_modules=["logger"],
