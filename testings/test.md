@@ -41,6 +41,7 @@
       "cost": "200"
     }
   ],
-  "filter": true
+  "filter": true,
+  "caption": ""
 }
 ```
