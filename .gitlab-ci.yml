@@ -144,8 +144,8 @@ make_windows_setup:
     - cd C:\temp\build\jtable\dist
     # - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
     - '& "C:\temp\build\nsis-3.11\nsis-3.11\makensis.exe" ..\jtable.nsi'
-  # rules:
-  #   - when: manual
+  rules:
+    - when: never
   allow_failure: true
 
 
@@ -181,8 +181,8 @@ deploy:
         -H "X-GitHub-Api-Version: 2022-11-28" \
         https://api.github.com/repos/vtougne/jtable/releases \
         -d '{"tag_name":"'"$new_version"'","target_commitish":"main","name":"'"$new_version"'","body":"'"${release_name}"'","draft":false,"prerelease":false,"generate_release_notes":false}'
-  rules:
-    - when: manual
+  # rules:
+  #   - when: manual
 
 cleanup:
   # variables:
