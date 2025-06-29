@@ -13,6 +13,7 @@ const top_search_box = `
 
 let selectedTable = null; // Variable pour stocker la table sélectionnée
 add_toc()
+add_div_to_tables()
 
 // Écouteur pour détecter le clic sur une table
 tables.forEach(table => {
@@ -67,8 +68,46 @@ for (const table of tables) {
 
 }
 
-// $("<h1>The Super title</h1>").prependTo("top_search_box");
 
+update_row_count = function (table_id = null) {
+  console.log("update_row_count called with table_id: " + table_id);
+  let totalVisibleRows = 0;
+  for (const table of tables) {
+    const tbody = table.tBodies[0];
+    if (tbody) {
+      const visibleRows = Array.from(tbody.rows).filter(row => row.style.display !== "none");
+      totalVisibleRows += visibleRows.length;
+      // Update the row count div for this table
+      const container = table.parentNode;
+      if (container && container.classList.contains("table-container")) {
+        const rowCountDiv = container.querySelector(".table-row-count");
+        if (rowCountDiv) {
+          rowCountDiv.textContent = `Row Count: ${visibleRows.length}`;
+        }
+      }
+    }
+  }
+  // Optionally update a global row count element if it exists
+  const rowCountElement = document.getElementById('row-count');
+  if (rowCountElement) {
+    rowCountElement.textContent = `Rows: ${totalVisibleRows}`;
+  }
+};
+
+function add_div_to_tables() {
+  for (const table of tables) {
+    // Create a div to hold the row count
+    const rowCountDiv = document.createElement("div");
+    rowCountDiv.className = "table-row-count";
+    rowCountDiv.textContent = `Rows: ${table.tBodies[0].rows.length}`;
+    // // Append the div to the table container
+    const tableContainer = document.createElement("div");
+    tableContainer.className = "table-container";
+    tableContainer.appendChild(rowCountDiv);
+    table.parentNode.insertBefore(tableContainer, table);
+    tableContainer.appendChild(table);
+  }
+} 
 
 function filterAllTables() {
   var search_input = $("#top-search-container").val().toUpperCase();
@@ -101,6 +140,8 @@ function filterTable(table_id, column = 0) {
     filterColumn(table_id, columnId);
     columnId++;
   }
+  update_row_count(table_id);
+
 }
 
 

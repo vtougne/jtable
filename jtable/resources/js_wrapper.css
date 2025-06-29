@@ -50,6 +50,37 @@ td {
   padding: 8px;
 }
 
+
+.table-row-count {
+    position: absolute;
+    /* top: -20px;
+    left: -20px; */
+    top: -20px;
+    left: 20px;
+    /* width: 80px; */
+    height: 15px;
+    background-color: rgb(188, 225, 231);
+    color: gray;
+    border: none;
+    /* border-radius: 50%; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    visibility: hidden; /* Masquer par défaut */
+}
+
+
+.table-container:hover .table-row-count {
+    visibility: visible;
+}
+
+.table-container {
+    position: relative;
+    display: inline-block;
+  }
+
 tbody tr:nth-child(even) {
   background-color: #f2f2f2;
 }

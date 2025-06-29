@@ -1,0 +1,31 @@
+vars:
+  dataset: "{{ plugin('shell','cat dataset.yml') | from_yaml }}"
+  format: html
+  query_simple:
+    path: simple{}
+    select:
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost
+  query_city:
+    path: city{city}.hosts{}
+    select:
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost
+    - as: state
+      expr: state
+    
+  report: |
+    <h1>Report hosts</h1>
+    {{ dataset  | jtable(queryset=query_simple,format=format) }}
+
+    <h1>City</h1>
+    {{ dataset | jtable(queryset=query_city,format=format) }}
+stdout: "{{ report | wrap_html }}"

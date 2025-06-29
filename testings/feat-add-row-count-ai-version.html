@@ -59,37 +59,6 @@ td {
   padding: 8px;
 }
 
-
-.table-row-count {
-    position: absolute;
-    /* top: -20px;
-    left: -20px; */
-    top: -20px;
-    left: 20px;
-    /* width: 80px; */
-    height: 15px;
-    background-color: rgb(188, 225, 231);
-    color: gray;
-    border: none;
-    /* border-radius: 50%; */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
-    visibility: hidden; /* Masquer par défaut */
-}
-
-
-.table-container:hover .table-row-count {
-    visibility: visible;
-}
-
-.table-container {
-    position: relative;
-    display: inline-block;
-  }
-
 tbody tr:nth-child(even) {
   background-color: #f2f2f2;
 }
@@ -158,7 +127,6 @@ tbody tr:nth-child(even) {
     </style>
 <body>
 <div id="toc"></div>
-<h1>Report hosts</h1>
 <table>
 <thead>
 <tr><th>hostname  </th><th>os     </th><th>cost  </th></tr>
@@ -171,29 +139,6 @@ tbody tr:nth-child(even) {
 <tr><td>host_5    </td><td>linux  </td><td>200   </td></tr>
 </tbody>
 </table>
-
-<h1>City</h1>
-<table>
-<thead>
-<tr><th>hostname  </th><th>os     </th><th>cost  </th><th>state      </th></tr>
-</thead>
-<tbody>
-<tr><td>host_2    </td><td>windows</td><td>300   </td><td>           </td></tr>
-<tr><td>host_3    </td><td>linux  </td><td>200   </td><td>           </td></tr>
-<tr><td>host_4    </td><td>aix    </td><td>600   </td><td>           </td></tr>
-<tr><td>host_1    </td><td>linux  </td><td>      </td><td>           </td></tr>
-<tr><td>host_5    </td><td>linux  </td><td>200   </td><td>           </td></tr>
-<tr><td>host_p_1  </td><td>linux  </td><td>5000  </td><td>alive      </td></tr>
-<tr><td>host_p_2  </td><td>linux  </td><td>5000  </td><td>unreachable</td></tr>
-<tr><td>host_p_3  </td><td>linux  </td><td>5000  </td><td>alive      </td></tr>
-<tr><td>host_b_1  </td><td>linux  </td><td>5000  </td><td>alive      </td></tr>
-<tr><td>host_b_2  </td><td>linux  </td><td>5000  </td><td>unreachable</td></tr>
-<tr><td>host_b_3  </td><td>linux  </td><td>5000  </td><td>alive      </td></tr>
-<tr><td>host_n_1  </td><td>linux  </td><td>5000  </td><td>alive      </td></tr>
-<tr><td>host_n_2  </td><td>linux  </td><td>5000  </td><td>unreachable</td></tr>
-<tr><td>host_n_3  </td><td>linux  </td><td>5000  </td><td>alive      </td></tr>
-</tbody>
-</table>
 <button id="scrollTopButton" onclick="scrollToTop()">Top</button>
 <script>
     // var tables = document.getElementsByTagName('table');
@@ -202,8 +147,13 @@ const pageTitle = $('title').text();
 console.log(pageTitle);
 const top_search_box = `
 <header>
-  <label>${pageTitle}</label>
-  <input type="text" id="top-search-container" onkeyup="filterAllTables()" placeholder="Filter on all tables">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <span id="row-count" style="font-weight: bold; color: rgb(95, 19, 19);">Rows: 0</span>
+      <label>${pageTitle}</label>
+    </div>
+    <input type="text" id="top-search-container" onkeyup="filterAllTables()" placeholder="Filter on all tables">
+  </div>
 </header>
 `;
 
@@ -211,7 +161,6 @@ const top_search_box = `
 
 let selectedTable = null; // Variable pour stocker la table sélectionnée
 add_toc()
-add_div_to_tables()
 
 // Écouteur pour détecter le clic sur une table
 tables.forEach(table => {
@@ -266,46 +215,29 @@ for (const table of tables) {
 
 }
 
-
-update_row_count = function (table_id = null) {
-  console.log("update_row_count called with table_id: " + table_id);
+// Function to count visible rows and update the display
+function updateRowCount() {
   let totalVisibleRows = 0;
+  
   for (const table of tables) {
     const tbody = table.tBodies[0];
     if (tbody) {
       const visibleRows = Array.from(tbody.rows).filter(row => row.style.display !== "none");
       totalVisibleRows += visibleRows.length;
-      // Update the row count div for this table
-      const container = table.parentNode;
-      if (container && container.classList.contains("table-container")) {
-        const rowCountDiv = container.querySelector(".table-row-count");
-        if (rowCountDiv) {
-          rowCountDiv.textContent = `Row Count: ${visibleRows.length}`;
-        }
-      }
     }
   }
-  // Optionally update a global row count element if it exists
+  
   const rowCountElement = document.getElementById('row-count');
   if (rowCountElement) {
     rowCountElement.textContent = `Rows: ${totalVisibleRows}`;
   }
-};
+}
 
-function add_div_to_tables() {
-  for (const table of tables) {
-    // Create a div to hold the row count
-    const rowCountDiv = document.createElement("div");
-    rowCountDiv.className = "table-row-count";
-    rowCountDiv.textContent = `Rows: ${table.tBodies[0].rows.length}`;
-    // // Append the div to the table container
-    const tableContainer = document.createElement("div");
-    tableContainer.className = "table-container";
-    tableContainer.appendChild(rowCountDiv);
-    table.parentNode.insertBefore(tableContainer, table);
-    tableContainer.appendChild(table);
-  }
-} 
+// Update row count after tables are initialized
+updateRowCount();
+
+// $("<h1>The Super title</h1>").prependTo("top_search_box");
+
 
 function filterAllTables() {
   var search_input = $("#top-search-container").val().toUpperCase();
@@ -314,6 +246,7 @@ function filterAllTables() {
     filterTable(tableId);
     tableId++;
   }
+  updateRowCount(); // Update row count after filtering
 }
 
 function filterTable(table_id, column = 0) {
@@ -338,8 +271,8 @@ function filterTable(table_id, column = 0) {
     filterColumn(table_id, columnId);
     columnId++;
   }
-  update_row_count(table_id);
-
+  
+  updateRowCount(); // Update row count after filtering
 }
 
 
@@ -357,6 +290,8 @@ function filterColumn(table_id, column) {
       row.style.display = "none";
     }
   });
+  
+  updateRowCount(); // Update row count after filtering
 }
 
 
