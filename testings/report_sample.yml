@@ -1,5 +1,5 @@
 vars:
-  hosts: "{{ plugin('shell','python simu_infra_inv.py') }}"
+  hosts: "{{ plugin('shell','python3 infra_simulator.py') }}"
   queryset:
     path: '{}'
     select:

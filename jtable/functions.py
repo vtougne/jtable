@@ -55,8 +55,11 @@ class Plugin:
             'total 1234\ndrwxr-xr-x ...'
         """
         import subprocess
-        
-        if running_context['shell_type'] == "git_bash" or running_context['shell_type'] == "cygwin":
+        import shutil
+        # print(shutil.which("bash"))
+        # print(running_context()['shell_type'])
+        # exit(1)
+        if running_context()['shell_type'] == "git_bash" or running_context()['shell_type'] == "cygwin":
             bash_path = shutil.which("bash.exe")
         else:
             bash_path = shutil.which("bash")

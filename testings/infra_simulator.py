@@ -51,7 +51,7 @@ def generate_hosts(scope):
 # scope = {'dev': 1000, 'qua': 1000, 'prod': 2000}
 # scope = {'dev': 2000, 'qua': 2000, 'prod': 4000}
 # scope = {'dev': 4000, 'qua': 4000, 'prod': 8000}
-scope = {'dev': 8000, 'qua': 8000, 'prod': 16000}
+scope = {'dev': 10, 'qua': 15, 'prod': 20}
 
 # Génération des hosts
 hosts_dict = generate_hosts(scope)
