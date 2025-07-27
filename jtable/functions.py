@@ -32,49 +32,7 @@ class Plugin:
         else:
             return os.environ[var_name]
 
-    @staticmethod
-    def shell(cmd,default=None):
-        """
-        Execute a shell command and return its output.
-        
-        Args:
-            cmd (str): Command to execute
-            default: Default value to return if command fails (not used in current implementation)
-            
-        Returns:
-            str: Command output
-            
-        Raises:
-            FileNotFoundError: If bash executable is not found
-            subprocess.CalledProcessError: If command execution fails
-
-        Examples:
-            >>> Plugin.shell('echo "Hello World"')
-            'Hello World\n'
-            >>> Plugin.shell('ls -l')
-            'total 1234\ndrwxr-xr-x ...'
-        """
-        import subprocess
-        import shutil
-        # print(shutil.which("bash"))
-        # print(running_context()['shell_type'])
-        # exit(1)
-        if running_context()['shell_type'] == "git_bash" or running_context()['shell_type'] == "cygwin":
-            bash_path = shutil.which("bash.exe")
-        else:
-            bash_path = shutil.which("bash")
-
-        if bash_path is None:
-            raise FileNotFoundError(f"bash_path {bash_path} was not found in PATH")
-        output = subprocess.run(
-            [bash_path, "-c", cmd],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=sys.stderr,
-            text=True
-        )
-        return output.stdout
-    
+   
     @staticmethod
     def load_files(search_string, format=json, ignore_errors=True):
         """
@@ -118,6 +76,50 @@ class Plugin:
                         logging.warning(f"fail loading file {file_name_full_path}, skipping")
         return file_list_dataset
     
+    @staticmethod
+    def shell(cmd,default=None):
+        """
+        Execute a shell command and return its output.
+        
+        Args:
+            cmd (str): Command to execute
+            default: Default value to return if command fails (not used in current implementation)
+            
+        Returns:
+            str: Command output
+            
+        Raises:
+            FileNotFoundError: If bash executable is not found
+            subprocess.CalledProcessError: If command execution fails
+
+        Examples:
+            >>> Plugin.shell('echo "Hello World"')
+            'Hello World\n'
+            >>> Plugin.shell('ls -l')
+            'total 1234\ndrwxr-xr-x ...'
+        """
+        import subprocess
+        import shutil
+        # print(shutil.which("bash"))
+        # print(running_context()['shell_type'])
+        # exit(1)
+        if running_context()['shell_type'] == "git_bash" or running_context()['shell_type'] == "cygwin":
+            bash_path = shutil.which("bash.exe")
+        else:
+            bash_path = shutil.which("bash")
+
+        if bash_path is None:
+            raise FileNotFoundError(f"bash_path {bash_path} was not found in PATH")
+        output = subprocess.run(
+            [bash_path, "-c", cmd],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=sys.stderr,
+            text=True
+        )
+        return output.stdout
+ 
+
 def b64decode(value):
     """
     Decode a base64 encoded string.
@@ -553,6 +555,30 @@ def strftime(string_format, second=None):
         except Exception:
             raise "Invalid value for epoch value (%s)" % second
     return time.strftime(string_format, time.localtime(second))
+
+
+def template(input_str, env_dict = {}):
+    """
+    Render a template string with given keyword arguments.
+    
+    Args:
+        template (str): Template string with placeholders
+        **kwargs: Keyword arguments to replace placeholders in the template
+        
+    Returns:
+        str: Rendered template string
+
+    Examples:
+        >>> template('Hello, {name}!', name='John')
+        'Hello, John!'
+        >>> template('Today is {day} of {month}.', day='Monday', month='January')
+        'Today is Monday of January.'
+    """
+    from jinja2 import Environment
+    env = Environment()
+    return env.from_string(input_str).render(env_dict)
+
+
 
 def to_datetime(_string, format=r"%Y-%m-%d %H:%M:%S"):
     """

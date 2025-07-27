@@ -1,0 +1,7 @@
+vars:
+  doc_base_url: "https://github.com/vtougne/jtable/blob/main"
+  # doc_base_url: "."
+  input: "{{ plugin('shell','cat README_template.md') }}"
+
+stdout: "{{ input | template({'doc_base_url': doc_base_url}) }}"
+
