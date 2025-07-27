@@ -50,7 +50,7 @@ setup(
     author="Vincent Tougne",
     author_email="vtougne@gmail.com",
     description="Tabulate JSON data and transform them using Jinja templates.",
-    long_description=open("./doc/README_pypi.md", "r", encoding="utf-8").read(),
+    long_description=open("doc/README_pypi.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     keywords="json, table, jinja, templating, data transformation",
     # project_urls={
