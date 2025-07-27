@@ -50,6 +50,12 @@ setup(
     author="Vincent Tougne",
     author_email="vtougne@gmail.com",
     description="Tabulate JSON data and transform them using Jinja templates.",
+    long_description=open("README.md", "r", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
+    keywords="json, table, jinja, templating, data transformation",
+    # project_urls={
+    #     "Documentation": "https://jtable.readthedocs.io/en/latest/",
+    #     "Source": " 
     license="MIT",
     license_files=["LICENSE.txt"],
     classifiers=[
