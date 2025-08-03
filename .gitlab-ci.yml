@@ -11,7 +11,6 @@ stages:
 variables:
   nsis_download_url: "https://sourceforge.net/projects/nsis/files/NSIS%203/3.11/nsis-3.11.zip"
 
-
 workflow:
   rules: 
     - if: '$CI_COMMIT_BRANCH != "main" &&  $CI_COMMIT_TAG != "null" && $CI_COMMIT_MESSAGE !~ /adding version/'
