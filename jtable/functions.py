@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import yaml,json,logging, sys, os, time, datetime
-
+import re
+import html
 
 class Plugin:
     @staticmethod
@@ -759,13 +760,16 @@ if __name__ == "__main__":
         print(f"Usage: ./functions.py [options] \"expression\"")
         print("Options:")
         print("  -h <function_name>    Display help for a specific function")
+        print("  --help <function_name>    Display help for a specific function")
         print("\nAvailable functions:")
         print(", ".join(sorted(safe_globals.keys())))
         sys.exit(1)
 
-    if sys.argv[1] == "-h":
+    # Support both -h and --help for function docstring
+    if (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
         if len(sys.argv) != 3:
             print("Usage: ./functions.py -h <function_name>")
+            print("   or: ./functions.py --help <function_name>")
             print("\nAvailable functions:")
             print(", ".join(sorted(safe_globals.keys())))
             sys.exit(1)
@@ -791,3 +795,4 @@ if __name__ == "__main__":
         print(result)
     except Exception as e:
         print(f"Error: {e}")
+

@@ -90,6 +90,7 @@ class JtableCli:
         parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
         parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
         parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
+        parser.add_argument('-c', '--context', help='Add context')
 
         args = parser.parse_args()
         global terminal_size
@@ -111,6 +112,13 @@ class JtableCli:
         logging.info(f"running_context: {running_context}")
         # logging_format = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)s | %(levelname)s %(message)s'
         
+        if args.context:
+            print(f"Loading context from: {args.context}")
+            logging.info(f"Loading context from: {args.context}")
+            queryset = json.loads(args.context)
+            print(f"queryset: {queryset}")
+            exit(0)
+
         if args.query_file:
             logging.info(f"loading query file: {args.query_file}")
             with open(args.query_file, 'r') as file:
