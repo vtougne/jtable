@@ -41,7 +41,6 @@ setup(
     entry_points={
         'console_scripts': [
             'jtable=jtable.jtable:main',
-            'templify=jtable.templify:main',
         ],
     },
     cmdclass={
