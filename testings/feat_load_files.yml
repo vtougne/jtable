@@ -1,5 +1,0 @@
-vars:
-  extract: "{{ plugin('load_files', '*.yml') }}"
-
-stdout: "{{ extract[0] | list }}"
-     

@@ -1,6 +1,0 @@
-- dc_1: { hostname: host_1, os: linux, cost: 5000, state: alive }
-- dc_2: { hostname: host_2, os: linux, cost: 200, state: alive }
-- dc_3: { hostname: host_3, os: windows, cost: 200, state: alive }
-- dc_4: { hostname: host_4, os: windows, cost: 5000, state: decom }
-- dc_5: { hostname: host_5, os: windows, cost: 200, state: alive }
-- dc_6: { hostname: host_6, os: windows, cost: 5000, state: decom }

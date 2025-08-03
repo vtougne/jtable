@@ -1,4 +1,0 @@
-vars:
-  the_string: "{{ plugin('shell','cat the_text.txt') | escape }}"
-
-stdout: "{{ the_string | unescape }}"

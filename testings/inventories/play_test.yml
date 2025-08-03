@@ -1,5 +1,0 @@
-- hosts: rmp:&windows
-  gather_facts: false
-  tasks:
-  - debug:
-      msg: coucou

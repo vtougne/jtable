@@ -1,8 +1,0 @@
-vars:
-  name: Vince
-  full_name: 
-    name : "{{ name }}"
-    last_name: "Nguyen"
-    other:
-    - "{{ name }}"
-    - bob

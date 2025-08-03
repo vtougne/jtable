@@ -1,6 +1,0 @@
-
-
-vars:
-  out: "{{ plugin('shell','echo coucou') }}"
-
-stdout: "{{ out }}"

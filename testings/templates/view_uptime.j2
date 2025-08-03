@@ -1,5 +1,0 @@
-{% set select = [  
-  {"as": "host", "expr": "item.hostname"},
-  {"as": "os", "expr": "item.os | replace('linux','youhou')" }
-] %}
-{{ host| jtable(select=select) }}

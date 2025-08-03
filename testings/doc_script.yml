@@ -1,7 +1,0 @@
-- text: "# coucou"
-
-- eval_cmd: cat dataset.yml | jtable -p simple
-  box_as: bash
-
-- eval_cmd: ./hello.sh
-  box_as: bash

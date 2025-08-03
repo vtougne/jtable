@@ -1,6 +1,0 @@
-
-
-
-- { hostname: host_dev_pay_1, os: linux, cost: 5000 }
-- { hostname: host_dev_pay_2, os: linux, cost: 200  }
-- { hostname: host_dev_pay_3, os: win, cost: 200  }
