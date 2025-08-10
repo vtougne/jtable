@@ -18,41 +18,14 @@ import yaml
 import functions
 Filters = functions
 Plugin = functions.Plugin
+InspectDataset = functions.InspectDataset
 running_context = functions.running_context()
 
 def stdin_has_data():
     """Retourne True si des données sont envoyées sur stdin (ex: via pipe ou redirection)"""
     return not sys.stdin.isatty()
 
-class Inspect:
-    def __init__(self):
-        self.out = []
-    def add_row(self,row):
-        self.out = self.out + [ [row[0]] + [row[1]] ]
-        logging.info("Covering " + " / ".join(Filters.flatten([ [row[0]] + [row[1]] ])))
-    def view_paths(self,dataset,path="", max_depth=0):
-        self.cover_data(dataset,path="", max_depth=0)
-        return self.out
-    def cover_data(self,dataset,path="", max_depth=0):
-        if type(dataset) is dict:
-            for key,value in dataset.items():
-                if " " in str(key):
-                    the_path = path + "['" + str(key) + "']"
-                else:
-                    if path == "":
-                        the_path = path + str(key)
-                    else:
-                        the_path = path + "." + str(key)
-                self.cover_data(value,the_path )
-        elif type(dataset) is list:
-            index=0
-            for item in dataset:
-                the_path = path + "[" + str(index) + "]"
-                # logging.warning(f"the_path: {the_path}")
-                index += 1
-                self.cover_data(item,the_path)
-        else:
-            self.add_row([path] + [str(dataset)])
+
 
 class JtableCli:
     def __init__(self):
@@ -411,9 +384,9 @@ class JtableCli:
             
         if args.inspect:
             if self.tabulate_var_name == "stdin":
-                inspected_paths = Inspect().view_paths(yaml.safe_load(stdin))
+                inspected_paths = InspectDataset().view_paths(yaml.safe_load(stdin))
             else:
-                inspected_paths = Inspect().view_paths(self.dataset[self.tabulate_var_name])
+                inspected_paths = InspectDataset().view_paths(self.dataset[self.tabulate_var_name])
             tbl = tabulate.tabulate(inspected_paths,['path','value'])
             print(tbl)
             return
@@ -452,7 +425,7 @@ class JtableCli:
             out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
 
-class JtableCls:
+class ToTable:
     def __init__(self, render="jinja_native"):
         logging.info(f"Initilizing render: {render}")
         self.td = []
@@ -893,7 +866,7 @@ class Templater:
         jtable_core_filters = [name[0] for name in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
             env.filters[filter_name] = getattr(Filters, filter_name)
-        env.filters['jtable'] = JtableCls().render_object
+        env.filters['jtable'] = ToTable().render_object
         # logging.info(f"jtable_core_filters: {jtable_core_filters}")
 
         ####################  Add plugin function ####################

@@ -12,7 +12,7 @@ except:
 # print(dir(jtable))
 
 def jtable_filter(dataset,select=[],path="{}",format="simple",views={}, when=[],queryset={}):
-    return jtable.JtableCls(render="jinja_ansible").render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)
+    return jtable.ToTable(render="jinja_ansible").render_object( dataset,path=path, select=select,views=views, when=when,format=format, queryset=queryset)
 
 class FilterModule(object):
 

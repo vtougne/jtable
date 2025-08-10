@@ -522,7 +522,7 @@ cat region_dataset.yml | jtable play region_view.yml
 output:
 
 ```bash
-13:03:11 cls.cross_path      | ERROR .dc was not found in dataset level: 2
+13:14:55 cls.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -608,7 +608,7 @@ jtable load_yaml_files "{input}:data/*/*/config.yml" play load_multi_json_querys
 output:
 
 ```bash
-13:03:11 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
+13:14:55 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
 ls: cannot access 'play': No such file or directory
 ls: cannot access 'play': No such file or directory
 name                          path    content.vars.queryset.select
