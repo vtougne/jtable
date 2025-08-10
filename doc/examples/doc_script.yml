@@ -24,7 +24,15 @@
 
       ---
 
-      ## CLI Options
+      ## CLI Commands and Options
+      
+      ### Commands
+      - `load_json <file>` : Load a single JSON file (or from stdin)
+      - `load_yaml <file>` : Load a single YAML file (or from stdin)
+      - `load_json_files <patterns...>` : Load multiple JSON files using glob patterns
+      - `load_yaml_files <patterns...>` : Load multiple YAML files using glob patterns
+      
+      ### Options
       - `-p, --json_path` : Specify a path in the input data
       - `-s, --select` : Select columns/fields to display
       - `-us, --unselect` : Exclude columns/fields
@@ -32,9 +40,6 @@
       - `-f, --format` : Output format (simple, json, th, td, html, github, etc.)
       - `-q, --query_file` : Load a query file (YAML)
       - `--inspect` : Inspect and display all paths/values in the input
-      - `-jf, --json_file` : Load a JSON file
-      - `-jfs, --json_files` : Load multiple JSON files
-      - `-yfs, --yaml_files` : Load multiple YAML files
       - `-vq, --view_query` : Show the generated query
       - `-o, --stdout` : Override output filter
       - `-pf, --post_filter` : Apply an additional filter to the output
@@ -73,6 +78,28 @@
     #### display dictionnaries of dictionnaries as a table
 
 - play_cmd: cat host_dict_of_dict.yml  | jtable
+  box_as: text
+  # collapse: command & output
+
+- text: |
+    ## Loading Files with Commands
+    
+    ### Load single files
+    Instead of piping files, you can use the new command syntax:
+
+- play_cmd: jtable load_json host_list_of_dict.json
+  box_as: text
+  # collapse: command & output
+
+- play_cmd: jtable load_yaml host_list_of_dict.yml
+  box_as: text
+  # collapse: command & output
+
+- text: |
+    ### Load from stdin (when no file specified)
+    When no file is provided, the commands read from stdin:
+
+- play_cmd: cat host_list_of_dict.yml | jtable load_yaml
   box_as: text
   # collapse: command & output
 
@@ -139,7 +166,7 @@
   box_as: yaml
   # collapse: dataset sample
 
-- play_cmd: "cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml"
+- play_cmd: "cat host_list_of_dict_in_key.yml  | jtable play select_host_basic.yml"
   box_as: text
   # collapse: command & output
 
@@ -160,7 +187,7 @@
   box_as: yaml
   # collapse: the query
 
-- play_cmd: cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
+- play_cmd: cat uptime_dataset.yml | jtable play uptime_view.yml
   box_as: text
   # collapse: command & output
 
@@ -175,7 +202,7 @@
   box_as: yaml
   # collapse: the query
 
-- play_cmd: cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
+- play_cmd: cat uptime_dataset.yml | jtable play uptime_view_with_views.yml
   box_as: text
   # collapse: command & output
 
@@ -189,7 +216,7 @@
 
 - text: |
     ```
-    cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
+    cat uptime_dataset.yml | jtable play name_incoming_attribute.yml
     ```
   # collapse: The command
 
@@ -204,7 +231,7 @@
   box_as: yaml
   # collapse: the dataset
 
-- play_cmd: 'cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view.yml'
+- play_cmd: 'cat region_dataset.yml | jtable play region_view.yml'
   box_as: bash
   # collapse: command & output
 
@@ -222,9 +249,9 @@
 #   # collapse: command & output
 #   box_as: bash
 
-- text: "## Load multiple files"
+- text: "## Load multiple files with glob patterns"
 
-- text: "Considering the files below returned by ```ls -1 data/*/*/config.yml```"
+- text: "Using the new `load_yaml_files` command to load multiple files with glob patterns. Considering the files below returned by ```ls -1 data/*/*/config.yml```"
   eval_cmd: "ls -1 data/*/*/config.yml"
   box_as: text
 
@@ -232,13 +259,21 @@
   eval_cmd: cat data/dev/it_services/config.yml
   box_as: yaml
 
-- play_cmd: 'jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_queryset.yml'
+- play_cmd: 'jtable load_yaml_files "{input}:data/*/*/config.yml" play load_multi_json_queryset.yml'
   # collapse: command & output
   box_as: bash
 
 - box_as: yaml
   eval_cmd: cat load_multi_json_queryset.yml
   # collapse: The query
+
+- text: |
+    ### Load multiple JSON files
+    Similarly, you can use `load_json_files` for JSON files:
+
+- play_cmd: 'jtable load_json_files "data/*/*/config.json" play load_multi_json_queryset.yml'
+  # collapse: command & output
+  box_as: bash
 
 - text: "# Embded filters"
 
@@ -250,7 +285,7 @@
   box_as: bash
   # collapse: dataset & query
 
-- play_cmd: jtable -q strf_time_example.yml
+- play_cmd: jtable play strf_time_example.yml
   box_as: bash
   # collapse: command & output
 
@@ -259,7 +294,7 @@
 - text: |
     #### Styling option
 
-- play_cmd: "jtable -q uptime_view_colored.yml -f github"
+- play_cmd: "jtable play uptime_view_colored.yml -f github"
   # box_as: bash
   # collapse: dataset & query
 

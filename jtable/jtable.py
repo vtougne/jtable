@@ -20,6 +20,10 @@ Filters = functions
 Plugin = functions.Plugin
 running_context = functions.running_context()
 
+def stdin_has_data():
+    """Retourne True si des données sont envoyées sur stdin (ex: via pipe ou redirection)"""
+    return not sys.stdin.isatty()
+
 class Inspect:
     def __init__(self):
         self.out = []
@@ -71,30 +75,84 @@ class JtableCli:
 
         import argparse
 
-        parser = argparse.ArgumentParser(description='Tabulate your JSON/Yaml data and transform it using Jinja',add_help=False)
+        parser = argparse.ArgumentParser(
+            prog='jtable',
+            description='Tabulate your JSON/Yaml data and transform it using Jinja',
+            add_help=False)
 
-        parser.add_argument("-h", "--help",nargs="*", help = "Show this help")
-        parser.add_argument("-p", "--json_path", help = "json path")
-        parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
-        parser.add_argument("-w", "--when", help = "key_1 == 'value'")
-        parser.add_argument("-f", "--format", help = "Table format applied in simple,json,th,td... list below")
-        parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
-        parser.add_argument("-q", "--query_file", help = "Load jtbale query file")
-        parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
-        parser.add_argument("-jf", "--json_file", help = "Load json")
-        parser.add_argument("-jfs", "--json_files", action='append', help = "Load multiple Json's")
-        parser.add_argument("-yfs", "--yaml_files", action='append', help = "Load multiple Yaml's")
-        parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
+        subparsers = parser.add_subparsers(dest='command')
+        # load_parser = subparsers.add_parser('load')
+        load_parser = argparse.ArgumentParser(add_help=False)
+
+        # load_parser.add_argument("-h", "--help",nargs="*", help = "Show this help")
+        load_parser.add_argument("-p", "--json_path", help = "json path")
+        load_parser.add_argument("-s", "--select", help = "select key_1,key_2,...")
+        load_parser.add_argument("-w", "--when", help = "key_1 == 'value'")
+        load_parser.add_argument("-f", "--format", help = "Table format applied in simple,json,th,td... list below")
+        load_parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
+        load_parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
+        # load_parser.add_argument("-jf", "--json_file", help = "Load json")
+        load_parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
         parser.add_argument('--version', action='version', version=version.__version__)
-        parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
-        parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
-        parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
-        parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
-        parser.add_argument('-c', '--context', help='Add context')
-
-        args = parser.parse_args()
+        load_parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
+        load_parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
+        load_parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
+        load_parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
+        load_parser.add_argument('-c', '--context', help='Add context')
+        # load_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
+        # args = parser.parse_args()
         global terminal_size
         terminal_size = shutil.get_terminal_size((80, 20))  # Largeur par défaut 80, hauteur 20
+
+        # parse_known_args = load_parser.parse_known_args()[0]
+        # print(parse_known_args)
+
+        load_json_parser = subparsers.add_parser(
+        'load_json', parents=[load_parser], help='Load JSON dataset'
+        )
+
+        load_yaml_parser = subparsers.add_parser(
+        'load_yaml', parents=[load_parser], help='Load YAML dataset'
+        )
+
+        load_json_files_parser = subparsers.add_parser(
+        'load_json_files', parents=[load_parser], help='Load multiple JSON files'
+        )
+
+        load_yaml_files_parser = subparsers.add_parser(
+        'load_yaml_files', parents=[load_parser], help='Load multiple YAML files'
+        )
+
+        play_parser = subparsers.add_parser(
+        'play', parents=[load_parser], help='Execute a query file (YAML)'
+        )
+
+        load_json_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
+        load_yaml_parser.add_argument('file', nargs='?', help='Path to YAML file (or piped via stdin)')
+        load_json_files_parser.add_argument('files', nargs='+', help='File patterns for JSON files (e.g., "folder/*/*.json" or "{var_name}:folder/*/*.json")')
+        load_yaml_files_parser.add_argument('files', nargs='+', help='File patterns for YAML files (e.g., "folder/*/*.yml" or "{var_name}:folder/*/*.yml")')
+        play_parser.add_argument('query_file', help='Path to query file (YAML)')
+        # exit(0)
+
+        # Check for --version first
+        if len(sys.argv) > 1 and '--version' in sys.argv:
+            args = parser.parse_args()
+            return
+            
+        if len(sys.argv) > 1 and sys.argv[1] in {'load_json','load_yaml','load_json_files','load_yaml_files','play'}:
+            # Commande explicite → on parse normalement
+            args = parser.parse_args()
+        elif stdin_has_data():
+            # Pas de commande explicite mais stdin actif → injecter "load_json" avant les arguments
+            sys.argv.insert(1, 'load_json')
+            args = parser.parse_args()
+        else:
+            # Pas de commande explicite et pas de stdin → afficher aide
+            parser.print_help()
+            sys.exit(1)
+
+
+        # print(args.debug)
 
         if os.environ.get('JTABLE_LOGGING') == "DEBUG" or args.debug:
             logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)-16s | %(levelname)s %(message)s'
@@ -119,22 +177,7 @@ class JtableCli:
             print(f"queryset: {queryset}")
             exit(0)
 
-        if args.query_file:
-            logging.info(f"loading query file: {args.query_file}")
-            with open(args.query_file, 'r') as file:
-                try:
-                    query_file = yaml.safe_load(file)
-                except Exception as error:
-                    logging.error(f"Fail to load query file {args.query_file}, check Yaml format")
-                    logging.error(f"error was:\n{error}")
-                    exit(2)
-                
-            if 'vars' in query_file:
-                if 'queryset' in query_file['vars']:
-                    queryset = query_file['vars']['queryset']
-            if 'secrets' in query_file:
-                global secrets
-                secrets = query_file['secrets']
+
 
                 
         is_pipe = not isatty(sys.stdin.fileno())
@@ -145,21 +188,19 @@ class JtableCli:
             for line in sys.stdin:
                 stdin = stdin + line
             self.dataset = { self.tabulate_var_name: stdin }
-        if args.help:
-            if args.help == ['color']:
-                jtable_color = [name for name, func in inspect.getmembers(Styling().__init__())]
-                print(Styling().view_all_colors())
-                exit(1)
-            elif args.help[0] == 'b64decode':
-                from .functions import b64decode
-                print(b64decode.__doc__)
-                exit(1)
-            else:
-                print(f"Error: No help available for '{args.help[0]}'")
-                exit(1)
-
-
-        if not is_pipe and not args.json_file and not args.json_files and not args.query_file and not args.yaml_files and not args.stdout:
+        # if args.help:
+        #     if args.help == ['color']:
+        #         jtable_color = [name for name, func in inspect.getmembers(Styling().__init__())]
+        #         print(Styling().view_all_colors())
+        #         exit(1)
+        #     elif args.help[0] == 'b64decode':
+        #         from .functions import b64decode
+        #         print(b64decode.__doc__)
+        #         exit(1)
+        #     else:
+        #         print(f"Error: No help available for '{args.help[0]}'")
+        #         exit(1)
+        if not is_pipe and not args.stdout and not args.command:
 
             parser.print_help(sys.stdout)
             jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
@@ -174,23 +215,25 @@ class JtableCli:
             print(f"  colors:\n    type jtable -h color | jtable\n")
             exit(1)
 
-        if args.json_file:
-            logging.info(f"loading json file: {args.json_file}")
-            got_variable_name_pattern = r'^\{[a-zA-Z_1-9]+\}:.*'
-            if re.match(got_variable_name_pattern, args.json_file):
-                self.tabulate_var_name = args.json_file[1:].split('}:')[0]
-                file_name = ':'.join(args.json_file.split(':')[1:])
-            else:
-                self.tabulate_var_name = "input_1"
-                file_name = args.json_file
-            logging.info(f"file_name: {file_name}, self.tabulate_var_name: {self.tabulate_var_name}")
-            with open(file_name, 'r') as input_yaml:
-                self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
-                
+        # if args.json_file:
+        #     logging.info(f"loading json file: {args.json_file}")
+        #     got_variable_name_pattern = r'^\{[a-zA-Z_1-9]+\}:.*'
+        #     if re.match(got_variable_name_pattern, args.json_file):
+        #         self.tabulate_var_name = args.json_file[1:].split('}:')[0]
+        #         file_name = ':'.join(args.json_file.split(':')[1:])
+        #     else:
+        #         self.tabulate_var_name = "input_1"
+        #         file_name = args.json_file
+        #     logging.info(f"file_name: {file_name}, self.tabulate_var_name: {self.tabulate_var_name}")
+        #     with open(file_name, 'r') as input_yaml:
+        #         self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
+
+        # print(f"args.command: {args.command}")
+
         def load_multiple_inputs(file_search_string,format):
             logging.info(f"loading {format} files: {file_search_string}")
             err_help = f"\n[ERROR] {format}_files must looks like this:\n\n\
-                jtable --{format}_files \"{{target_var_name}}:folder_1/*/*/config.yml\"\n"
+                jtable load_{format}_files \"{{target_var_name}}:folder_1/*/*/config.{format}\"\n"
             got_variable_name_pattern = r'^\{[a-zA-Z_1-9]+\}:.*'
             if re.match(got_variable_name_pattern, file_search_string):
                 logging.info(f"Contains variable name file_names: {file_search_string}")
@@ -203,8 +246,6 @@ class JtableCli:
                 path = file_search_string
             logging.info(f"var_name: {self.tabulate_var_name}, path: {path}")
             logging.info(f"path: {path}")
-            # print(f"shell_family: {running_context['shell_family']}")
-            # exit(0)
             if running_context['shell_family'] == "windows":
                 cmd = f"dir /s /b {path}"
                 logging.info(f"cmd: {cmd}")
@@ -213,14 +254,15 @@ class JtableCli:
                 files_str = os.popen("ls -1 " + path).read()
             files_str = os.popen("ls -1 " + path).read()
             logging.info(f"files_str: {files_str}")
-            # exit(0)
-            # for windows syntax will be --> # dir /s /b data\*config.yml
             file_list_dataset = []
             for file_name_full_path in files_str.split('\n'):
                 if file_name_full_path != '':
-                    with open(file_name_full_path, 'r') as input_yaml:
+                    with open(file_name_full_path, 'r') as input_file:
                         try:
-                            file_content =  yaml.safe_load(input_yaml)
+                            if format == 'json':
+                                file_content = json.load(input_file)
+                            else:
+                                file_content = yaml.safe_load(input_file)
                             if running_context['shell_family'] == "windows":
                                 sep = "\\"
                                 file_path = sep.join(file_name_full_path.split('\\')[:-1])
@@ -237,14 +279,74 @@ class JtableCli:
                         except Exception as error:
                             logging.warning(f"fail loading file {file_name_full_path}, skipping")
             self.dataset = {**self.dataset, **{ self.tabulate_var_name: file_list_dataset } }
-        
-        if args.json_files:
-            for file in args.json_files:
-                load_multiple_inputs(file,"json")
 
-        if args.yaml_files:
-            for file in args.yaml_files:
-                load_multiple_inputs(file,"yaml")
+        if args.command == 'load_json' or args.command == 'load_yaml':
+            if stdin_has_data() and not args.file:
+                dict_content = stdin
+            else:
+                file_type = "_".join(args.command.split('_')[1:]).upper()
+                if not args.file:
+                    logging.error(f"No {file_type} file provided, please provide a file or pipe {file_type} content to stdin")
+                    exit(1)
+                logging.info(f"loading {args.command} file: {args.file}")
+                self.tabulate_var_name = "input"
+                file_name = args.file
+                with open(file_name, 'r') as file_content:
+                    try:
+                        if args.command == 'load_yaml':
+                            dict_content = yaml.safe_load(file_content)
+                        else:
+                            # Assume JSON file
+                            dict_content = json.load(file_content)
+                    except Exception as error:
+                        logging.error(f"Failed to load {args.command} file {file_name}, error was:\n{error}")
+                        logging.error(f"File path: {os.path.abspath(file_name)}")
+                        logging.error(f"File exists: {os.path.exists(file_name)}")
+                        if os.path.exists(file_name):
+                            logging.error(f"File size: {os.path.getsize(file_name)} bytes")
+                        exit(2)
+                
+                # Check if the loaded content is None
+                if dict_content is None:
+                    logging.error(f"Loaded content from {file_name} is None. Please check the file content.")
+                    exit(2)
+                    
+            self.dataset = {**self.dataset, **{ self.tabulate_var_name: dict_content } }
+        elif args.command == 'load_json_files' or args.command == 'load_yaml_files':
+            file_type = "_".join(args.command.split('_')[1:]).upper()
+            for file_pattern in args.files:
+                load_multiple_inputs(file_pattern, file_type.lower())
+        elif args.command == 'play':
+            logging.info(f"loading query file: {args.query_file}")
+            with open(args.query_file, 'r') as file:
+                try:
+                    query_file = yaml.safe_load(file)
+                except Exception as error:
+                    logging.error(f"Fail to load query file {args.query_file}, check Yaml format")
+                    logging.error(f"error was:\n{error}")
+                    exit(2)
+                
+            if 'vars' in query_file:
+                if 'queryset' in query_file['vars']:
+                    queryset = query_file['vars']['queryset']
+            if 'secrets' in query_file:
+                global secrets
+                secrets = query_file['secrets']
+            # print(f"json_content: {json_content}")
+            # exit(0)
+
+            # got_variable_name_pattern = r'^\{[a-zA-Z_1-9]+\}:.*'
+            # if re.match(got_variable_name_pattern, args.json_file):
+            #     self.tabulate_var_name = args.json_file[1:].split('}:')[0]
+            #     file_name = ':'.join(args.json_file.split(':')[1:])
+            # else:
+            #     self.tabulate_var_name = "input_1"
+            #     file_name = args.json_file
+            # logging.info(f"file_name: {file_name}, self.tabulate_var_name: {self.tabulate_var_name}")
+            # with open(file_name, 'r') as input_yaml:
+            #     self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
+        
+
         
         if args.json_path:
             new_path = args.json_path
@@ -253,7 +355,8 @@ class JtableCli:
                 new_path = new_path + "{}"
             queryset['path'] = new_path
 
-        if args.query_file:
+        # Process query file if it was loaded (either from play command or other sources)
+        if 'query_file' in locals() and query_file:
 
             if 'vars' in query_file:
                 vars = {}
@@ -302,7 +405,7 @@ class JtableCli:
                 out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
 
 
-        if args.query_file:
+        if 'query_file' in locals() and query_file:
             if 'stdout' in query_file:
                 out_expr = query_file['stdout']
             
@@ -672,6 +775,11 @@ class path_auto_discover:
 
     def discover_paths(self,dataset):
         
+        # Check if dataset is None or empty
+        if dataset is None:
+            logging.error("Dataset is None. Please check your input data.")
+            exit(1)
+        
         # when input is dict transform as list like dict2items
         if type(dataset) is dict:
             dataset_as_list = []
@@ -689,6 +797,8 @@ class path_auto_discover:
         except(Exception) as error:
             logging.error(f"Something wrong with your dataset, error was:")
             logging.error(f"    {error}")
+            logging.error(f"Dataset type: {type(dataset)}")
+            logging.error(f"Dataset content: {dataset}")
             exit(1)
         logging.info(f"fields: {self.fields}")
         return self.fields
