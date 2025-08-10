@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform
+import sys, json, re, os, inspect, logging, logging.config, shutil
 from os import isatty
 from sys import exit
 from typing import Any, Dict, Optional
@@ -16,6 +16,16 @@ import tabulate
 import yaml
 
 import functions
+
+# Import ToTable and path_auto_discover from the new module
+import to_table
+ToTable = to_table.ToTable
+path_auto_discover = to_table.path_auto_discover
+Styling = to_table.Styling
+
+
+
+
 Filters = functions
 Plugin = functions.Plugin
 InspectDataset = functions.InspectDataset
@@ -40,10 +50,6 @@ class JtableCli:
     def __init__(self):
         self.path = ""
         self.dataset = {}
-        
-        # global BaseLoader,Environment
-        # from jinja2 import Environment, BaseLoader
-
         
     def parse_args(self):
 
@@ -73,12 +79,10 @@ class JtableCli:
         load_parser.add_argument("-f", "--format", help = "Table format applied in simple,json,th,td... list below")
         load_parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
         load_parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
-        # load_parser.add_argument("-jf", "--json_file", help = "Load json")
         load_parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
         parser.add_argument('--version', action='version', version=version.__version__)
         load_parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
         load_parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
-        # load_parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | to_table(queryset=queryset) }}')
         load_parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
         load_parser.add_argument('-c', '--context', help='Add context')
         # load_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
@@ -94,7 +98,7 @@ class JtableCli:
         )
 
         load_yaml_parser = subparsers.add_parser(
-        'load_yaml', parents=[load_parser], help='%Load YAML dataset'
+        'load_yaml', parents=[load_parser], help='Load YAML dataset'
         )
 
         load_json_files_parser = subparsers.add_parser(
@@ -131,6 +135,9 @@ class JtableCli:
             args = parser.parse_args()
             return
             
+        # Check for help requests
+        help_requested = '--help' in sys.argv or '-h' in sys.argv
+        
         if len(sys.argv) > 1 and sys.argv[1] in {'load_json','load_yaml','load_json_files','load_yaml_files','play','print'}:
             # Commande explicite → on parse normalement
             args = parser.parse_args()
@@ -192,9 +199,18 @@ class JtableCli:
         #     else:
         #         print(f"Error: No help available for '{args.help[0]}'")
         #         exit(1)
-        if not is_pipe and not args.command:
-
-            parser.print_help(sys.stdout)
+        # Show detailed help when no command is specified or when help is requested for load_parser commands
+        load_parser_commands = {'load_json', 'load_yaml', 'load_json_files', 'load_yaml_files', 'play'}
+        should_show_detailed_help = (not is_pipe and not args.command) or (help_requested and args.command in load_parser_commands)
+        
+        if should_show_detailed_help:
+            if args.command:
+                # For specific commands, print their help first
+                parser.print_help(sys.stdout)
+            else:
+                # For general help, print main parser help
+                parser.print_help(sys.stdout)
+            
             jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
             jtable_plugins = [name for name, func in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
             print(f"\njtable core filters:\n   {', '.join(jtable_core_filters)}\n")
@@ -207,20 +223,6 @@ class JtableCli:
             print(f"  colors:\n    type jtable -h color | jtable\n")
             exit(1)
 
-        # if args.json_file:
-        #     logging.info(f"loading json file: {args.json_file}")
-        #     got_variable_name_pattern = r'^\{[a-zA-Z_1-9]+\}:.*'
-        #     if re.match(got_variable_name_pattern, args.json_file):
-        #         self.tabulate_var_name = args.json_file[1:].split('}:')[0]
-        #         file_name = ':'.join(args.json_file.split(':')[1:])
-        #     else:
-        #         self.tabulate_var_name = "input_1"
-        #         file_name = args.json_file
-        #     logging.info(f"file_name: {file_name}, self.tabulate_var_name: {self.tabulate_var_name}")
-        #     with open(file_name, 'r') as input_yaml:
-        #         self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
-
-        # print(f"args.command: {args.command}")
 
         def load_multiple_inputs(file_search_string,format):
             logging.info(f"loading {format} files: {file_search_string}")
@@ -324,21 +326,6 @@ class JtableCli:
             if 'secrets' in query_file:
                 global secrets
                 secrets = query_file['secrets']
-            # print(f"json_content: {json_content}")
-            # exit(0)
-
-            # got_variable_name_pattern = r'^\{[a-zA-Z_1-9]+\}:.*'
-            # if re.match(got_variable_name_pattern, args.json_file):
-            #     self.tabulate_var_name = args.json_file[1:].split('}:')[0]
-            #     file_name = ':'.join(args.json_file.split(':')[1:])
-            # else:
-            #     self.tabulate_var_name = "input_1"
-            #     file_name = args.json_file
-            # logging.info(f"file_name: {file_name}, self.tabulate_var_name: {self.tabulate_var_name}")
-            # with open(file_name, 'r') as input_yaml:
-            #     self.dataset = {**self.dataset, **{ self.tabulate_var_name: yaml.safe_load(input_yaml) } }
-        
-
         
         if 'json_path' in args and args.json_path:
             new_path = args.json_path
@@ -384,7 +371,6 @@ class JtableCli:
             original_format = queryset['format']
             queryset['format'] = "th"
             
-        # if args.stdout:
         if args.command == 'print':
             out_expr = args.string
         else:
@@ -428,9 +414,6 @@ class JtableCli:
             if args.when:
                 query_set_out['when'] = args.when
             query_file_out['vars'] = {'queryset': query_set_out }
-            # if args.post_filter:
-            #     query_file_out['vars'].update({'prepa_stdout': f"{out_expr}" })
-            # query_file_out['stdout'] = f"{{{{ prepa_stdout | {args.post_filter} }}}}"
             query_file_out['stdout'] = out_expr
 
 
@@ -440,24 +423,8 @@ class JtableCli:
         else:
             logging.info(f"queryset: {queryset}")
             logging.info(f"out_expr: {out_expr}")
-            # logging.info(str({**self.dataset,**{"queryset": queryset}}))
-            # exit(0)
             out = create_templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
-
-# Import ToTable and path_auto_discover from the new module
-import to_table
-ToTable = to_table.ToTable
-path_auto_discover = to_table.path_auto_discover
-Styling = to_table.Styling
-
-
-
-# from jinja2 import nativetypes,StrictUndefined,Undefined,Environment
-# from jinja2.sandbox import SandboxedEnvironment
-
-        
-
 
 
 def main():
