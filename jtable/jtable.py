@@ -21,6 +21,15 @@ Plugin = functions.Plugin
 InspectDataset = functions.InspectDataset
 running_context = functions.running_context()
 
+# Import Templater from the new module
+import templater
+Templater = templater.Templater
+
+def create_templater(*args, **kwargs):
+    """Helper function to create Templater instances with to_table filter"""
+    to_table_filter = ToTable().render_object
+    return Templater(*args, to_table_filter=to_table_filter, **kwargs)
+
 def stdin_has_data():
     """Retourne True si des données sont envoyées sur stdin (ex: via pipe ou redirection)"""
     return not sys.stdin.isatty()
@@ -335,7 +344,7 @@ class JtableCli:
                 vars = {}
                 for key,value in query_file['vars'].items():
                     logging.info(f"Covering vars, key: {key}")
-                    jinja_eval = Templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
+                    jinja_eval = create_templater(template_string=str(value), static_context=self.dataset).render({},eval_str=True)
                     vars.update({key: jinja_eval})
                     self.dataset = {**self.dataset,**vars, **{"vars": vars}}
 
@@ -393,9 +402,9 @@ class JtableCli:
 
         if args.view_query:
             if args.post_filter:
-                out = Templater(template_string=original_out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
+                out = create_templater(template_string=original_out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
             else:
-                out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
+                out = create_templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
             query_file_out = {}
             query_set_out = {}
             fields = out
@@ -422,7 +431,7 @@ class JtableCli:
             logging.info(f"out_expr: {out_expr}")
             # logging.info(str({**self.dataset,**{"queryset": queryset}}))
             # exit(0)
-            out = Templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
+            out = create_templater(template_string=out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=False)
             print(out)
 
 class ToTable:
@@ -620,15 +629,15 @@ class ToTable:
         column_templates = []
         for expr in expressions:
             jinja_expr = '{{ ' + expr  + ' }}'
-            column_templates = column_templates + [Templater(template_string=jinja_expr, static_context={**context,**self.context},strict_undefined=False)]
+            column_templates = column_templates + [create_templater(template_string=jinja_expr, static_context={**context,**self.context},strict_undefined=False)]
 
         view_templates = []
         for var_name,var_data in self.views.items():
-            view_templates = view_templates + [Templater(template_string=str(var_data), static_context={**context,**self.context},strict_undefined=False)]
+            view_templates = view_templates + [create_templater(template_string=str(var_data), static_context={**context,**self.context},strict_undefined=False)]
 
         when_templates = []
         for condition in self.when:
-            when_templates = when_templates + [Templater(template_string=condition, static_context={**context,**self.context},strict_undefined=False)]
+            when_templates = when_templates + [create_templater(template_string=condition, static_context={**context,**self.context},strict_undefined=False)]
 
 
 
@@ -648,7 +657,7 @@ class ToTable:
                     logging.info(f"loop_condition_context: {loop_condition_context}")
                     logging.info(f"when_context: {when_context}")
                     # loop_condition_context = { item_name: item }
-                    condition_template = Templater(template_string=jinja_expr, static_context= {**when_context,**loop_condition_context},strict_undefined=False)
+                    condition_template = create_templater(template_string=jinja_expr, static_context= {**when_context,**loop_condition_context},strict_undefined=False)
                     condition_test_result = condition_template.render({},eval_str=True)
                     logging.info(f"condition_test_result: {condition_test_result}, type: {type(condition_test_result)}")
                     if condition_test_result == "False" or condition_test_result == False:
@@ -855,114 +864,8 @@ class Styling:
 # from jinja2.sandbox import SandboxedEnvironment
 
         
-class Templater:
-    def __init__(self, template_string = "", static_context = {},strict_undefined = True):
-        from jinja2 import Environment
-        env = Environment()
-        self.strict_undefined = strict_undefined
-        import random
-        self.id = random.randint(0,1000000)
 
-        jtable_core_filters = [name[0] for name in inspect.getmembers(Filters, predicate=inspect.isfunction)]
-        for filter_name in jtable_core_filters:
-            env.filters[filter_name] = getattr(Filters, filter_name)
-        env.filters['to_table'] = ToTable().render_object
-        # logging.info(f"jtable_core_filters: {jtable_core_filters}")
 
-        ####################  Add plugin function ####################
-        jtable_core_plugins = [name[0] for name in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
-        logging.info(f"jtable_core_plugins: {jtable_core_plugins}")
-        class plugin_fct(object):
-            def process_plugin(self,*args, **kwargs):
-                if len(args) == 0 and len(kwargs) == 0:
-                    logging.error("plugin function must have at least one argument in:")
-                    exit(3)
-                if args[0] not in jtable_core_plugins:
-                    logging.error(f"plugin function {args[0]} not found in {', '.join(jtable_core_plugins)}")
-                    exit(3)
-                method_to_call = getattr(Plugin, args[0], None)
-                try:
-                    res = method_to_call(*args[1:],**kwargs)
-                except Exception as error:
-                    logging.error(f"Failed to call plugin function {args[0]}, error was:\n  {str(error)}")
-                    exit(3)
-                return res
-            
-        plugin = lambda: plugin_fct().process_plugin
-        logging.debug(f"({self.id}) strict_undefined: {strict_undefined}, static_context: {static_context}")
-        static_context = {**static_context, **{"plugin": plugin()}}
-
-        ##############################################################
-        logging.info(f"({self.id}) compiling template_string: {template_string}")
-        logging.info(f"({self.id}) template_string type  {type(template_string)}")
-        try:
-            self.template = env.from_string(template_string, globals=static_context)
-        except Exception as error:
-            logging.error(f"({self.id}) Failed to compile template, error was:\n  {str(error)}")
-            exit(3)
-    
-    def render(self, vars, eval_str = False):
-
-        logging.debug(f"({self.id}) Rendering template, self.strict_undefined: {self.strict_undefined}, vars: {vars}")
-        
-        try:
-            out_str = self.template.render(vars)
-        except Exception as error:
-            if str(error)[0:30] == "'dict object' has no attribute" \
-                or str(error)[0:30] == "'list object' has no attribute"\
-                or str(error).__contains__("is undefined"):
-                    if self.strict_undefined == True:
-                        logging.error(f"({self.id}) Failed while rendering context, error was:\n  {str(error)}")
-                        logging.error(f"({self.id}) debug strict_undefined: {self.strict_undefined}")
-                        logging.error(f"({self.id}) debug vars: {vars}")
-                        raise error
-                        # out = out_str =""
-                    else:
-                        out = out_str =""
-            else:
-                out = out_str = error
-                logging.error(f"Failed while rendering context, error was:\n  {str(error)}")
-                raise out
-                # out = out_str =""
-            
-        if eval_str == True:
-            try:
-                expr = ast.parse(out_str, mode='eval').body
-                expr_type = expr.__class__.__name__
-                if expr_type == 'List' or expr_type == 'Dict':
-                    out =  ast.literal_eval(out_str)
-                elif expr_type == 'Name':
-                    out = out_str
-                else:
-                    out = str(out_str)
-            except:
-                out = out_str
-        else:
-            out = out_str
-                    
-        return out
-    
-class UnicodeString:
-    def __init__(self, value):
-        self.value = value
-    
-    def __str__(self):
-        return self.value
-
-    def __repr__(self):
-        return f"UnicodeString({repr(self.value)})"
-
-    def __add__(self, other):
-        if isinstance(other, (str, UnicodeString)):
-            # Convertir en chaîne si `other` est un UnicodeString
-            return UnicodeString(self.value + str(other))
-        raise TypeError(f"Unsupported operand type(s) for +: 'UnicodeString' and '{type(other).__name__}'")
-
-    def __radd__(self, other):
-        # Pour prendre en charge str + UnicodeString
-        if isinstance(other, str):
-            return UnicodeString(other + self.value)
-        raise TypeError(f"Unsupported operand type(s) for +: '{type(other).__name__}' and 'UnicodeString'")
 
 def main():
     try:
