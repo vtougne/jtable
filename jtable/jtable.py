@@ -69,7 +69,7 @@ class JtableCli:
         parser.add_argument('--version', action='version', version=version.__version__)
         load_parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
         load_parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
-        load_parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | jtable(queryset=queryset) }}')
+        load_parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | to_table(queryset=queryset) }}')
         load_parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
         load_parser.add_argument('-c', '--context', help='Add context')
         # load_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
@@ -370,12 +370,12 @@ class JtableCli:
         else:
             if self.tabulate_var_name == "stdin":
                 if args.post_filter:
-                    original_out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
-                    out_expr = "{{ " + self.tabulate_var_name + f" | from_json_or_yaml | jtable(queryset=queryset) | {args.post_filter} }}}}"
+                    original_out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | to_table(queryset=queryset) }}"
+                    out_expr = "{{ " + self.tabulate_var_name + f" | from_json_or_yaml | to_table(queryset=queryset) | {args.post_filter} }}}}"
                 else:
-                    out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | jtable(queryset=queryset) }}"
+                    out_expr = "{{ " + self.tabulate_var_name + " | from_json_or_yaml | to_table(queryset=queryset) }}"
             else:
-                out_expr = "{{ " + self.tabulate_var_name + " | jtable(queryset=queryset) }}"
+                out_expr = "{{ " + self.tabulate_var_name + " | to_table(queryset=queryset) }}"
 
 
         if 'query_file' in locals() and query_file:
@@ -866,7 +866,7 @@ class Templater:
         jtable_core_filters = [name[0] for name in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
             env.filters[filter_name] = getattr(Filters, filter_name)
-        env.filters['jtable'] = ToTable().render_object
+        env.filters['to_table'] = ToTable().render_object
         # logging.info(f"jtable_core_filters: {jtable_core_filters}")
 
         ####################  Add plugin function ####################

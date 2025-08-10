@@ -318,7 +318,7 @@ vars:
     - as: env
       expr: env
     format: simple
-stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
+stdout: '{{ stdin | from_json_or_yaml | to_table(queryset=queryset) }}'
 
 
 ```
@@ -401,7 +401,7 @@ vars:
       - as: uptime in days
         expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
 
-stdout: "{{ stdin | from_yaml | jtable(queryset=queryset) }}"
+stdout: "{{ stdin | from_yaml | to_table(queryset=queryset) }}"
 
 
 
@@ -451,7 +451,7 @@ vars:
       uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
-stdout: "{{ stdin | from_yaml | jtable(queryset=queryset)}}"
+stdout: "{{ stdin | from_yaml | to_table(queryset=queryset)}}"
 ```
 
 command: 
@@ -522,7 +522,7 @@ cat region_dataset.yml | jtable play region_view.yml
 output:
 
 ```bash
-13:14:55 cls.cross_path      | ERROR .dc was not found in dataset level: 2
+13:56:55 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -608,7 +608,7 @@ jtable load_yaml_files "{input}:data/*/*/config.yml" play load_multi_json_querys
 output:
 
 ```bash
-13:14:55 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
+13:56:55 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
 ls: cannot access 'play': No such file or directory
 ls: cannot access 'play': No such file or directory
 name                          path    content.vars.queryset.select
@@ -679,7 +679,7 @@ vars:
       - as: strftime 
         expr: "  (order_date|to_datetime).strftime('%S') "
 
-stdout: "{{ host_list | jtable(queryset=queryset) }}"
+stdout: "{{ host_list | to_table(queryset=queryset) }}"
 ```
 
 command: 

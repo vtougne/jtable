@@ -13,4 +13,4 @@ vars:
     - as: env
       expr: env
     format: simple
-stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
+stdout: '{{ stdin | from_json_or_yaml | to_table(queryset=queryset) }}'
