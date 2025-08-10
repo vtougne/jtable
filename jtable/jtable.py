@@ -78,7 +78,7 @@ class JtableCli:
         parser.add_argument('--version', action='version', version=version.__version__)
         load_parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
         load_parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
-        load_parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | to_table(queryset=queryset) }}')
+        # load_parser.add_argument('-o', '--stdout', help='Ovewrite applied ouput filter, default: {{ stdin | to_table(queryset=queryset) }}')
         load_parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
         load_parser.add_argument('-c', '--context', help='Add context')
         # load_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
@@ -94,7 +94,7 @@ class JtableCli:
         )
 
         load_yaml_parser = subparsers.add_parser(
-        'load_yaml', parents=[load_parser], help='Load YAML dataset'
+        'load_yaml', parents=[load_parser], help='%Load YAML dataset'
         )
 
         load_json_files_parser = subparsers.add_parser(
@@ -109,11 +109,21 @@ class JtableCli:
         'play', parents=[load_parser], help='Execute a query file (YAML)'
         )
 
+        print_parser = subparsers.add_parser(
+        'print',  help='Print dataset'
+        )
+        
+        # Add debug options to print_parser
+        print_parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
+        print_parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
+        print_parser.add_argument('-c', '--context', help='Add context')
+
         load_json_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
         load_yaml_parser.add_argument('file', nargs='?', help='Path to YAML file (or piped via stdin)')
         load_json_files_parser.add_argument('files', nargs='+', help='File patterns for JSON files (e.g., "folder/*/*.json" or "{var_name}:folder/*/*.json")')
         load_yaml_files_parser.add_argument('files', nargs='+', help='File patterns for YAML files (e.g., "folder/*/*.yml" or "{var_name}:folder/*/*.yml")')
         play_parser.add_argument('query_file', help='Path to query file (YAML)')
+        print_parser.add_argument('string', help='Free template string to print')
         # exit(0)
 
         # Check for --version first
@@ -121,7 +131,7 @@ class JtableCli:
             args = parser.parse_args()
             return
             
-        if len(sys.argv) > 1 and sys.argv[1] in {'load_json','load_yaml','load_json_files','load_yaml_files','play'}:
+        if len(sys.argv) > 1 and sys.argv[1] in {'load_json','load_yaml','load_json_files','load_yaml_files','play','print'}:
             # Commande explicite → on parse normalement
             args = parser.parse_args()
         elif stdin_has_data():
@@ -133,8 +143,8 @@ class JtableCli:
             parser.print_help()
             sys.exit(1)
 
-
         # print(args.debug)
+        # exit(0)
 
         if os.environ.get('JTABLE_LOGGING') == "DEBUG" or args.debug:
             logging_config['formatters']['my_formatter']['format'] = '%(asctime)s (%(lineno)s) %(class_name)s.%(parent_function)-16s | %(levelname)s %(message)s'
@@ -182,7 +192,7 @@ class JtableCli:
         #     else:
         #         print(f"Error: No help available for '{args.help[0]}'")
         #         exit(1)
-        if not is_pipe and not args.stdout and not args.command:
+        if not is_pipe and not args.command:
 
             parser.print_help(sys.stdout)
             jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
@@ -330,7 +340,7 @@ class JtableCli:
         
 
         
-        if args.json_path:
+        if 'json_path' in args and args.json_path:
             new_path = args.json_path
             expr_end_by_braces=(re.sub('.*({).*(})$',r'\1\2',args.json_path))
             if expr_end_by_braces != "{}":
@@ -352,13 +362,13 @@ class JtableCli:
         if 'select' in queryset:
             select = queryset['select']
 
-        if args.unselect:
+        if 'unselect' in queryset and args.unselect:
            queryset['unselect'] = args.unselect
 
-        if args.select:
+        if 'select' in queryset and args.select:
             queryset['select'] = args.select
 
-        if args.when:
+        if 'when' in queryset and args.when:
             queryset['when'] = args.when
 
         if not 'path' in queryset:
@@ -367,15 +377,16 @@ class JtableCli:
         if not "format" in queryset:
             queryset['format'] = 'simple'
 
-        if args.format:
+        if 'format' in args and args.format:
             queryset['format'] = args.format
 
-        if args.view_query:
+        if 'view_query' in args and args.view_query:
             original_format = queryset['format']
             queryset['format'] = "th"
             
-        if args.stdout:
-            out_expr = args.stdout
+        # if args.stdout:
+        if args.command == 'print':
+            out_expr = args.string
         else:
             if self.tabulate_var_name == "stdin":
                 if args.post_filter:
@@ -391,7 +402,7 @@ class JtableCli:
             if 'stdout' in query_file:
                 out_expr = query_file['stdout']
             
-        if args.inspect:
+        if 'inspect' in args and args.inspect:
             if self.tabulate_var_name == "stdin":
                 inspected_paths = InspectDataset().view_paths(yaml.safe_load(stdin))
             else:
@@ -400,7 +411,7 @@ class JtableCli:
             print(tbl)
             return
 
-        if args.view_query:
+        if 'view_query' in args and args.view_query:
             if args.post_filter:
                 out = create_templater(template_string=original_out_expr, static_context={**self.dataset,**{"queryset": queryset}}).render({},eval_str=True)
             else:
