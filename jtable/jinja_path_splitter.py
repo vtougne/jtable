@@ -69,7 +69,10 @@ class JinjaPathSplitter():
     def extract_var_from_path(self,path):
         if len(path) > 0:
             left_part = re.sub(r'^([^[^\.^{]*).*',r'\1',path)
-            self.path_list = [ "['" + left_part + "']" ]
+            if left_part != "":
+                self.path_list = [ "['" + left_part + "']" ]
+            else:
+                self.path_list = []
             remaining_path = path[len(left_part):]
             return remaining_path
     
@@ -80,6 +83,11 @@ class JinjaPathSplitter():
         return self.path_list
 
 if __name__ == "__main__":
+    import sys
+    jpath= sys.argv[1] 
     jinja_path_splitter = JinjaPathSplitter()
-    res = jinja_path_splitter.split_path("simple{}")
+    res = jinja_path_splitter.split_path(jpath)
+    # For standalone usage, clean up the first element
+    if res and res[0].startswith("['") and res[0].endswith("']"):
+        res[0] = res[0][2:-2]
     print(res)

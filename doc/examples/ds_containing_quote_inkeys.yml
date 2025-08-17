@@ -1,0 +1,16 @@
+hosts:
+  - "host]name": host_1
+    os: linux
+    cost: 5000
+    state: alive
+    env: qua
+  - "host]name": host_2
+    os: windows
+    cost: 5000
+    state: alive
+    env: qua
+  - "host]name": host_3
+    os: linux
+    state: unreachable
+    env: qua
+

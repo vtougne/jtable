@@ -1,0 +1,17 @@
+vars:
+  system_info:
+    - info: "Current User"
+      value: "{{ USER }}"
+    - info: "Home Directory"  
+      value: "{{ HOME }}"
+    - info: "Current Shell"
+      value: "{{ SHELL }}"
+    - info: "LOGNAME"
+      value: "{{ LOGNAME }}"
+
+stdout: |
+  System Information:
+  {{ system_info | to_table }}
+  
+  Direct access test:
+  LOGNAME is directly accessible: {{ LOGNAME }}

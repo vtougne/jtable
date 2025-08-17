@@ -1,7 +1,16 @@
 vars:
   queryset:
+    path: hosts{}
     select:
-      - as: host
-        expr: hostname
-      - as: os type
-        expr: os
+    - as: hostname
+      expr: hostname
+    - as: os
+      expr: os
+    - as: cost
+      expr: cost
+    - as: state
+      expr: state
+    - as: env
+      expr: env
+    format: simple
+stdout: '{{ stdin | from_json_or_yaml | to_table(queryset=queryset) }}'

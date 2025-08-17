@@ -10,7 +10,7 @@ if [ -z "$ref_doc" ] || [ -z "$new_doc" ]; then
     exit 1
 fi
 
-echo debug exclude_patterns: $exclude_patterns
+# echo debug exclude_patterns: $exclude_patterns
 if [ ! -z "$exclude_patterns" ]; then
     exclude_cmd=" | egrep -v \"$exclude_patterns\"" 
     cmd="diff --side-by-side --suppress-common-lines $ref_doc $new_doc $exclude_cmd"

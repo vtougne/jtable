@@ -1,0 +1,5 @@
+stdout: |
+  Current user: {{ USER }}
+  Home directory: {{ HOME }}
+  Shell: {{ SHELL }}
+  Path length: {{ PATH | length }}

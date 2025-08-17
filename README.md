@@ -1,7 +1,5 @@
 # Jtable
 
-![Colored Table Example](doc/examples/uptime_view_colored.png)
-
 Jtable helps you render tables from key/value sources like JSON, YAML, and Python dictionaries.
 It works as a CLI tool, a Jinja filter (usable in Ansible, Django, Flask, etc.), or a Python module.
 
@@ -10,12 +8,17 @@ It works as a CLI tool, a Jinja filter (usable in Ansible, Django, Flask, etc.),
 ## Features
 - Render tables from JSON, YAML, or Python objects
 - CLI usage, Jinja filter, or Python import
-- Conditional coloring and formatting (see screenshot above)
+- Conditional coloring and formatting
 - Advanced selection, filtering, and transformation with query files
 - Output formats: plain, JSON, HTML, GitHub, LaTeX, etc.
 - Multi-file loading and aggregation
 - Integration with Ansible and other Python frameworks
 - Inspect and explore nested data structures
+
+---
+
+## Gallery
+See [Gallery]({{ doc_base_url }}/doc/gallery.md) for visual examples and screenshots.
 
 ---
 
@@ -67,8 +70,8 @@ host_3      linux          unreachable  qua
 ---
 
 ## More Examples
-- [Setup Guide](./doc/setup/README.md)
-- [Advanced Examples](./doc/examples/README.md)
+- [Setup Guide]({{ doc_base_url }}/doc/setup/README.md)
+- [Advanced Examples]({{ doc_base_url }}/doc/examples/README.md)
 
 ---
 
@@ -78,5 +81,5 @@ Pull requests and issues are welcome! For major changes, please open an issue fi
 ---
 
 ## License
-See [LICENSE.txt](LICENSE.txt)
+See [LICENSE.txt]({{ doc_base_url }}/LICENSE.txt)
 

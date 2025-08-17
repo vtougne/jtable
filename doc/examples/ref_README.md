@@ -24,7 +24,15 @@
 
 ---
 
-## CLI Options
+## CLI Commands and Options
+
+### Commands
+- `load_json <file>` : Load a single JSON file (or from stdin)
+- `load_yaml <file>` : Load a single YAML file (or from stdin)
+- `load_json_files <patterns...>` : Load multiple JSON files using glob patterns
+- `load_yaml_files <patterns...>` : Load multiple YAML files using glob patterns
+
+### Options
 - `-p, --json_path` : Specify a path in the input data
 - `-s, --select` : Select columns/fields to display
 - `-us, --unselect` : Exclude columns/fields
@@ -32,9 +40,6 @@
 - `-f, --format` : Output format (simple, json, th, td, html, github, etc.)
 - `-q, --query_file` : Load a query file (YAML)
 - `--inspect` : Inspect and display all paths/values in the input
-- `-jf, --json_file` : Load a JSON file
-- `-jfs, --json_files` : Load multiple JSON files
-- `-yfs, --yaml_files` : Load multiple YAML files
 - `-vq, --view_query` : Show the generated query
 - `-o, --stdout` : Override output filter
 - `-pf, --post_filter` : Apply an additional filter to the output
@@ -100,6 +105,59 @@ key     value.os    value.cost    value.state
 host_1  linux       5000          alive
 host_2  linux       200           alive
 host_3  linux                     unreachable
+
+```
+## Loading Files with Commands
+
+### Load single files
+Instead of piping files, you can use the new command syntax:
+
+
+command: 
+```bash
+jtable load_json host_list_of_dict.json
+```
+output:
+
+```text
+hostname    os     cost    state        env
+----------  -----  ------  -----------  -----
+host_1      linux  5000    alive        qua
+host_2      linux  5000    alive        qua
+host_3      linux          unreachable  qua
+
+```
+
+command: 
+```bash
+jtable load_yaml host_list_of_dict.yml
+```
+output:
+
+```text
+hostname    os     cost    state        env
+----------  -----  ------  -----------  -----
+host_1      linux  5000    alive        qua
+host_2      linux  5000    alive        qua
+host_3      linux          unreachable  qua
+
+```
+### Load from stdin (when no file specified)
+When no file is provided, the commands read from stdin:
+
+
+command: 
+```bash
+cat host_list_of_dict.yml | jtable load_yaml
+```
+output:
+
+```text
+hostname    os     cost    state        env
+----------  -----  ------  -----------  -----
+host_1      linux  5000    alive        qua
+host_2      linux  5000    alive        qua
+host_3      linux          unreachable  qua
 
 ```
 ## Use path  
@@ -260,7 +318,7 @@ vars:
     - as: env
       expr: env
     format: simple
-stdout: '{{ stdin | from_json_or_yaml | jtable(queryset=queryset) }}'
+stdout: '{{ stdin | from_json_or_yaml | to_table(queryset=queryset) }}'
 
 
 ```
@@ -288,16 +346,16 @@ hosts:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml | jtable -p hosts -q select_host_basic.yml
+cat host_list_of_dict_in_key.yml  | jtable play select_host_basic.yml
 ```
 output:
 
 ```text
-host    os type
-------  ---------
-host_1  linux
-host_2  windows
-host_3  linux
+hostname    os       cost    state        env
+----------  -------  ------  -----------  -----
+host_1      linux    5000    alive        qua
+host_2      windows  5000    alive        qua
+host_3      linux            unreachable  qua
 
 ```
 ## Transform table content using Jinja  
@@ -343,7 +401,7 @@ vars:
       - as: uptime in days
         expr: "(((uptime | int ) / (60 * 60 * 24)) | string).split('.')[0] | string + ' days'"
 
-stdout: "{{ stdin | from_yaml | jtable(queryset=queryset) }}"
+stdout: "{{ stdin | from_yaml | to_table(queryset=queryset) }}"
 
 
 
@@ -351,7 +409,7 @@ stdout: "{{ stdin | from_yaml | jtable(queryset=queryset) }}"
 
 command: 
 ```bash
-cat uptime_dataset.yml | jtable -p hosts -q uptime_view.yml
+cat uptime_dataset.yml | jtable play uptime_view.yml
 ```
 output:
 
@@ -393,12 +451,12 @@ vars:
       uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
 
-stdout: "{{ stdin | from_yaml | jtable(queryset=queryset)}}"
+stdout: "{{ stdin | from_yaml | to_table(queryset=queryset)}}"
 ```
 
 command: 
 ```bash
-cat uptime_dataset.yml | jtable -q uptime_view_with_views.yml
+cat uptime_dataset.yml | jtable play uptime_view_with_views.yml
 ```
 output:
 
@@ -417,7 +475,7 @@ and avoid your variable coming from your input and the ones present.
 #### Store data in a namespace using path syntaxe stdin.hosts{```item```}
 
 ```
-cat uptime_dataset.yml | jtable -p "hosts{host}" -q name_incoming_attribute.yml
+cat uptime_dataset.yml | jtable play name_incoming_attribute.yml
 ```
 
 
@@ -459,12 +517,12 @@ regions:
 
 command: 
 ```bash
-cat region_dataset.yml | jtable -p "regions{region}.dc{dc}{host}" -q region_view.yml
+cat region_dataset.yml | jtable play region_view.yml
 ```
 output:
 
 ```bash
-14:19:57 cls.cross_path      | ERROR .dc was not found in dataset level: 2
+11:44:46 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -482,6 +540,7 @@ dc_c       east        host_c_3    linux  alive
 ```yaml
 vars:
   queryset:
+    path: regions{region}.dc{dc}{host}
     select:
     - as: dc name
       expr: dc.key
@@ -518,8 +577,8 @@ The playbook
 
 
 ```
-## Load multiple files
-Considering the files below returned by ```ls -1 data/*/*/config.yml```
+## Load multiple files with glob patterns
+Using the new `load_yaml_files` command to load multiple files with glob patterns. Considering the files below returned by ```ls -1 data/*/*/config.yml```
 
 ```text
 data/dev/it_services/config.yml
@@ -544,12 +603,12 @@ dirty line
 
 command: 
 ```bash
-jtable -jfs "{input}:data/*/*/config.yml" -p {file}.content -q load_multi_json_queryset.yml
+jtable load_yaml_files "{input}:data/*/*/config.yml" --play load_multi_json_queryset.yml
 ```
 output:
 
 ```bash
-14:19:57 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
+11:44:47 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -570,6 +629,7 @@ qua    pay          host_qua_pay_3R3  win       200
 ```yaml
 vars:
   queryset:
+    path: "{file}.content{}"
     select:
       - as: env
         expr: file.path.split('/')[1]
@@ -581,6 +641,27 @@ vars:
         expr: os
       - as: cost
         expr: cost
+
+stdout: '{{ input | to_table(queryset=queryset) }}'
+# stdout: '{{ input  }}'
+```
+### Load multiple JSON files
+Similarly, you can use `load_json_files` for JSON files:
+
+
+command: 
+```bash
+jtable load_json_files "data/*/*/config.json" play load_multi_json_queryset.yml
+```
+output:
+
+```bash
+ls: cannot access 'play': No such file or directory
+ls: cannot access 'play': No such file or directory
+name                          path    content.vars.queryset.path    content.vars.queryset.select                                                                                                                                                                               content.stdout
+----------------------------  ------  ----------------------------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  -----------------------------------------
+load_multi_json_queryset.yml          {file}.content{}              [{'as': 'env', 'expr': "file.path.split('/')[1]"}, {'as': 'dept', 'expr': "file.path.split('/')[2]"}, {'as': 'hostname', 'expr': 'hostname'}, {'as': 'os', 'expr': 'os'}, {'as': 'cost', 'expr': 'cost'}]  {{ input | to_table(queryset=queryset) }}
+
 ```
 # Embded filters
 #### strf_time
@@ -611,12 +692,12 @@ vars:
       - as: strftime 
         expr: "  (order_date|to_datetime).strftime('%S') "
 
-stdout: "{{ host_list | jtable(queryset=queryset) }}"
+stdout: "{{ host_list | to_table(queryset=queryset) }}"
 ```
 
 command: 
 ```bash
-jtable -q strf_time_example.yml
+jtable play strf_time_example.yml
 ```
 output:
 
@@ -635,7 +716,7 @@ host_3      linux     200  alive     2.02032e+07          12
 
 command: 
 ```bash
-jtable -q uptime_view_colored.yml -f github
+jtable play uptime_view_colored.yml -f github
 ```
 output:
 

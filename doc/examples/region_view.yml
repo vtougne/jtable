@@ -1,5 +1,6 @@
 vars:
   queryset:
+    path: regions{region}.dc{dc}{host}
     select:
     - as: dc name
       expr: dc.key

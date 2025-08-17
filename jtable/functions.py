@@ -33,6 +33,23 @@ class Plugin:
         else:
             return os.environ[var_name]
 
+    @staticmethod
+    def load_os_vars():
+        """
+        Get all environment variables as a dictionary.
+        
+        Returns:
+            dict: Dictionary containing all environment variables
+            
+        Examples:
+            >>> env_vars = Plugin.load_os_vars()
+            >>> 'PATH' in env_vars
+            True
+            >>> type(env_vars['HOME'])
+            <class 'str'>
+        """
+        return dict(os.environ)
+
    
     @staticmethod
     def load_files(search_string, format=json, ignore_errors=True):
@@ -742,6 +759,69 @@ def type_debug(o):
     """
     return  o.__class__.__name__
 
+
+class InspectDataset:
+    """
+    Class for inspecting and exploring dataset structures.
+    
+    This class provides methods to traverse nested data structures
+    and discover all available paths and values within them.
+    """
+    def __init__(self):
+        self.out = []
+        
+    def add_row(self, row):
+        """
+        Add a row to the output list.
+        
+        Args:
+            row (list): Row data containing path and value
+        """
+        self.out = self.out + [ [row[0]] + [row[1]] ]
+        logging.info("Covering " + " / ".join(flatten([ [row[0]] + [row[1]] ])))
+        
+    def view_paths(self, dataset, path="", max_depth=0):
+        """
+        Get all paths and values in a dataset.
+        
+        Args:
+            dataset: The dataset to inspect
+            path (str): Current path being explored
+            max_depth (int): Maximum depth to explore (0 = unlimited)
+            
+        Returns:
+            list: List of [path, value] pairs
+        """
+        self.cover_data(dataset, path="", max_depth=0)
+        return self.out
+        
+    def cover_data(self, dataset, path="", max_depth=0):
+        """
+        Recursively cover all data in a dataset structure.
+        
+        Args:
+            dataset: The dataset to cover
+            path (str): Current path being explored
+            max_depth (int): Maximum depth to explore (0 = unlimited)
+        """
+        if type(dataset) is dict:
+            for key, value in dataset.items():
+                if " " in str(key):
+                    the_path = path + "['" + str(key) + "']"
+                else:
+                    if path == "":
+                        the_path = path + str(key)
+                    else:
+                        the_path = path + "." + str(key)
+                self.cover_data(value, the_path)
+        elif type(dataset) is list:
+            index = 0
+            for item in dataset:
+                the_path = path + "[" + str(index) + "]"
+                index += 1
+                self.cover_data(item, the_path)
+        else:
+            self.add_row([path] + [str(dataset)])
 
 
 

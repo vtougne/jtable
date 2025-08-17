@@ -1,0 +1,10 @@
+vars:
+  test_data:
+    - variable: "USER"
+      value: "{{ USER }}"
+    - variable: "HOME" 
+      value: "{{ HOME }}"
+    - variable: "SHELL"
+      value: "{{ SHELL }}"
+
+stdout: "{{ test_data | to_table }}"

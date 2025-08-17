@@ -1,5 +1,6 @@
 vars:
   queryset:
+    path: "{file}.content{}"
     select:
       - as: env
         expr: file.path.split('/')[1]
@@ -11,3 +12,6 @@ vars:
         expr: os
       - as: cost
         expr: cost
+
+stdout: '{{ input | to_table(queryset=queryset) }}'
+# stdout: '{{ input  }}'
