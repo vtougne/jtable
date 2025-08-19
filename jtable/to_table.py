@@ -193,7 +193,13 @@ class ToTable:
                 fields_label = select.split(",")
                 item_name = 'item' if item_name == '' else item_name
                 # Transform field names into proper Jinja expressions that handle quotes safely
-                expressions = list(map(lambda field: item_name + '["' + escape_field_name(field) + '"]', fields_label))
+                # Special handling for context keys (e.g., region.key, dc.key)
+                def generate_expression(field):
+                    if '.key' in field:
+                        return field  # Direct context access (e.g., region.key)
+                    else:
+                        return item_name + '["' + escape_field_name(field) + '"]'  # Item field access
+                expressions = list(map(generate_expression, fields_label))
             else:
                 expressions = [expressions['expr'] for expressions in select]
                 stylings = [(stylings['styling'] if 'styling' in stylings else []) for stylings in select]
@@ -272,7 +278,7 @@ class ToTable:
                 view_index = 0
                 for exp_key,exp_val in self.views.items():
                     try:
-                        templated_var = view_templates[view_index].render({**loop_context,**view_context},eval_str=True)
+                        templated_var = view_templates[view_index].render({**loop_context,**view_context,**context},eval_str=True)
                     except Exception as error:
                         logging.error(f"Error while rendering var_name: {exp_key}, exp_val: {exp_val}, error was:\n{error}")
                         exit(1)
@@ -292,7 +298,7 @@ class ToTable:
                 for expr in expressions:
                     loop_context = { item_name: item } if item_name != '' else item
                     try:
-                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context},eval_str=True)
+                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context,**context},eval_str=True)
                     except:
                         break
                     del loop_context
