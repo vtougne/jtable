@@ -372,7 +372,7 @@ class JtableCli:
                 # Simple case: no complex select in queryset
                 queryset['select'] = args.select
 
-        if 'when' in queryset and hasattr(args, 'when') and args.when:
+        if hasattr(args, 'when') and args.when:
             queryset['when'] = args.when
 
         if not 'path' in queryset:

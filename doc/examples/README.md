@@ -289,6 +289,92 @@ host_2      linux  5000    alive        qua
 host_3      linux          unreachable  qua
 
 ```
+## Conditional Filtering with --when
+Filter data rows based on conditions using the `--when` option. This allows you to display only the data that meets specific criteria.
+
+### Basic conditional filtering
+Let's filter the hosts to show only Linux systems:
+
+
+command: 
+```bash
+cat host_list_of_dict_in_key.yml | jtable -p hosts --when "os == 'linux'"
+```
+output:
+
+```text
+hostname    os     cost    state        env
+----------  -----  ------  -----------  -----
+host_1      linux  5000    alive        qua
+host_3      linux          unreachable  qua
+
+```
+### Filter by multiple conditions
+You can use logical operators like `and`, `or` for complex conditions:
+
+
+command: 
+```bash
+cat host_list_of_dict_in_key.yml | jtable -p hosts --when "os != 'linux' and cost > 300"
+```
+output:
+
+```text
+hostname    os         cost  state    env
+----------  -------  ------  -------  -----
+host_2      windows    5000  alive    qua
+
+```
+### Filter by state
+Filter hosts that are alive:
+
+
+command: 
+```bash
+cat host_list_of_dict_in_key.yml | jtable -p hosts --when "state == 'alive'"
+```
+output:
+
+```text
+hostname    os         cost  state    env
+----------  -------  ------  -------  -----
+host_1      linux      5000  alive    qua
+host_2      windows    5000  alive    qua
+
+```
+### Alternative bracket syntax
+You can also use bracket syntax for conditions:
+
+
+command: 
+```bash
+cat host_list_of_dict_in_key.yml | jtable -p hosts --when "[os == 'linux']"
+```
+output:
+
+```text
+hostname    os     cost    state        env
+----------  -----  ------  -----------  -----
+host_1      linux  5000    alive        qua
+host_3      linux          unreachable  qua
+
+```
+### Filter with string contains
+Filter hosts where hostname contains specific text:
+
+
+command: 
+```bash
+cat host_list_of_dict_in_key.yml | jtable -p hosts --when "'host_1' in hostname"
+```
+output:
+
+```text
+hostname    os       cost  state    env
+----------  -----  ------  -------  -----
+host_1      linux    5000  alive    qua
+
+```
 ## Use query file
 if you want to hide, show a given filter you have to build a query file
 You can display the query and redirect it to a given file using the following option:
@@ -522,7 +608,7 @@ cat region_dataset.yml | jtable play region_view.yml
 output:
 
 ```bash
-18:57:59 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+12:14:35 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -608,7 +694,7 @@ jtable load_yaml_files "{input}:data/*/*/config.yml" --play load_multi_json_quer
 output:
 
 ```bash
-18:57:59 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
+12:14:35 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000

@@ -149,6 +149,50 @@
   # collapse: command & output
 
 - text: |
+    ## Conditional Filtering with --when
+    Filter data rows based on conditions using the `--when` option. This allows you to display only the data that meets specific criteria.
+
+- text: |
+    ### Basic conditional filtering
+    Let's filter the hosts to show only Linux systems:
+
+- play_cmd: cat host_list_of_dict_in_key.yml | jtable -p hosts --when "os == 'linux'"
+  box_as: text
+  # collapse: command & output
+
+- text: |
+    ### Filter by multiple conditions
+    You can use logical operators like `and`, `or` for complex conditions:
+
+- play_cmd: cat host_list_of_dict_in_key.yml | jtable -p hosts --when "os != 'linux' and cost > 300"
+  box_as: text
+  # collapse: command & output
+
+- text: |
+    ### Filter by state
+    Filter hosts that are alive:
+
+- play_cmd: cat host_list_of_dict_in_key.yml | jtable -p hosts --when "state == 'alive'"
+  box_as: text
+  # collapse: command & output
+
+- text: |
+    ### Alternative bracket syntax
+    You can also use bracket syntax for conditions:
+
+- play_cmd: cat host_list_of_dict_in_key.yml | jtable -p hosts --when "[os == 'linux']"
+  box_as: text
+  # collapse: command & output
+
+- text: |
+    ### Filter with string contains
+    Filter hosts where hostname contains specific text:
+
+- play_cmd: cat host_list_of_dict_in_key.yml | jtable -p hosts --when "'host_1' in hostname"
+  box_as: text
+  # collapse: command & output
+
+- text: |
     ## Use query file
     if you want to hide, show a given filter you have to build a query file
     You can display the query and redirect it to a given file using the following option:

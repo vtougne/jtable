@@ -268,6 +268,12 @@ class ToTable:
                     condition_template = create_templater(template_string=jinja_expr, static_context= {**when_context,**loop_condition_context},strict_undefined=False)
                     condition_test_result = condition_template.render({},eval_str=True)
                     logging.info(f"condition_test_result: {condition_test_result}, type: {type(condition_test_result)}")
+                    
+                    # Handle different result types
+                    if isinstance(condition_test_result, list) and len(condition_test_result) > 0:
+                        # If result is a list, check the first element
+                        condition_test_result = condition_test_result[0]
+                    
                     if condition_test_result == "False" or condition_test_result == False:
                         break
                 return condition_test_result
