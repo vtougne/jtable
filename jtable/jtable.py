@@ -369,8 +369,17 @@ class JtableCli:
                                  if 'as' in field and field['as'] in requested_fields]
                 queryset['select'] = filtered_select
             else:
-                # Simple case: no complex select in queryset
-                queryset['select'] = args.select
+                # Convert CLI select string to proper select expressions
+                requested_fields = args.select.split(',')
+                select_expressions = []
+                for field in requested_fields:
+                    field = field.strip()
+                    # Create proper select expression
+                    select_expressions.append({
+                        'as': field,
+                        'expr': field
+                    })
+                queryset['select'] = select_expressions
 
         if hasattr(args, 'when') and args.when:
             queryset['when'] = args.when

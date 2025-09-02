@@ -608,7 +608,7 @@ cat region_dataset.yml | jtable play region_view.yml
 output:
 
 ```bash
-12:14:35 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+10:40:16 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -694,7 +694,7 @@ jtable load_yaml_files "{input}:data/*/*/config.yml" --play load_multi_json_quer
 output:
 
 ```bash
-12:14:35 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
+10:40:16 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -737,16 +737,28 @@ Similarly, you can use `load_json_files` for JSON files:
 
 command: 
 ```bash
-jtable load_json_files "data/*/*/config.json" play load_multi_json_queryset.yml
+jtable load_json_files "{input}:data/*/*/config.json" --play load_multi_json_queryset.yml
 ```
 output:
 
 ```bash
-ls: cannot access 'play': No such file or directory
-ls: cannot access 'play': No such file or directory
-name                          path    content.vars.queryset.path    content.vars.queryset.select                                                                                                                                                                               content.stdout
-----------------------------  ------  ----------------------------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  -----------------------------------------
-load_multi_json_queryset.yml          {file}.content{}              [{'as': 'env', 'expr': "file.path.split('/')[1]"}, {'as': 'dept', 'expr': "file.path.split('/')[2]"}, {'as': 'hostname', 'expr': 'hostname'}, {'as': 'os', 'expr': 'os'}, {'as': 'cost', 'expr': 'cost'}]  {{ input | to_table(queryset=queryset) }}
+env    dept         hostname         os       cost
+-----  -----------  ---------------  -----  ------
+dev    it_services  host_dev_its_1   linux    5000
+dev    it_services  host_dev_its_2   linux     200
+dev    it_services  host_dev_its_3   win       200
+dev    pay          host_dev_pay_1   linux    5000
+dev    pay          host_dev_pay_2   linux     200
+dev    pay          host_dev_pay_3   win       200
+prod   it_services  host_prd_its_1   linux    5000
+prod   it_services  host_prd_its_2   linux     200
+prod   it_services  host_prd_its_3   win       200
+prod   pay          host_dev_pay_22  linux    5000
+prod   pay          host_dev_pay_22  linux     200
+prod   pay          host_dev_pay_22  win       200
+qua    pay          host_qua_pay_22  linux    5000
+qua    pay          host_qua_pay_22  linux     200
+qua    pay          host_qua_pay_22  win       200
 
 ```
 # Embded filters

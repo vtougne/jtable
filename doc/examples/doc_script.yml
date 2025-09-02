@@ -315,7 +315,7 @@
     ### Load multiple JSON files
     Similarly, you can use `load_json_files` for JSON files:
 
-- play_cmd: 'jtable load_json_files "data/*/*/config.json" play load_multi_json_queryset.yml'
+- play_cmd: 'jtable load_json_files "{input}:data/*/*/config.json" --play load_multi_json_queryset.yml'
   # collapse: command & output
   box_as: bash
 
