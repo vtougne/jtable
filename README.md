@@ -18,7 +18,7 @@ It works as a CLI tool, a Jinja filter (usable in Ansible, Django, Flask, etc.),
 ---
 
 ## Gallery
-See [Gallery]({{ doc_base_url }}/doc/gallery.md) for visual examples and screenshots.
+See [Gallery](./doc/gallery.md) for visual examples and screenshots.
 
 ---
 
@@ -70,8 +70,8 @@ host_3      linux          unreachable  qua
 ---
 
 ## More Examples
-- [Setup Guide]({{ doc_base_url }}/doc/setup/README.md)
-- [Advanced Examples]({{ doc_base_url }}/doc/examples/README.md)
+- [Setup Guide](./doc/setup/README.md)
+- [Advanced Examples](./doc/examples/README.md)
 
 ---
 
@@ -81,5 +81,5 @@ Pull requests and issues are welcome! For major changes, please open an issue fi
 ---
 
 ## License
-See [LICENSE.txt]({{ doc_base_url }}/LICENSE.txt)
+See [LICENSE.txt](./LICENSE.txt)
 
