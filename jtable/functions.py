@@ -742,10 +742,10 @@ def to_yaml(v):
 def type_debug(o):
     """
     Get the class name of an object.
-    
+
     Args:
         o: Object to get class name from
-        
+
     Returns:
         str: Class name of the object
 
@@ -758,6 +758,36 @@ def type_debug(o):
         'dict'
     """
     return  o.__class__.__name__
+
+def dict2items(dictionary, key_name='key', value_name='value'):
+    """
+    Convert a dictionary to a list of dictionaries with key and value pairs.
+    Similar to Ansible's dict2items filter.
+
+    Args:
+        dictionary (dict): Dictionary to convert
+        key_name (str): Name for the key field (default: 'key')
+        value_name (str): Name for the value field (default: 'value')
+
+    Returns:
+        list: List of dictionaries containing key-value pairs
+
+    Examples:
+        >>> dict2items({'a': 1, 'b': 2})
+        [{'key': 'a', 'value': 1}, {'key': 'b', 'value': 2}]
+        >>> dict2items({'host1': {'ip': '1.1.1.1'}, 'host2': {'ip': '2.2.2.2'}})
+        [{'key': 'host1', 'value': {'ip': '1.1.1.1'}}, {'key': 'host2', 'value': {'ip': '2.2.2.2'}}]
+        >>> dict2items({'x': 10, 'y': 20}, key_name='name', value_name='data')
+        [{'name': 'x', 'data': 10}, {'name': 'y', 'data': 20}]
+    """
+    if not isinstance(dictionary, dict):
+        raise TypeError("Input must be a dictionary")
+
+    result = []
+    for k, v in dictionary.items():
+        result.append({key_name: k, value_name: v})
+
+    return result
 
 
 class InspectDataset:
