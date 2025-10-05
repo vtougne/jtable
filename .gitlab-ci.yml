@@ -145,6 +145,7 @@ make_windows_setup:
     - '& "C:\temp\build\nsis-3.11\nsis-3.11\makensis.exe" ..\jtable.nsi'
   # rules:
   #   - when: never
+  
   allow_failure: true
 
 
