@@ -143,8 +143,8 @@ make_windows_setup:
     - cd C:\temp\build\jtable\dist
     # - '& "C:\Program Files (x86)\NSIS\makensis.exe" ..\jtable.nsi'
     - '& "C:\temp\build\nsis-3.11\nsis-3.11\makensis.exe" ..\jtable.nsi'
-  rules:
-    - when: never
+  # rules:
+  #   - when: never
   allow_failure: true
 
 
