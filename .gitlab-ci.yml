@@ -114,6 +114,18 @@ build_windows_env:
           Write-Host "Git is already installed."
       }
 
+    - |
+        if (-not (Test-Path C:\Program Files\Python314 {
+          $python_version="3.14.0"
+          $python_package="python-${python_version}-amd64.exe"
+          $download_url="https://www.python.org/ftp/python/${python_version}/$python_package"
+          Invoke-WebRequest -Uri $download_url -OutFile $python_package
+          Start-Process -FilePath $python_package -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0" -Wait -NoNewWindow
+          Write-Host "Python installation complete."
+          } else {
+          Write-Host "Python is already installed." }
+
+
     # - Import-Module BitsTransfer
     # - echo $nsis_download_url
     # - echo $nsis_path
@@ -180,7 +192,7 @@ make_windows_setup:
     - cd c:\temp
     - $Env:USERNAME
     - $Env:LOCALAPPDATA
-    - $env:Path += ";C:\Program Files\Python311"
+    # - $env:Path += ";C:\Program Files\Python314"
     # - |
     #   if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     #       Write-Host "Python not found. Installing Python..."
