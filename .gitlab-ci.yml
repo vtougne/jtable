@@ -154,7 +154,7 @@ make_windows_setup:
     - cd c:\temp
     - $Env:USERNAME
     - $Env:LOCALAPPDATA
-    # - $env:Path += ";C:\Program Files\Python314"
+    - $env:Path += ";C:\Program Files\Python314"
     # - |
     #   if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     #       Write-Host "Python not found. Installing Python..."
