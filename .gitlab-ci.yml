@@ -87,23 +87,84 @@ make_release:
     - git push origin $new_version
   # rules:
   #   - when: manual
+
+
 build_windows_env:
   stage: build
   # image: $CI_REGISTRY_IMAGE:latest
   tags:
     - windows
+  variables:
+    GIT_STRATEGY: none
   script:
-    - if (-not (Test-Path C:\temp\build)) {New-Item -Path C:\temp\build -ItemType Directory }
+    - if (-not (Test-Path C:\temp\build)) {New-Item -Path C:\temp\build -ItemType Directory -Force }
+    - if (-not (Test-Path C:\bin) {New-Item -Path C:\bin -ItemType Directory -Force }
     - cd C:\temp\build
-    - Import-Module BitsTransfer
-    - echo $nsis_download_url
-    - echo $nsis_path
-    - Start-BitsTransfer -Source $nsis_download_url
-    - Expand-Archive -Path nsis-3.11.zip
-    - python -m venv jtable_env
+    # Install Git for Windows
+    - |
+      if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+          Write-Host "Git not found. Installing Git for Windows..."
+          $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.1/Git-2.47.1-64-bit.exe"
+          $gitInstaller = "git-installer.exe"
+          Invoke-WebRequest -Uri $gitUrl -OutFile $gitInstaller
+          Start-Process -FilePath $gitInstaller -ArgumentList "/VERYSILENT","/NORESTART","/SP-","/SUPPRESSMSGBOXES" -Wait -NoNewWindow
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          Write-Host "Git installation complete."
+      } else {
+          Write-Host "Git is already installed."
+      }
 
-  rules: 
+    # - Import-Module BitsTransfer
+    # - echo $nsis_download_url
+    # - echo $nsis_path
+    # - if (-not (Test-Path nsis-3.11.zip)) { Start-BitsTransfer -Source $nsis_download_url }
+    # - if (Test-Path nsis-3.11) { Remove-Item -Path nsis-3.11 -Recurse -Force -Confirm:$false }
+    # - Expand-Archive -Path nsis-3.11.zip -Force
+    # # Find Python executable
+    # - |
+    #   $pythonExe = $null
+    #   # Try to find python in PATH first
+    #   $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+    #   if ($pythonCmd) {
+    #     $pythonExe = $pythonCmd.Source
+    #     Write-Host "Found Python in PATH at: $pythonExe"
+    #   } else {
+    #     # Search in common locations
+    #     $pythonPaths = @(
+    #       "C:\Program Files\Python311\python.exe",
+    #       "C:\Python311\python.exe",
+    #       "C:\Users\$env:USERNAME\AppData\Local\Programs\Python\Python311\python.exe",
+    #       "C:\Program Files\Python312\python.exe",
+    #       "C:\Python312\python.exe",
+    #       "C:\Users\$env:USERNAME\AppData\Local\Programs\Python\Python312\python.exe"
+    #     )
+    #     foreach ($path in $pythonPaths) {
+    #       if (Test-Path $path) {
+    #         $pythonExe = $path
+    #         Write-Host "Found Python at: $pythonExe"
+    #         break
+    #       }
+    #     }
+    #   }
+    #   if (-not $pythonExe) {
+    #     Write-Host "Searching for Python using where.exe..."
+    #     $whereResult = where.exe python 2>$null
+    #     if ($whereResult) {
+    #       $pythonExe = $whereResult[0]
+    #       Write-Host "Found Python at: $pythonExe"
+    #     }
+    #   }
+    #   if (-not $pythonExe) {
+    #     Write-Error "Python not found. Please install Python first."
+    #     exit 1
+    #   }
+    #   if (-not (Test-Path jtable_env)) {
+    #     & $pythonExe -m venv jtable_env
+    #   }
+
+  rules:
     - if: '$CI_COMMIT_MESSAGE =~ /build_windows_env/'
+
 
 
 make_windows_setup:
