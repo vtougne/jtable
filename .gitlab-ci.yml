@@ -115,15 +115,16 @@ build_windows_env:
       }
 
     - |
-        if (-not (Test-Path C:\Program Files\Python314 {
-          $python_version="3.14.0"
-          $python_package="python-${python_version}-amd64.exe"
-          $download_url="https://www.python.org/ftp/python/${python_version}/$python_package"
-          Invoke-WebRequest -Uri $download_url -OutFile $python_package
-          Start-Process -FilePath $python_package -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0" -Wait -NoNewWindow
-          Write-Host "Python installation complete."
-          } else {
-          Write-Host "Python is already installed." }
+      if (-not (Test-Path "C:\Program Files\Python314" )) {
+        $python_version="3.14.0"
+        $python_package="python-${python_version}-amd64.exe"
+        $download_url="https://www.python.org/ftp/python/${python_version}/$python_package"
+        Invoke-WebRequest -Uri $download_url -OutFile $python_package
+        Start-Process -FilePath $python_package -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0" -Wait -NoNewWindow
+        Write-Host "Python installation complete."
+        } else {
+        Write-Host "Python is already installed." 
+        }
 
 
     # - Import-Module BitsTransfer
