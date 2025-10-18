@@ -87,23 +87,58 @@ make_release:
     - git push origin $new_version
   # rules:
   #   - when: manual
+
+
 build_windows_env:
   stage: build
   # image: $CI_REGISTRY_IMAGE:latest
   tags:
     - windows
+  variables:
+    GIT_STRATEGY: none
   script:
-    - if (-not (Test-Path C:\temp\build)) {New-Item -Path C:\temp\build -ItemType Directory }
+    - if (-not (Test-Path C:\temp\build)) {New-Item -Path C:\temp\build -ItemType Directory -Force }
+    - if (-not (Test-Path C:\bin) {New-Item -Path C:\bin -ItemType Directory -Force }
     - cd C:\temp\build
-    - Import-Module BitsTransfer
-    - echo $nsis_download_url
-    - echo $nsis_path
-    - Start-BitsTransfer -Source $nsis_download_url
-    - Expand-Archive -Path nsis-3.11.zip
-    - python -m venv jtable_env
+    # Install Git for Windows
+    - |
+      if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+          Write-Host "Git not found. Installing Git for Windows..."
+          $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.1/Git-2.47.1-64-bit.exe"
+          $gitInstaller = "git-installer.exe"
+          Invoke-WebRequest -Uri $gitUrl -OutFile $gitInstaller
+          Start-Process -FilePath $gitInstaller -ArgumentList "/VERYSILENT","/NORESTART","/SP-","/SUPPRESSMSGBOXES" -Wait -NoNewWindow
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          Write-Host "Git installation complete."
+      } else {
+          Write-Host "Git is already installed."
+      }
 
-  rules: 
+    - |
+      if (-not (Test-Path "C:\Program Files\Python314" )) {
+        $python_version="3.14.0"
+        $python_package="python-${python_version}-amd64.exe"
+        $download_url="https://www.python.org/ftp/python/${python_version}/$python_package"
+        Invoke-WebRequest -Uri $download_url -OutFile $python_package
+        Start-Process -FilePath $python_package -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0" -Wait -NoNewWindow
+        Write-Host "Python installation complete."
+        } else {
+        Write-Host "Python is already installed." 
+      }
+
+
+  # - Import-Module BitsTransfer
+  # - echo $nsis_download_url
+  # - echo $nsis_path
+  # - if (-not (Test-Path nsis-3.11.zip)) { Start-BitsTransfer -Source $nsis_download_url }
+  # - if (Test-Path nsis-3.11) { Remove-Item -Path nsis-3.11 -Recurse -Force -Confirm:$false }
+  # - Expand-Archive -Path nsis-3.11.zip -Force
+  # # Find Python executable
+  # - |
+
+  rules:
     - if: '$CI_COMMIT_MESSAGE =~ /build_windows_env/'
+
 
 
 make_windows_setup:
@@ -119,7 +154,7 @@ make_windows_setup:
     - cd c:\temp
     - $Env:USERNAME
     - $Env:LOCALAPPDATA
-    - $env:Path += ";C:\Program Files\Python311"
+    - $env:Path += ";C:\Program Files\Python314"
     # - |
     #   if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     #       Write-Host "Python not found. Installing Python..."
@@ -145,6 +180,7 @@ make_windows_setup:
     - '& "C:\temp\build\nsis-3.11\nsis-3.11\makensis.exe" ..\jtable.nsi'
   # rules:
   #   - when: never
+  
   allow_failure: true
 
 
