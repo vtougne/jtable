@@ -52,13 +52,13 @@ class Plugin:
 
    
     @staticmethod
-    def load_files(search_string, format=json, ignore_errors=True):
+    def load_files(search_string, format='yaml', ignore_errors=True):
         """
         Load multiple files from a search string pattern.
 
         Args:
             search_string (str): File search pattern
-            format: Output format (default: json)
+            format (str): File format - 'json' or 'yaml' (default: 'yaml')
             ignore_errors (bool): Whether to ignore errors when loading files
 
         Returns:
@@ -74,9 +74,14 @@ class Plugin:
         file_list_dataset = []
         for file_name_full_path in files_str.split('\n'):
             if file_name_full_path != '':
-                with open(file_name_full_path, 'r') as input_yaml:
+                with open(file_name_full_path, 'r') as input_file:
                     try:
-                        file_content =  yaml.safe_load(input_yaml)
+                        # Use the appropriate loader based on format parameter
+                        if format == 'json':
+                            file_content = json.load(input_file)
+                        else:
+                            file_content = yaml.safe_load(input_file)
+
                         if running_context()['platform']['system'] == "Windows":
                             sep = "\\"
                             file_path = sep.join(file_name_full_path.split('\\')[:-1])
@@ -84,7 +89,7 @@ class Plugin:
                         else:
                             file_path = "/".join(file_name_full_path.split('/')[:-1])
                             file_name = file_name_full_path.split('/')[-1]
-                        file = { 
+                        file = {
                                 "name": file_name,
                                 "path": file_path,
                                 "content": file_content

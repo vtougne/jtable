@@ -240,39 +240,9 @@ class JtableCli:
                 logging.info(f"Adding var_name: {self.tabulate_var_name}")
                 path = file_search_string
             logging.info(f"var_name: {self.tabulate_var_name}, path: {path}")
-            logging.info(f"path: {path}")
-            if running_context['shell_family'] == "windows":
-                cmd = f"dir /s /b {path}"
-                logging.info(f"cmd: {cmd}")
-                files_str = os.popen("dir /s /b " + path).read()
-            else:
-                files_str = os.popen("ls -1 " + path).read()
-            files_str = os.popen("ls -1 " + path).read()
-            logging.info(f"files_str: {files_str}")
-            file_list_dataset = []
-            for file_name_full_path in files_str.split('\n'):
-                if file_name_full_path != '':
-                    with open(file_name_full_path, 'r') as input_file:
-                        try:
-                            if format == 'json':
-                                file_content = json.load(input_file)
-                            else:
-                                file_content = yaml.safe_load(input_file)
-                            if running_context['shell_family'] == "windows":
-                                sep = "\\"
-                                file_path = sep.join(file_name_full_path.split('\\')[:-1])
-                                file_name = file_name_full_path.split('\\')[-1]
-                            else:
-                                file_path = "/".join(file_name_full_path.split('/')[:-1])
-                                file_name = file_name_full_path.split('/')[-1]
-                            file = { 
-                                    "name": file_name,
-                                    "path": file_path,
-                                    "content": file_content
-                                    }
-                            file_list_dataset = file_list_dataset + [{ **file }]
-                        except Exception as error:
-                            logging.warning(f"fail loading file {file_name_full_path}, skipping")
+
+            # Use Plugin.load_files instead of duplicating code
+            file_list_dataset = Plugin.load_files(path, format=format)
             self.dataset = {**self.dataset, **{ self.tabulate_var_name: file_list_dataset } }
 
         if args.command == 'load_json' or args.command == 'load_yaml':
