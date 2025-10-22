@@ -140,6 +140,7 @@ cd /mnt/c/data/perso/dev/project/jtable/doc/examples && cat key_containing_space
 
 # Todo
 
+- [x] ***refactor*** - expose load_files function in plugins ✅ Completed: load_files is now directly accessible as a plugin function, and fixed bug where it incorrectly accessed running_context as a dictionary instead of calling it as a function
 - [x] ***refactor*** - plugin previously call like this: jtable template "{{ plugin('shell', 'echo -n Hello $(hostname)') }}", now should be called only like this:
 jtable template "{{ shell('echo -n Hello $(hostname)') }}" ✅ Completed: Plugins are now directly accessible in Jinja2 context
 - [x] ***Bug/Fix*** - jtable template "Hello {{ something }}" should failed with undefined error. ✅ Fixed: Jinja2 Environment now properly configured with StrictUndefined when strict_undefined=True

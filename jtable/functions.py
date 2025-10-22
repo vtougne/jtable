@@ -55,16 +55,16 @@ class Plugin:
     def load_files(search_string, format=json, ignore_errors=True):
         """
         Load multiple files from a search string pattern.
-        
+
         Args:
             search_string (str): File search pattern
             format: Output format (default: json)
             ignore_errors (bool): Whether to ignore errors when loading files
-            
+
         Returns:
             list: List of dictionaries containing file information (name, path, content)
         """
-        if running_context['platform']['system'] == "Windows":
+        if running_context()['platform']['system'] == "Windows":
             cmd = f"dir /s /b {search_string}"
             logging.info(f"cmd: {cmd}")
             files_str = os.popen("dir /s /b " + search_string).read()
@@ -77,7 +77,7 @@ class Plugin:
                 with open(file_name_full_path, 'r') as input_yaml:
                     try:
                         file_content =  yaml.safe_load(input_yaml)
-                        if running_context['platform']['system'] == "Windows":
+                        if running_context()['platform']['system'] == "Windows":
                             sep = "\\"
                             file_path = sep.join(file_name_full_path.split('\\')[:-1])
                             file_name = file_name_full_path.split('\\')[-1]
