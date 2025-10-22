@@ -140,4 +140,6 @@ cd /mnt/c/data/perso/dev/project/jtable/doc/examples && cat key_containing_space
 
 # Todo
 
+- [x] ***refactor*** - plugin previously call like this: jtable template "{{ plugin('shell', 'echo -n Hello $(hostname)') }}", now should be called only like this:
+jtable template "{{ shell('echo -n Hello $(hostname)') }}" ✅ Completed: Plugins are now directly accessible in Jinja2 context
 - [x] ***Bug/Fix*** - jtable template "Hello {{ something }}" should failed with undefined error. ✅ Fixed: Jinja2 Environment now properly configured with StrictUndefined when strict_undefined=True

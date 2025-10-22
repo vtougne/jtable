@@ -40,29 +40,17 @@ class Templater:
         
         # logging.info(f"jtable_core_filters: {jtable_core_filters}")
 
-        ####################  Add plugin function ####################
+        ####################  Add plugin functions ####################
         jtable_core_plugins = [name[0] for name in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
         logging.info(f"jtable_core_plugins: {jtable_core_plugins}")
-        
-        class plugin_fct(object):
-            def process_plugin(self,*args, **kwargs):
-                if len(args) == 0 and len(kwargs) == 0:
-                    logging.error("plugin function must have at least one argument in:")
-                    exit(3)
-                if args[0] not in jtable_core_plugins:
-                    logging.error(f"plugin function {args[0]} not found in {', '.join(jtable_core_plugins)}")
-                    exit(3)
-                method_to_call = getattr(Plugin, args[0], None)
-                try:
-                    res = method_to_call(*args[1:],**kwargs)
-                except Exception as error:
-                    logging.error(f"Failed to call plugin function {args[0]}, error was:\n  {str(error)}")
-                    exit(3)
-                return res
-            
-        plugin = lambda: plugin_fct().process_plugin
+
+        # Add each plugin method directly to the static context
+        # This allows calling plugins directly: {{ shell('cmd') }} instead of {{ plugin('shell', 'cmd') }}
+        for plugin_name in jtable_core_plugins:
+            plugin_method = getattr(Plugin, plugin_name)
+            static_context[plugin_name] = plugin_method
+
         logging.debug(f"({self.id}) strict_undefined: {strict_undefined}, static_context: {static_context}")
-        static_context = {**static_context, **{"plugin": plugin()}}
 
         ##############################################################
         logging.info(f"({self.id}) compiling template_string: {template_string}")

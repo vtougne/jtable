@@ -1,5 +1,5 @@
 vars:
-  env_vars: "{{ plugin('load_os_vars') }}"
+  env_vars: "{{ load_os_vars() }}"
   filtered_vars: |
     {% set result = [] %}
     {% for key, value in env_vars.items() %}
