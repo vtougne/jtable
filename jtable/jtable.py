@@ -46,14 +46,14 @@ class JtableCli:
         self.path = ""
         self.dataset = {}
         
-    def play_task_file(self, query_file_path):
+    def play_task_file(self, play_file):
         """Load and process a query file (YAML format)"""
-        logging.info(f"loading query file: {query_file_path}")
-        with open(query_file_path, 'r') as file:
+        logging.info(f"loading query file: {play_file}")
+        with open(play_file, 'r') as file:
             try:
                 query_file = yaml.safe_load(file)
             except Exception as error:
-                logging.error(f"Fail to load query file {query_file_path}, check Yaml format")
+                logging.error(f"Fail to load query file {play_file}, check Yaml format")
                 logging.error(f"error was:\n{error}")
                 exit(2)
         return query_file
