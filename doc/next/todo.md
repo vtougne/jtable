@@ -17,16 +17,21 @@ jtable usage:
       echo <some_data> | jtable [ filter <filer options> ] [ filter <filter options> ]
     
 
-# Examples
-    jtable load_json <json_file> to_table -p hosts -s hostname,os,state
-    # will be equivalent to 
-    jtable load_json <json_file> to_nice_yaml
-    cat hosts_dataset.json | jtable from_json to_table -p hosts -s hostname,os,state
+    # Examples
+        jtable load_json <json_file> to_table -p hosts -s hostname,os,state
+        # will be equivalent to 
+        jtable load_json <json_file> to_nice_yaml
+        cat hosts_dataset.json | jtable from_json to_table -p hosts -s hostname,os,state
 
 
 jtable-play:
     jtable [-f|--file] <jtable_playbook.yml> 
     jtable <jtable_playbook.yml> -v "first_name=john" -d '{"last_name": "Doe"}'
+
+
+jtable-template:
+    echo John | jtable-template "Hello {{ stdin }}"
+
 
 ```
 
@@ -69,6 +74,7 @@ https://github.com/aisbergg/python-templer
 
 | ShortCut	|	Project name                |
 |-----------|-------------------------------|
+|	jd      |	jdecode
 |	ol      |	opslab
 |	ml      |	mylab
 |	frog    |	frog

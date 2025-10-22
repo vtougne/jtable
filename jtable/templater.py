@@ -19,8 +19,12 @@ class Templater:
     for jtable filters and plugins.
     """
     def __init__(self, template_string = "", static_context = {}, strict_undefined = True, to_table_filter=None):
-        from jinja2 import Environment
-        env = Environment()
+        from jinja2 import Environment, StrictUndefined, Undefined
+        # Configure environment with appropriate undefined behavior
+        if strict_undefined:
+            env = Environment(undefined=StrictUndefined)
+        else:
+            env = Environment(undefined=Undefined)
         self.strict_undefined = strict_undefined
         import random
         self.id = random.randint(0,1000000)
