@@ -138,6 +138,7 @@ build_windows_env:
 
   rules:
     - if: '$CI_COMMIT_MESSAGE =~ /build_windows_env/'
+    
 
 
 
