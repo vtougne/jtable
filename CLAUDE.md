@@ -140,7 +140,53 @@ cd /mnt/c/data/perso/dev/project/jtable/doc/examples && cat key_containing_space
 
 # Todo
 
-- [x] ***refactor*** - expose load_files function in plugins ✅ Completed: load_files is now directly accessible as a plugin function, and fixed bug where it incorrectly accessed running_context as a dictionary instead of calling it as a function
-- [x] ***refactor*** - plugin previously call like this: jtable template "{{ plugin('shell', 'echo -n Hello $(hostname)') }}", now should be called only like this:
-jtable template "{{ shell('echo -n Hello $(hostname)') }}" ✅ Completed: Plugins are now directly accessible in Jinja2 context
-- [x] ***Bug/Fix*** - jtable template "Hello {{ something }}" should failed with undefined error. ✅ Fixed: Jinja2 Environment now properly configured with StrictUndefined when strict_undefined=True
+## New endpoints
+```
+CLI Endpoints:
+- jtable            # old CLI kept until the CLI below will replace it
+- jtable-filter     # Filter cascading
+- jtable-play       # Play a sequence written in yaml
+- jtable-template   # Template string or file
+```
+
+### jtable-filter
+
+
+```
+jtable-filter usage:
+    # first action may be a module, for example load_json, and the suite is anytime a filter
+      jtable-filter [module <module options>] [ filter <filer options> ] [ filter <filter options> ]
+
+    # Or a filter, assuming data are piped from stdin
+      echo <some_data> | jtable-filter [ filter <filer options> ] [ filter <filter options> ]
+    
+
+    # Examples
+        jtable-filter load_json <json_file> to_table -p hosts -s hostname,os,state
+        # will be equivalent to 
+        jtable-filter load_json <json_file> to_nice_yaml
+        cat hosts_dataset.json | jtable-filter from_json to_table -p hosts -s hostname,os,state
+```
+
+### jtable-play
+
+```
+jtable-play:
+    jtable [-f|--file] <jtable_playbook.yml> 
+    jtable <jtable_playbook.yml> -v "first_name=john" -d '{"last_name": "Doe"}'
+```
+
+
+### jtable-template
+```
+jtable-template:
+    echo John | jtable-template "Hello {{ stdin }}"
+```
+
+## tasks:
+
+```
+1- jtable-play: create a new cli endpoint named jtable-play that call jtable.player like the old method like "jtable -p <playbook>"  
+    create a new python module player.py calling the temmplater and doing the job  
+2- jtable-template: create new endpoint, that will build a in_memory playbook and give it to  Player classe
+```

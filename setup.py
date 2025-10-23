@@ -41,6 +41,7 @@ setup(
     entry_points={
         'console_scripts': [
             'jtable=jtable.jtable:main',
+            'jtable-play=jtable.jtable_play:main',
         ],
     },
     cmdclass={
