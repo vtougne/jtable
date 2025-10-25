@@ -27,9 +27,10 @@ Templater = templater.Templater
 
 
 def create_templater(*args, **kwargs):
-    """Helper function to create Templater instances with to_table filter"""
+    """Helper function to create Templater instances with to_table and to_table_x filters"""
     to_table_filter = ToTable().render_object
-    return Templater(*args, to_table_filter=to_table_filter, **kwargs)
+    to_table_x_filter = ToTable().render_object
+    return Templater(*args, to_table_filter=to_table_filter, to_table_x_filter=to_table_x_filter, **kwargs)
 
 class ToTable:
     def __init__(self, render="jinja_native"):

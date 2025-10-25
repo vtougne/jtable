@@ -18,7 +18,7 @@ class Templater:
     This class provides template rendering functionality with built-in support
     for jtable filters and plugins.
     """
-    def __init__(self, template_string = "", static_context = {}, strict_undefined = True, to_table_filter=None):
+    def __init__(self, template_string = "", static_context = {}, strict_undefined = True, to_table_filter=None, to_table_x_filter=None):
         from jinja2 import Environment, StrictUndefined, Undefined
         # Configure environment with appropriate undefined behavior
         if strict_undefined:
@@ -33,10 +33,36 @@ class Templater:
         jtable_core_filters = [name[0] for name in inspect.getmembers(Filters, predicate=inspect.isfunction)]
         for filter_name in jtable_core_filters:
             env.filters[filter_name] = getattr(Filters, filter_name)
-        
+
         # Add to_table filter if provided
         if to_table_filter:
             env.filters['to_table'] = to_table_filter
+
+
+
+        # Add to_table_x filter if provided (make it context-aware)
+        if to_table_x_filter:
+            from jinja2 import pass_context
+
+            @pass_context
+            def context_aware_to_table_x(context, dataset, **kwargs):
+                """Wrapper to make to_table_x filter context-aware"""
+                # Extract global variables from the Jinja context
+                # This includes stdin and other variables from static_context
+                global_vars = {}
+                for key, value in context.items():
+                    # Skip Jinja internal variables
+                    if not key.startswith('_'):
+                        global_vars[key] = value
+
+                # Merge global vars with the context parameter
+                # This allows access to stdin in when conditions
+                existing_context = kwargs.get('context', {})
+                kwargs['context'] = {**global_vars, **existing_context}
+
+                return to_table_x_filter(dataset, **kwargs)
+
+            env.filters['to_table_x'] = context_aware_to_table_x
         
         # logging.info(f"jtable_core_filters: {jtable_core_filters}")
 

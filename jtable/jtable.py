@@ -33,9 +33,10 @@ import templater
 Templater = templater.Templater
 
 def create_templater(*args, **kwargs):
-    """Helper function to create Templater instances with to_table filter"""
+    """Helper function to create Templater instances with to_table and to_table_x filters"""
     to_table_filter = to_table.ToTable().render_object
-    return Templater(*args, to_table_filter=to_table_filter, **kwargs)
+    to_table_x_filter = to_table.ToTable().render_object
+    return Templater(*args, to_table_filter=to_table_filter, to_table_x_filter=to_table_x_filter, **kwargs)
 
 def stdin_has_data():
     """Retourne True si des données sont envoyées sur stdin (ex: via pipe ou redirection)"""

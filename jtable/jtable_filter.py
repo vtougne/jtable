@@ -43,6 +43,10 @@ def discover_filters_and_plugins():
     filters_dict['to_table'] = lambda **kwargs: None  # Placeholder for parameter discovery
     logging.debug(f"Added special filter: to_table")
 
+    # Add to_table_x as a special filter (context-aware version of to_table)
+    filters_dict['to_table_x'] = lambda **kwargs: None  # Placeholder for parameter discovery
+    logging.debug(f"Added special filter: to_table_x")
+
     # Discover plugins (static methods in Plugin class)
     plugins_dict = {}
     for name, obj in inspect.getmembers(Plugin, inspect.isfunction):
@@ -370,7 +374,7 @@ Modules (Plugins):
         help_msg += "\nFilters:\n"
 
         # Show all filters (limit to most common ones for brevity)
-        common_filters = ['from_json', 'from_yaml', 'to_table', 'to_json', 'to_yaml',
+        common_filters = ['from_json', 'from_yaml', 'to_table', 'to_table_x', 'to_json', 'to_yaml',
                          'to_nice_json', 'to_nice_yaml', 'dict2items', 'flatten']
 
         for filter_name in sorted(filters_dict.keys()):
@@ -393,6 +397,15 @@ Modules (Plugins):
                     help_msg += f"        -s, --select    Comma-separated list of columns to select\n"
                     help_msg += f"        -us, --unselect Comma-separated list of columns to exclude\n"
                     help_msg += f"        -w, --when      Filter condition\n"
+                    help_msg += f"        -f, --format    Output format (simple, github, html, etc.)\n"
+
+                # Show parameters for to_table_x (context-aware version)
+                if filter_name == 'to_table_x':
+                    help_msg += f"        (Context-aware version - has access to stdin and vars in when conditions)\n"
+                    help_msg += f"        -p, --path      Path in data structure\n"
+                    help_msg += f"        -s, --select    Comma-separated list of columns to select\n"
+                    help_msg += f"        -us, --unselect Comma-separated list of columns to exclude\n"
+                    help_msg += f"        -w, --when      Filter condition (can use stdin, vars, etc.)\n"
                     help_msg += f"        -f, --format    Output format (simple, github, html, etc.)\n"
 
         help_msg += "\n    Also supports Jinja2 built-in filters: list, keys, values, items, etc.\n"
