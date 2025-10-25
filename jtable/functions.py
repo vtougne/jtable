@@ -5,17 +5,19 @@ import html
 
 class Plugin:
     @staticmethod
-    def env(var_name,**kwargs):
+    def env(var_name=None, **kwargs):
         """
-        Get an environment variable value.
-        
+        Get an environment variable value or all environment variables.
+
         Args:
-            var_name (str): Name of the environment variable to retrieve
+            var_name (str, optional): Name of the environment variable to retrieve.
+                                     If None, returns all environment variables.
             **kwargs: Optional arguments including 'default' value if var_name is not found
-            
+
         Returns:
-            str: Value of the environment variable or default value if specified
-            
+            str or dict: Value of the environment variable, default value if specified,
+                        or dictionary of all environment variables if var_name is None
+
         Raises:
             Exception: If environment variable is not found and no default is provided
 
@@ -24,7 +26,15 @@ class Plugin:
             '/usr/local/bin:/usr/bin:/bin'
             >>> Plugin.env('NONEXISTENT', default='default_value')
             'default_value'
+            >>> env_vars = Plugin.env()
+            >>> 'PATH' in env_vars
+            True
         """
+        # If no var_name provided, return all environment variables
+        if var_name is None:
+            return dict(os.environ)
+
+        # Otherwise, return specific variable
         if var_name not in os.environ:
             if 'default' in kwargs:
                 return kwargs['default']
