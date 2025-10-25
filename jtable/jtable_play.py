@@ -17,6 +17,9 @@ from logger import logging_config
 # Import Player class
 from player import Player
 
+# Import Plugin for environment variable access
+from functions import Plugin
+
 
 def parse_variable_args(var_string: str) -> dict:
     """
@@ -75,6 +78,14 @@ Examples:
 
   # Combined variables and dictionaries
   jtable-play playbook.yml -v "env=prod" -d '{"config": {"debug": false}}'
+
+  # Expose OS environment variables directly
+  jtable-play playbook.yml -E
+  # Now you can use {{ PATH }}, {{ HOME }}, {{ LOGNAME }}, etc.
+
+  # Store OS environment variables in a namespace
+  jtable-play playbook.yml -En os_vars
+  # Now you can use {{ os_vars.PATH }}, {{ os_vars.HOME }}, etc.
         """
     )
 
@@ -95,6 +106,21 @@ Examples:
         action='append',
         dest='dicts',
         help='Add variables from JSON dictionary (can be used multiple times)'
+    )
+
+    parser.add_argument(
+        '-E', '--env',
+        action='store_true',
+        dest='env',
+        help='Expose OS env vars directly ({{ PATH }}, {{ HOME }})'
+    )
+
+    parser.add_argument(
+        '-En', '--env-ns',
+        type=str,
+        dest='env_ns',
+        metavar='VAR_NAME',
+        help='Store OS env vars in namespace (usage: -En my_var creates {{ my_var }} containing env())'
     )
 
     parser.add_argument(
@@ -145,6 +171,18 @@ Examples:
             dict_vars = parse_dict_args(dict_string)
             variables.update(dict_vars)
             logging.info(f"Added dictionary variables: {list(dict_vars.keys())}")
+
+    # Process -E/--env argument (expose env vars directly)
+    if args.env:
+        env_vars = Plugin.env()
+        variables.update(env_vars)
+        logging.info(f"Exposed {len(env_vars)} environment variables directly")
+
+    # Process -En/--env-ns argument (store env vars in namespace)
+    if args.env_ns:
+        env_vars = Plugin.env()
+        variables[args.env_ns] = env_vars
+        logging.info(f"Stored {len(env_vars)} environment variables in namespace '{args.env_ns}'")
 
     # Check for stdin data
     stdin_data = None
