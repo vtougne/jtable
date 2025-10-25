@@ -43,6 +43,7 @@ setup(
             'jtable=jtable.jtable:main',
             'jtable-play=jtable.jtable_play:main',
             'jtable-template=jtable.jtable_template:main',
+            'jtable-filter=jtable.jtable_filter:main',
         ],
     },
     cmdclass={

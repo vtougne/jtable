@@ -264,4 +264,21 @@ jtable-template:
     -vp  | --view-play  # Display the playbook in yaml format without executing it
 
 
+3- jtable-filter
+    # first action may be a plugin, for example load_json, and the suite is anytime a filter
+      jtable [module <module options>] [ filter <filer options> ] [ filter <filter options> ]
+
+    # Or a filter, assuming data are piped from stdin
+      echo <some_data> | jtable [ filter <filer options> ] [ filter <filter options> ]
+    
+
+    # Example 1 using plugin
+        jtable-filter load_json <json_file> to_table -p hosts -s hostname,os,state
+        # will be equivalent to 
+        jtable-template '{{ load_json("json_file") | to_table(path="hosts",select=["hostname","os","state"]) }}
+    # Example 2 using stdin with filter only
+        cat hosts_dataset.json | jtable-filter from_json to_table -p hosts -s hostname,os,state
+        # will be equivalent to 
+        cat hosts_dataset.json | jtable-template '{{ stdin | from_json | to_table(path="hosts",select=["hostname","os","state"]) }}
+
 ```

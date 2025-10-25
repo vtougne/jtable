@@ -108,7 +108,53 @@ class Plugin:
                     except Exception as error:
                         logging.warning(f"fail loading file {file_name_full_path}, skipping")
         return file_list_dataset
-    
+
+    @staticmethod
+    def load_json(filename):
+        """
+        Load a single JSON file and return its content as a Python object.
+
+        Args:
+            filename (str): Path to the JSON file
+
+        Returns:
+            object: Parsed JSON content (dict, list, or other JSON type)
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            json.JSONDecodeError: If file contains invalid JSON
+
+        Examples:
+            >>> data = Plugin.load_json('config.json')
+            >>> data = Plugin.load_json('/path/to/data.json')
+        """
+        logging.info(f"Loading JSON file: {filename}")
+        with open(filename, 'r') as file:
+            return json.load(file)
+
+    @staticmethod
+    def load_yaml(filename):
+        """
+        Load a single YAML file and return its content as a Python object.
+
+        Args:
+            filename (str): Path to the YAML file
+
+        Returns:
+            object: Parsed YAML content (dict, list, or other YAML type)
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            yaml.YAMLError: If file contains invalid YAML
+
+        Examples:
+            >>> data = Plugin.load_yaml('config.yml')
+            >>> data = Plugin.load_yaml('/path/to/data.yaml')
+        """
+        logging.info(f"Loading YAML file: {filename}")
+        with open(filename, 'r') as file:
+            return yaml.safe_load(file)
+
     @staticmethod
     def shell(cmd,default=None):
         """
