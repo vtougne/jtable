@@ -186,7 +186,24 @@ jtable-template:
 ## tasks:
 
 ```
-1- jtable-play: create a new cli endpoint named jtable-play that call jtable.player like the old method like "jtable -p <playbook>"  
-    create a new python module player.py calling the temmplater and doing the job  
+1- jtable-play (CLI):
+    Parse user inputs and option, and call player module
+    options
+    -v   | --var      # Add a variable in format key=value (can be used multiple times)
+    -d   | --dict     # Add variables from JSON dictionary (can be used multiple times)
+    -E   | --env      # Expose OS env vars directly ({{ PATH }}, {{ HOME }})
+    -En  | --env-ns   # Store OS env vars in namespace (usage: -En my_var creates {{ my_var }} containing env())
+
+
+
 2- jtable-template: create new endpoint, that will build a in_memory playbook and give it to  Player classe
+    it will have the same behavior with jtable template
+    jtable-template -E "Hello {{ LOGNAME }}, how are you ?"
+    will return Hello vince, how are you ?
+    like old method, jtable template -E "Hello {{ LOGNAME }}, how are you ?"
+
+    options:
+    -E   | --env        # Expose OS env vars directly
+    -En  | --env-ns     # Store OS env vars in namespace
+    -vp  | --view-play  # Display the playbook in yaml format without executing it
 ```

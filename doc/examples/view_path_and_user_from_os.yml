@@ -14,4 +14,4 @@ vars:
     {% endfor %}
     {{ result }}
 
-stdout: "{{ env_vars }}"
+stdout: "{{ env_vars | to_json }}"

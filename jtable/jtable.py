@@ -93,7 +93,7 @@ class JtableCli:
         load_parser.add_argument('-pf', '--post_filter', help='Additionnal filter to apply on stdout, eg: jtable ..-f json -pf "from_json | to_nice_yaml"')
         load_parser.add_argument('-c', '--context', help='Add context')
         load_parser.add_argument('-pl', '--play', help='Execute a query file (YAML)')
-        load_parser.add_argument('-lv', '--load_os_vars', action="store_true", help='Load OS environment variables into vars context')
+        load_parser.add_argument('-os', '--load_os_vars', action="store_true", help='Load OS environment variables into vars context')
         # load_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
         # args = parser.parse_args()
         global terminal_size
@@ -130,7 +130,7 @@ class JtableCli:
         template_parser.add_argument('-v', '--verbose', action='count', default=0, help='Verbosity level')
         template_parser.add_argument('-d', '--debug', action="store_true", help='Add code row number in log')
         template_parser.add_argument('-c', '--context', help='Add context')
-        template_parser.add_argument('-lv', '--load_os_vars', action="store_true", help='Load OS environment variables into vars context')
+        template_parser.add_argument('-os', '--load_os_vars', action="store_true", help='Load OS environment variables into vars context')
 
         load_json_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
         load_yaml_parser.add_argument('file', nargs='?', help='Path to YAML file (or piped via stdin)')
