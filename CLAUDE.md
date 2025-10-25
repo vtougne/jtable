@@ -291,8 +291,25 @@ jtable-template:
       echo '{"hostname": "host_1", "os": "linux"}' | jtable-filter from_json list
       # returns:
       # ['hostname', 'os']
-      
+    
+    # Options expose os env vars:
+    -E/--env (IMPLEMENTED)
+    export the_host=host_1
+    echo '[{"hostname": "host_1", "os": "linux"}, {"hostname": "host_2", "os": "win"}]' |  jtable-filter -E from_json to_table_x -w "hostname==the_host"
 
+    # returns:
+    hostname    os
+    ----------  -----
+    host_1      linux
+
+    # Additional examples:
+    # Use standard env vars like USER, HOME, PATH
+    echo '[{"name": "john"}, {"name": "vince"}]' | jtable-filter -E from_json to_table_x -w "name==USER"
+
+    # Multiple env vars in one expression
+    export os_filter=linux
+    export state_filter=alive
+    echo '[{"os": "linux", "state": "alive"}, {"os": "win", "state": "down"}]' | jtable-filter -E from_json to_table_x -w "os==os_filter and state==state_filter"
 
 
 ```

@@ -428,6 +428,7 @@ Examples:
 Options:
     -h, --help         Show this help message
     -v, --verbose      Increase verbosity (shows all filters)
+    -E, --env          Expose OS environment variables in filter expressions
     --debug            Enable debug mode
 """
         print(help_msg)
@@ -436,9 +437,10 @@ Options:
     # Parse arguments
     verbose = '--verbose' in sys.argv or '-v' in sys.argv
     debug = '--debug' in sys.argv
+    expose_env = '--env' in sys.argv or '-E' in sys.argv
 
     # Remove options from argv
-    argv = [arg for arg in sys.argv[1:] if arg not in ['--verbose', '-v', '--debug']]
+    argv = [arg for arg in sys.argv[1:] if arg not in ['--verbose', '-v', '--debug', '--env', '-E']]
 
     if verbose:
         logging_config['handlers']['console_stderr']['level'] = 'INFO'
@@ -487,11 +489,17 @@ Options:
         'vars': {}
     }
 
+    # Prepare variables for Player
+    variables = {}
+    if expose_env:
+        logging.info("Exposing OS environment variables")
+        variables.update(os.environ.copy())
+
     # Create and execute player
     try:
         player = Player(
             playbook_dict=playbook,
-            variables={},
+            variables=variables,
             stdin_data=stdin_data
         )
         output = player.execute()
