@@ -3,6 +3,7 @@ import sys
 import os
 import logging
 import logging.config
+import inspect
 
 # Add jtable to path
 jtable_path = os.path.dirname(os.path.abspath(__file__))
@@ -15,11 +16,121 @@ from logger import logging_config
 # Import Player class
 from player import Player
 
-# Import Plugin for environment variable access
+# Import Plugin and functions module for discovery
+import functions
 from functions import Plugin
 
 
-def build_filter_expression(args):
+def discover_filters_and_plugins():
+    """
+    Discover all available filters and plugins by introspecting the functions module.
+
+    Returns:
+        tuple: (filters_dict, plugins_dict, jinja_builtins)
+            filters_dict: Dict mapping filter names to their function objects
+            plugins_dict: Dict mapping plugin names to their function objects
+            jinja_builtins: List of known Jinja2 built-in filter names
+    """
+    # Discover filters (module-level functions in functions.py)
+    filters_dict = {}
+    for name, obj in inspect.getmembers(functions, inspect.isfunction):
+        if not name.startswith('_'):  # Skip private functions
+            filters_dict[name] = obj
+            logging.debug(f"Discovered filter: {name}")
+
+    # Add to_table as a special filter (it's from to_table module, not functions)
+    # to_table is a method that accepts various parameters for table rendering
+    filters_dict['to_table'] = lambda **kwargs: None  # Placeholder for parameter discovery
+    logging.debug(f"Added special filter: to_table")
+
+    # Discover plugins (static methods in Plugin class)
+    plugins_dict = {}
+    for name, obj in inspect.getmembers(Plugin, inspect.isfunction):
+        if not name.startswith('_'):  # Skip private functions
+            plugins_dict[name] = obj
+            logging.debug(f"Discovered plugin: {name}")
+
+    # Known Jinja2 built-in filters
+    # These don't need parameter introspection - they're handled by Jinja directly
+    jinja_builtins = [
+        'abs', 'attr', 'batch', 'capitalize', 'center', 'default',
+        'dictsort', 'escape', 'filesizeformat', 'first', 'float',
+        'forceescape', 'format', 'groupby', 'indent', 'int', 'join',
+        'last', 'length', 'list', 'lower', 'map', 'max', 'min',
+        'pprint', 'random', 'reject', 'rejectattr', 'replace',
+        'reverse', 'round', 'safe', 'select', 'selectattr', 'slice',
+        'sort', 'string', 'striptags', 'sum', 'title', 'trim',
+        'truncate', 'unique', 'upper', 'urlencode', 'urlize',
+        'wordcount', 'wordwrap', 'xmlattr', 'tojson', 'items', 'keys',
+        'values'
+    ]
+
+    return filters_dict, plugins_dict, jinja_builtins
+
+
+def get_function_parameters(func):
+    """
+    Introspect a function to get its parameters.
+
+    Args:
+        func: Function object to introspect
+
+    Returns:
+        dict: Dictionary mapping parameter names to their default values (or None if no default)
+    """
+    try:
+        sig = inspect.signature(func)
+        params = {}
+        for param_name, param in sig.parameters.items():
+            if param_name in ['self', 'cls']:  # Skip self/cls for methods
+                continue
+            if param.default == inspect.Parameter.empty:
+                params[param_name] = None  # No default value
+            else:
+                params[param_name] = param.default
+        return params
+    except Exception as e:
+        logging.warning(f"Failed to introspect function {func.__name__}: {e}")
+        return {}
+
+
+def generate_short_names(param_names):
+    """
+    Generate short names for parameters, handling conflicts.
+
+    If two parameters start with the same letter, append letters until unique.
+    Example: 'name' and 'no_log' -> 'na' and 'no'
+
+    Args:
+        param_names: List of parameter names
+
+    Returns:
+        dict: Dictionary mapping parameter names to their short names
+    """
+    short_names = {}
+    used_shorts = set()
+
+    for param in param_names:
+        # Start with first letter
+        short = param[0]
+        idx = 1
+
+        # Keep adding letters until we find a unique short name
+        while short in used_shorts and idx < len(param):
+            short = param[:idx + 1]
+            idx += 1
+
+        # If still not unique (shouldn't happen with proper param names), use full name
+        if short in used_shorts:
+            short = param
+
+        short_names[param] = short
+        used_shorts.add(short)
+
+    return short_names
+
+
+def build_filter_expression(args, filters_dict, plugins_dict, jinja_builtins):
     """
     Build a Jinja2 filter expression from parsed arguments.
 
@@ -31,6 +142,9 @@ def build_filter_expression(args):
 
     Args:
         args (list): List of argument strings representing the filter and its options
+        filters_dict: Dictionary of available filters
+        plugins_dict: Dictionary of available plugins
+        jinja_builtins: List of Jinja built-in filters
 
     Returns:
         str: Jinja filter expression
@@ -39,7 +153,40 @@ def build_filter_expression(args):
         return ""
 
     filter_name = args[0]
-    filter_args = []
+
+    # For Jinja built-ins, just return the filter name (no parameters supported for now)
+    if filter_name in jinja_builtins:
+        logging.debug(f"Using Jinja built-in filter: {filter_name}")
+        # Some Jinja built-ins take simple arguments, pass them through
+        if len(args) > 1 and not args[1].startswith('-'):
+            # Simple positional argument (e.g., 'default' filter with a value)
+            return f"{filter_name}({args[1]})"
+        return filter_name
+
+    # Get filter function to introspect parameters
+    filter_func = filters_dict.get(filter_name) or plugins_dict.get(filter_name)
+    if not filter_func:
+        logging.warning(f"Unknown filter: {filter_name}, treating as Jinja built-in")
+        return filter_name
+
+    # Get parameter information
+    filter_params = get_function_parameters(filter_func)
+    param_names = list(filter_params.keys())
+
+    # Generate short names for parameters
+    short_to_long = generate_short_names(param_names)
+    # Invert to create long-to-short mapping for lookup
+    long_to_short = {v: k for k, v in short_to_long.items()}
+
+    # Also support legacy short names for backwards compatibility
+    legacy_short_names = {
+        'p': 'path',
+        's': 'select',
+        'us': 'unselect',
+        'w': 'when',
+        'f': 'format',
+    }
+
     filter_kwargs = {}
 
     i = 1
@@ -50,16 +197,19 @@ def build_filter_expression(args):
             # It's an option
             option_name = arg.lstrip('-')
 
-            # Map common short options to their full names
-            option_mapping = {
-                'p': 'path',
-                's': 'select',
-                'us': 'unselect',
-                'w': 'when',
-                'f': 'format',
-            }
-
-            full_option = option_mapping.get(option_name, option_name)
+            # Try legacy mapping first, then check if it's a valid parameter
+            if option_name in legacy_short_names:
+                full_option = legacy_short_names[option_name]
+            elif option_name in param_names:
+                # Already the full parameter name
+                full_option = option_name
+            elif option_name in short_to_long.values():
+                # It's a generated short name, find the corresponding long name
+                full_option = [k for k, v in short_to_long.items() if v == option_name][0]
+            else:
+                # Unknown option, use as-is
+                full_option = option_name
+                logging.warning(f"Unknown option for filter {filter_name}: {option_name}")
 
             # Get the value (next argument)
             if i + 1 < len(args) and not args[i + 1].startswith('-'):
@@ -114,13 +264,19 @@ def build_filter_expression(args):
         return filter_name
 
 
-def parse_filter_chain(argv):
+def parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins):
     """
     Parse command-line arguments to identify module and filter chain.
 
     This function processes the argv to extract:
     1. Optional initial module (like 'load_json <file>')
     2. Chain of filters with their options
+
+    Args:
+        argv: Command-line arguments
+        filters_dict: Dictionary of available filters
+        plugins_dict: Dictionary of available plugins
+        jinja_builtins: List of Jinja built-in filters
 
     Returns:
         tuple: (module_expr, filter_exprs)
@@ -131,12 +287,13 @@ def parse_filter_chain(argv):
     filter_exprs = []
     current_filter = []
 
-    # Known modules that take a filename argument
-    known_modules = ['load_json', 'load_yaml']
+    # Modules are plugins that load data (typically take a filename argument)
+    # Common file loading plugins
+    file_loading_plugins = ['load_json', 'load_yaml', 'load_files']
+    known_modules = [name for name in plugins_dict.keys() if name in file_loading_plugins]
 
-    # Known filters
-    known_filters = ['from_json', 'from_yaml', 'to_table', 'to_json', 'to_yaml',
-                     'to_nice_json', 'to_nice_yaml', 'from_json_or_yaml']
+    # All available filters (functions + plugins + jinja builtins)
+    known_filters = list(filters_dict.keys()) + list(plugins_dict.keys()) + jinja_builtins
 
     i = 0
 
@@ -162,7 +319,7 @@ def parse_filter_chain(argv):
         if arg in known_filters:
             # Save previous filter if any
             if current_filter:
-                filter_exprs.append(build_filter_expression(current_filter))
+                filter_exprs.append(build_filter_expression(current_filter, filters_dict, plugins_dict, jinja_builtins))
 
             # Start new filter
             current_filter = [arg]
@@ -177,7 +334,7 @@ def parse_filter_chain(argv):
 
     # Save last filter
     if current_filter:
-        filter_exprs.append(build_filter_expression(current_filter))
+        filter_exprs.append(build_filter_expression(current_filter, filters_dict, plugins_dict, jinja_builtins))
 
     return module_expr, filter_exprs
 
@@ -188,9 +345,13 @@ def main():
     logging_config['handlers']['console_stderr']['level'] = 'WARNING'
     logging.config.dictConfig(logging_config)
 
+    # Discover all available filters and plugins
+    filters_dict, plugins_dict, jinja_builtins = discover_filters_and_plugins()
+
     # Check for help
     if '--help' in sys.argv or '-h' in sys.argv or len(sys.argv) == 1:
-        print("""jtable-filter - Chain filters for data transformation
+        # Build help message with discovered filters
+        help_msg = """jtable-filter - Chain filters for data transformation
 
 Usage:
     # With module (loading from file)
@@ -199,24 +360,45 @@ Usage:
     # From stdin (piped data)
     cat data.json | jtable-filter <filter> [filter_options] [filter <filter_options>]...
 
-Modules:
-    load_json <file>    Load JSON file
-    load_yaml <file>    Load YAML file
+Modules (Plugins):
+"""
+        # Show file-loading plugins
+        for plugin_name in sorted(plugins_dict.keys()):
+            if plugin_name in ['load_json', 'load_yaml', 'load_files']:
+                help_msg += f"    {plugin_name:<20} {plugins_dict[plugin_name].__doc__.split(chr(10))[0] if plugins_dict[plugin_name].__doc__ else ''}\n"
 
-Filters:
-    from_json           Parse JSON string
-    from_yaml           Parse YAML string
-    to_table            Render as table
-        -p, --path      Path in data structure
-        -s, --select    Comma-separated list of columns to select
-        -us, --unselect Comma-separated list of columns to exclude
-        -w, --when      Filter condition
-        -f, --format    Output format (simple, github, html, etc.)
-    to_json             Convert to JSON
-    to_yaml             Convert to YAML
-    to_nice_json        Convert to nicely formatted JSON
-    to_nice_yaml        Convert to nicely formatted YAML
+        help_msg += "\nFilters:\n"
 
+        # Show all filters (limit to most common ones for brevity)
+        common_filters = ['from_json', 'from_yaml', 'to_table', 'to_json', 'to_yaml',
+                         'to_nice_json', 'to_nice_yaml', 'dict2items', 'flatten']
+
+        for filter_name in sorted(filters_dict.keys()):
+            if filter_name in common_filters:
+                func = filters_dict[filter_name]
+                params = get_function_parameters(func)
+                short_names = generate_short_names(list(params.keys()))
+
+                # Show filter name
+                help_msg += f"    {filter_name:<20}"
+
+                # Show first line of docstring if available
+                if func.__doc__:
+                    help_msg += func.__doc__.split('\n')[0].strip()
+                help_msg += "\n"
+
+                # Show parameters if any
+                if params and filter_name == 'to_table':
+                    help_msg += f"        -p, --path      Path in data structure\n"
+                    help_msg += f"        -s, --select    Comma-separated list of columns to select\n"
+                    help_msg += f"        -us, --unselect Comma-separated list of columns to exclude\n"
+                    help_msg += f"        -w, --when      Filter condition\n"
+                    help_msg += f"        -f, --format    Output format (simple, github, html, etc.)\n"
+
+        help_msg += "\n    Also supports Jinja2 built-in filters: list, keys, values, items, etc.\n"
+        help_msg += "\n    Use -v/--verbose to see all available filters.\n"
+
+        help_msg += """
 Examples:
     # Load JSON file and display as table
     jtable-filter load_json data.json to_table -p hosts -s hostname,os,state
@@ -224,14 +406,18 @@ Examples:
     # From stdin with filter chain
     cat data.json | jtable-filter from_json to_table -p hosts
 
+    # Use Jinja built-in filters
+    echo '{"hostname": "host_1", "os": "linux"}' | jtable-filter from_json list
+
     # Multiple filters
     cat data.yml | jtable-filter from_yaml to_table -s name,value to_json
 
 Options:
     -h, --help         Show this help message
-    -v, --verbose      Increase verbosity
+    -v, --verbose      Increase verbosity (shows all filters)
     --debug            Enable debug mode
-""")
+"""
+        print(help_msg)
         sys.exit(0)
 
     # Parse arguments
@@ -257,7 +443,7 @@ Options:
         logging.info("Read data from stdin")
 
     # Parse the filter chain
-    module_expr, filter_exprs = parse_filter_chain(argv)
+    module_expr, filter_exprs = parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins)
 
     logging.info(f"Module expression: {module_expr}")
     logging.info(f"Filter expressions: {filter_exprs}")

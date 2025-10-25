@@ -270,7 +270,8 @@ jtable-template:
 
     # Or a filter, assuming data are piped from stdin
       echo <some_data> | jtable [ filter <filer options> ] [ filter <filter options> ]
-    
+
+
 
     # Example 1 using plugin
         jtable-filter load_json <json_file> to_table -p hosts -s hostname,os,state
@@ -280,5 +281,18 @@ jtable-template:
         cat hosts_dataset.json | jtable-filter from_json to_table -p hosts -s hostname,os,state
         # will be equivalent to 
         cat hosts_dataset.json | jtable-template '{{ stdin | from_json | to_table(path="hosts",select=["hostname","os","state"]) }}
+
+
+    # Note: All plugin / defaults are loaded and discovred
+      if an argument of the filter / plugin is name, the cli will expose -n/--name option
+      on shortname conflict a letter is added for both short names, example name,no_log, the cli will expose -na/--name, -no/no_log
+    
+    # Example:
+      echo '{"hostname": "host_1", "os": "linux"}' | jtable-filter from_json list
+      # returns:
+      # ['hostname', 'os']
+      
+
+
 
 ```
