@@ -44,11 +44,16 @@ class Templater:
         jtable_core_plugins = [name[0] for name in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
         logging.info(f"jtable_core_plugins: {jtable_core_plugins}")
 
-        # Add each plugin method directly to the static context
-        # This allows calling plugins directly: {{ shell('cmd') }} instead of {{ plugin('shell', 'cmd') }}
+        # Build a new context with plugin functions first, then user variables
+        # This allows user variables to override plugin functions if there's a name conflict
+        context_with_plugins = {}
         for plugin_name in jtable_core_plugins:
             plugin_method = getattr(Plugin, plugin_name)
-            static_context[plugin_name] = plugin_method
+            context_with_plugins[plugin_name] = plugin_method
+
+        # User variables take precedence over plugin functions
+        context_with_plugins.update(static_context)
+        static_context = context_with_plugins
 
         logging.debug(f"({self.id}) strict_undefined: {strict_undefined}, static_context: {static_context}")
 

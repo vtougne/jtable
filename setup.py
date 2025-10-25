@@ -42,6 +42,7 @@ setup(
         'console_scripts': [
             'jtable=jtable.jtable:main',
             'jtable-play=jtable.jtable_play:main',
+            'jtable-template=jtable.jtable_template:main',
         ],
     },
     cmdclass={

@@ -31,17 +31,18 @@ class Player:
     standalone CLI tool.
     """
 
-    def __init__(self, playbook_file: str, variables: Optional[Dict[str, Any]] = None, stdin_data: Optional[str] = None):
+    def __init__(self, playbook_file: Optional[str] = None, variables: Optional[Dict[str, Any]] = None, stdin_data: Optional[str] = None, playbook_dict: Optional[Dict[str, Any]] = None):
         """
-        Initialize the Player with a playbook file and optional variables.
+        Initialize the Player with a playbook file or in-memory playbook dict and optional variables.
 
         Args:
-            playbook_file: Path to the YAML playbook file
+            playbook_file: Path to the YAML playbook file (optional if playbook_dict is provided)
             variables: Optional dictionary of variables to inject into the context
             stdin_data: Optional stdin data to be available in templates
+            playbook_dict: Optional in-memory playbook dictionary (instead of loading from file)
         """
         self.playbook_file = playbook_file
-        self.playbook = None
+        self.playbook = playbook_dict  # Can be pre-loaded if provided
         self.dataset = {}
         self.variables = variables or {}
 
@@ -50,8 +51,18 @@ class Player:
             self.dataset['stdin'] = stdin_data
 
     def load_playbook(self):
-        """Load and parse the YAML playbook file"""
+        """Load and parse the YAML playbook file or use pre-loaded playbook dict"""
+        # If playbook is already loaded (from playbook_dict), skip file loading
+        if self.playbook is not None:
+            logging.info("Using pre-loaded in-memory playbook")
+            return self.playbook
+
+        # Otherwise, load from file
         logging.info(f"Loading playbook file: {self.playbook_file}")
+
+        if not self.playbook_file:
+            logging.error("No playbook file or playbook dict provided")
+            sys.exit(2)
 
         if not os.path.exists(self.playbook_file):
             logging.error(f"Playbook file not found: {self.playbook_file}")

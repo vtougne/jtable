@@ -195,8 +195,64 @@ jtable-template:
     -En  | --env-ns   # Store OS env vars in namespace (usage: -En my_var creates {{ my_var }} containing env())
 
 
+2- player (Class):
+    The Player class (jtable/player.py) executes jtable playbooks (YAML query files).
+    It provides the core engine for the jtable-play CLI command.
 
-2- jtable-template: create new endpoint, that will build a in_memory playbook and give it to  Player classe
+    Key Responsibilities:
+    - Load and parse YAML playbook files
+    - Manage execution context with variables and datasets
+    - Process vars section from playbook with Jinja template evaluation
+    - Execute playbook stdout expression using Templater
+    - Support stdin data injection into templates
+
+    Main Methods:
+    - __init__(playbook_file, variables=None, stdin_data=None)
+      Initialize Player with playbook path, optional variables dict, and stdin data
+      Variables are injected into the execution context for template rendering
+
+    - load_playbook()
+      Load and parse YAML playbook file
+      Validates file existence and YAML format
+      Exits with error code 2 if loading fails
+
+    - prepare_context()
+      Prepare execution context by:
+      1. Starting with command-line provided variables
+      2. Processing 'vars' section from playbook (Jinja template evaluation)
+      3. Merging all variables into dataset for template rendering
+      4. Making variables available as {{ vars.key }} and {{ key }}
+
+    - execute() -> str
+      Execute the playbook and return rendered output:
+      1. Load playbook
+      2. Prepare context
+      3. Handle queryset if present in vars
+      4. Render stdout expression using Templater
+      Returns: Rendered output string
+
+    Usage Flow:
+    1. jtable-play CLI parses command-line arguments
+    2. Creates Player instance with playbook file and variables
+    3. Calls player.execute() to get output
+    4. Prints output to stdout
+
+    Template Context:
+    - Command-line variables: Available as {{ var_name }}
+    - Playbook vars: Available as {{ vars.var_name }}
+    - Stdin data: Available as {{ stdin }}
+    - Environment vars (if -E): Available as {{ PATH }}, {{ HOME }}, etc.
+    - Environment vars (if -En ns): Available as {{ ns.PATH }}, {{ ns.HOME }}, etc.
+    - Queryset: Available as {{ queryset }}
+
+    Implementation Details:
+    - Uses create_templater() helper to create Templater instances with to_table filter
+    - Supports eval_str=True for vars evaluation (converts string representations)
+    - Supports eval_str=False for stdout rendering (preserves formatting)
+    - Integrates with ToTable for table rendering via jtable filter
+
+2- jtable-template:
+    build a in_memory playbook and give it to  Player classe
     it will have the same behavior with jtable template
     jtable-template -E "Hello {{ LOGNAME }}, how are you ?"
     will return Hello vince, how are you ?
@@ -206,4 +262,6 @@ jtable-template:
     -E   | --env        # Expose OS env vars directly
     -En  | --env-ns     # Store OS env vars in namespace
     -vp  | --view-play  # Display the playbook in yaml format without executing it
+
+
 ```
