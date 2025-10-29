@@ -13,5 +13,5 @@ vars:
       - as: cost
         expr: cost
 
-stdout: '{{ input | to_table(queryset=queryset) }}'
+stdout: "{{ stdin | from_yaml | to_table(queryset=queryset) }}"
 # stdout: '{{ input  }}'

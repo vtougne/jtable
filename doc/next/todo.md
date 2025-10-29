@@ -42,7 +42,8 @@ jtable-template:
 ### Todo
 | #         | category    |   task |
 |------------------|-------|--------|
- 1 | bug/fix    | unaccepeted chars in json format input
+ 1 | feature    | --inspect as a filter
+ 1 | bug/fix     | jtable-play variable precedence
  1 | bug/fix    | Plugin issue on git bash: printf "2025-04-12 11:19:32" | jtable.exe -o "{{ (stdin | to_epoch) }}"
  1 | feature    | option as in to_table to name fileds --as hostname,os,cost
  1 | feature    | option custom filter / plugin /functions

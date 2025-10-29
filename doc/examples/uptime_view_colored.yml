@@ -6,6 +6,7 @@ vars:
     - {hostname: host_7, os: windows, uptime: 5279723, state: alive, env: qua, dc: dc_2}
     - {hostname: host_3, os: linux, uptime: 534554, state: "unreachable", env: qua, dc: dc_1}
     # - {hostname: host_4, os: linux, env: qua, dc: dc_1}
+  format: "{{ format | default('simple')}}"
 
   queryset:
     path: "{host}"
@@ -45,4 +46,4 @@ vars:
         dc_2: North
       uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
-stdout: "{{ hosts | sort (attribute='dc')| to_table(queryset=queryset)}}"
+stdout: "{{ hosts | sort (attribute='dc')| to_table(queryset=queryset,format=format)}}"

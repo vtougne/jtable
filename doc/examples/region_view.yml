@@ -12,3 +12,5 @@ vars:
       expr: host.os
     - as: state
       expr: host.state
+
+stdout: "{{ stdin | from_yaml | to_table(queryset=queryset) }}"
