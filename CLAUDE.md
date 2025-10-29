@@ -292,24 +292,46 @@ jtable-template:
       # returns:
       # ['hostname', 'os']
     
-    # Options expose os env vars:
-    -E/--env (IMPLEMENTED)
-    export the_host=host_1
-    echo '[{"hostname": "host_1", "os": "linux"}, {"hostname": "host_2", "os": "win"}]' |  jtable-filter -E from_json to_table_x -w "hostname==the_host"
+    # Options :
+      expose os env vars -E/--env (IMPLEMENTED)
+        export the_host=host_1
+        echo '[{"hostname": "host_1", "os": "linux"}, {"hostname": "host_2", "os": "win"}]' |  jtable-filter -E from_json to_table_x -w "hostname==the_host"
 
-    # returns:
-    hostname    os
-    ----------  -----
-    host_1      linux
+        # returns:
+        hostname    os
+        ----------  -----
+        host_1      linux
 
-    # Additional examples:
-    # Use standard env vars like USER, HOME, PATH
-    echo '[{"name": "john"}, {"name": "vince"}]' | jtable-filter -E from_json to_table_x -w "name==USER"
+        # Additional examples:
+        # Use standard env vars like USER, HOME, PATH
+        echo '[{"name": "john"}, {"name": "vince"}]' | jtable-filter -E from_json to_table_x -w "name==USER"
 
-    # Multiple env vars in one expression
-    export os_filter=linux
-    export state_filter=alive
-    echo '[{"os": "linux", "state": "alive"}, {"os": "win", "state": "down"}]' | jtable-filter -E from_json to_table_x -w "os==os_filter and state==state_filter"
+        # Multiple env vars in one expression
+        export os_filter=linux
+        export state_filter=alive
+        echo '[{"os": "linux", "state": "alive"}, {"os": "win", "state": "down"}]' | jtable-filter -E from_json to_table_x -w "os==os_filter and state==state_filter"
+
+
+      View play -vp/--view_play
+        instead of running the play_load it print it in a yaml ouput
+        Particular case for to_table / to_table_x if used to help the user, queryset must be exposed in queryset namespace
+
+        Example:
+        echo '[{"hostname": "host_1", "os": "linux"}, {"hostname": "host_2", "os": "win"}]' |  jtable-filter -E from_json to_table
+        note this is the same behavior with the old one:
+        echo '[{"hostname": "host_1", "os": "linux"}, {"hostname": "host_2", "os": "win"}]' |  jtable -vq
+        
+        should return:
+        vars:
+          queryset:
+            path: '{}'
+            select:
+            - as: hostname
+              expr: hostname
+            - as: os
+              expr: os
+            format: simple
+        stdout: '{{ stdin | from_json | to_table(queryset=queryset) }}'
 
 
 ```

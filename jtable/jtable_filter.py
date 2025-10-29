@@ -134,7 +134,120 @@ def generate_short_names(param_names):
     return short_names
 
 
-def build_filter_expression(args, filters_dict, plugins_dict, jinja_builtins):
+def extract_queryset_from_filter(args, filters_dict, plugins_dict):
+    """
+    Extract queryset structure from to_table/to_table_x filter parameters.
+
+    This is used when view_play option is enabled to generate the queryset
+    that will be placed in the vars section of the playbook.
+
+    Args:
+        args (list): List of argument strings representing the filter and its options
+        filters_dict: Dictionary of available filters
+        plugins_dict: Dictionary of available plugins
+
+    Returns:
+        dict: Queryset structure or None if not a to_table filter
+    """
+    if not args:
+        return None
+
+    filter_name = args[0]
+
+    # Only extract queryset for to_table and to_table_x
+    if filter_name not in ['to_table', 'to_table_x']:
+        return None
+
+    # Get filter function to introspect parameters
+    filter_func = filters_dict.get(filter_name) or plugins_dict.get(filter_name)
+    if not filter_func:
+        return None
+
+    # Get parameter information
+    filter_params = get_function_parameters(filter_func)
+    param_names = list(filter_params.keys())
+
+    # Generate short names for parameters
+    short_to_long = generate_short_names(param_names)
+
+    # Legacy short names for backwards compatibility
+    legacy_short_names = {
+        'p': 'path',
+        's': 'select',
+        'us': 'unselect',
+        'w': 'when',
+        'f': 'format',
+    }
+
+    filter_kwargs = {}
+
+    i = 1
+    while i < len(args):
+        arg = args[i]
+
+        if arg.startswith('-'):
+            # It's an option
+            option_name = arg.lstrip('-')
+
+            # Try legacy mapping first, then check if it's a valid parameter
+            if option_name in legacy_short_names:
+                full_option = legacy_short_names[option_name]
+            elif option_name in param_names:
+                full_option = option_name
+            elif option_name in short_to_long.values():
+                full_option = [k for k, v in short_to_long.items() if v == option_name][0]
+            else:
+                full_option = option_name
+
+            # Get the value (next argument)
+            if i + 1 < len(args) and not args[i + 1].startswith('-'):
+                value = args[i + 1]
+                i += 1
+
+                # Handle comma-separated values (like select fields)
+                if ',' in value and full_option in ['select', 'unselect']:
+                    filter_kwargs[full_option] = [v.strip() for v in value.split(',')]
+                elif full_option == 'path':
+                    # Auto-append {} to path if not already present
+                    import re
+                    expr_end_by_braces = re.sub('.*({).*(})$', r'\1\2', value)
+                    if expr_end_by_braces != "{}":
+                        value = value + "{}"
+                    filter_kwargs[full_option] = value
+                else:
+                    filter_kwargs[full_option] = value
+            else:
+                # Boolean flag
+                filter_kwargs[full_option] = True
+
+        i += 1
+
+    # Build the queryset structure
+    queryset = {}
+
+    # Add path (default to '{}' if not specified)
+    queryset['path'] = filter_kwargs.get('path', '{}')
+
+    # Add select (convert to list of dicts with 'as' and 'expr' keys)
+    if 'select' in filter_kwargs:
+        select_list = filter_kwargs['select'] if isinstance(filter_kwargs['select'], list) else filter_kwargs['select'].split(',')
+        queryset['select'] = [{'as': field.strip(), 'expr': field.strip()} for field in select_list]
+
+    # Add unselect if present
+    if 'unselect' in filter_kwargs:
+        queryset['unselect'] = filter_kwargs['unselect']
+
+    # Add when if present
+    if 'when' in filter_kwargs:
+        queryset['when'] = filter_kwargs['when']
+
+    # Add format (default to 'simple' if not specified)
+    queryset['format'] = filter_kwargs.get('format', 'simple')
+
+    return queryset
+
+
+def build_filter_expression(args, filters_dict, plugins_dict, jinja_builtins, use_queryset=False):
     """
     Build a Jinja2 filter expression from parsed arguments.
 
@@ -149,6 +262,7 @@ def build_filter_expression(args, filters_dict, plugins_dict, jinja_builtins):
         filters_dict: Dictionary of available filters
         plugins_dict: Dictionary of available plugins
         jinja_builtins: List of Jinja built-in filters
+        use_queryset (bool): If True, use queryset=queryset for to_table/to_table_x filters
 
     Returns:
         str: Jinja filter expression
@@ -157,6 +271,10 @@ def build_filter_expression(args, filters_dict, plugins_dict, jinja_builtins):
         return ""
 
     filter_name = args[0]
+
+    # Special handling for to_table/to_table_x when use_queryset is True
+    if use_queryset and filter_name in ['to_table', 'to_table_x']:
+        return f"{filter_name}(queryset=queryset)"
 
     # For Jinja built-ins, just return the filter name (no parameters supported for now)
     if filter_name in jinja_builtins:
@@ -268,7 +386,7 @@ def build_filter_expression(args, filters_dict, plugins_dict, jinja_builtins):
         return filter_name
 
 
-def parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins):
+def parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins, use_queryset=False):
     """
     Parse command-line arguments to identify module and filter chain.
 
@@ -281,15 +399,18 @@ def parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins):
         filters_dict: Dictionary of available filters
         plugins_dict: Dictionary of available plugins
         jinja_builtins: List of Jinja built-in filters
+        use_queryset (bool): If True, use queryset=queryset for to_table/to_table_x filters
 
     Returns:
-        tuple: (module_expr, filter_exprs)
+        tuple: (module_expr, filter_exprs, queryset)
             module_expr: Initial module expression or None if stdin is used
             filter_exprs: List of filter expressions
+            queryset: Queryset dict if to_table/to_table_x is used, None otherwise
     """
     module_expr = None
     filter_exprs = []
     current_filter = []
+    queryset = None
 
     # Modules are plugins that load data (typically take a filename argument)
     # Common file loading plugins
@@ -323,7 +444,13 @@ def parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins):
         if arg in known_filters:
             # Save previous filter if any
             if current_filter:
-                filter_exprs.append(build_filter_expression(current_filter, filters_dict, plugins_dict, jinja_builtins))
+                # Extract queryset from to_table/to_table_x if use_queryset is True
+                if use_queryset:
+                    extracted_queryset = extract_queryset_from_filter(current_filter, filters_dict, plugins_dict)
+                    if extracted_queryset:
+                        queryset = extracted_queryset
+
+                filter_exprs.append(build_filter_expression(current_filter, filters_dict, plugins_dict, jinja_builtins, use_queryset))
 
             # Start new filter
             current_filter = [arg]
@@ -338,9 +465,15 @@ def parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins):
 
     # Save last filter
     if current_filter:
-        filter_exprs.append(build_filter_expression(current_filter, filters_dict, plugins_dict, jinja_builtins))
+        # Extract queryset from to_table/to_table_x if use_queryset is True
+        if use_queryset:
+            extracted_queryset = extract_queryset_from_filter(current_filter, filters_dict, plugins_dict)
+            if extracted_queryset:
+                queryset = extracted_queryset
 
-    return module_expr, filter_exprs
+        filter_exprs.append(build_filter_expression(current_filter, filters_dict, plugins_dict, jinja_builtins, use_queryset))
+
+    return module_expr, filter_exprs, queryset
 
 
 def main():
@@ -428,6 +561,7 @@ Examples:
 Options:
     -h, --help         Show this help message
     -v, --verbose      Increase verbosity (shows all filters)
+    -vp, --view_play   Display the playbook YAML instead of executing it
     -E, --env          Expose OS environment variables in filter expressions
     --debug            Enable debug mode
 """
@@ -438,9 +572,10 @@ Options:
     verbose = '--verbose' in sys.argv or '-v' in sys.argv
     debug = '--debug' in sys.argv
     expose_env = '--env' in sys.argv or '-E' in sys.argv
+    view_play = '--view_play' in sys.argv or '-vp' in sys.argv
 
     # Remove options from argv
-    argv = [arg for arg in sys.argv[1:] if arg not in ['--verbose', '-v', '--debug', '--env', '-E']]
+    argv = [arg for arg in sys.argv[1:] if arg not in ['--verbose', '-v', '--debug', '--env', '-E', '--view_play', '-vp']]
 
     if verbose:
         logging_config['handlers']['console_stderr']['level'] = 'INFO'
@@ -458,10 +593,12 @@ Options:
         logging.info("Read data from stdin")
 
     # Parse the filter chain
-    module_expr, filter_exprs = parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins)
+    module_expr, filter_exprs, queryset = parse_filter_chain(argv, filters_dict, plugins_dict, jinja_builtins, use_queryset=view_play)
 
     logging.info(f"Module expression: {module_expr}")
     logging.info(f"Filter expressions: {filter_exprs}")
+    if view_play and queryset:
+        logging.info(f"Queryset: {queryset}")
 
     # Build the template expression
     if module_expr:
@@ -485,9 +622,71 @@ Options:
 
     # Build in-memory playbook
     playbook = {
-        'stdout': template,
-        'vars': {}
+        'vars': {},
+        'stdout': template
     }
+
+    # If view_play is enabled, build and display the playbook YAML instead of executing
+    if view_play:
+        if queryset:
+            # Auto-discover select fields if not specified
+            if 'select' not in queryset:
+                # Need to execute the filter chain with format="th" to discover field names
+                # Create a temporary queryset with format="th" to get headers
+                temp_queryset = queryset.copy()
+                temp_queryset['format'] = 'th'
+
+                # Build temporary playbook for field discovery
+                temp_playbook = {
+                    'stdout': template.replace('(queryset=queryset)', f'(queryset={temp_queryset})'),
+                    'vars': {}
+                }
+
+                # Prepare variables
+                temp_variables = {}
+                if expose_env:
+                    temp_variables.update(os.environ.copy())
+
+                try:
+                    # Execute to discover fields
+                    temp_player = Player(
+                        playbook_dict=temp_playbook,
+                        variables=temp_variables,
+                        stdin_data=stdin_data
+                    )
+                    fields_output = temp_player.execute()
+
+                    # Parse the discovered fields (they're returned as a list)
+                    import ast
+                    try:
+                        fields = ast.literal_eval(fields_output.strip())
+                        if isinstance(fields, list):
+                            # Rebuild queryset in correct order: path, select, format, when, unselect
+                            new_queryset = {}
+                            new_queryset['path'] = queryset.get('path', '{}')
+                            new_queryset['select'] = [{'as': field, 'expr': field} for field in fields]
+                            if 'unselect' in queryset:
+                                new_queryset['unselect'] = queryset['unselect']
+                            if 'when' in queryset:
+                                new_queryset['when'] = queryset['when']
+                            new_queryset['format'] = queryset.get('format', 'simple')
+                            queryset = new_queryset
+                        else:
+                            logging.warning(f"Unexpected fields format: {fields}")
+                    except (ValueError, SyntaxError) as e:
+                        logging.warning(f"Failed to parse discovered fields: {e}")
+                except Exception as e:
+                    logging.warning(f"Failed to auto-discover fields: {e}")
+
+            playbook['vars']['queryset'] = queryset
+
+        # Import yaml for output
+        import yaml
+
+        # Generate YAML output
+        yaml_output = yaml.dump(playbook, allow_unicode=True, sort_keys=False, default_flow_style=False)
+        print(yaml_output)
+        sys.exit(0)
 
     # Prepare variables for Player
     variables = {}
