@@ -40,10 +40,10 @@ test:
     - ls -lrta
     - pip install .
     - pip install -r requirements.txt
+    - pip install wcwidth
     - jtable -h || true
     - cd doc/examples
     - ./make_doc.sh --halt
-    - sleep 3000
     - ./diff_doc.sh ref_README.md README.md "^[0-2][0-9]:[0-6][0-9]:[0-6][0-9]"
     - 'echo debug CI_COMMIT_MESSAGE: "$CI_COMMIT_MESSAGE"'
     - 'echo debug CI_COMMIT_MESSAGE: $CI_COMMIT_MESSAGE'
@@ -172,6 +172,7 @@ make_windows_setup:
     - git switch ${CI_COMMIT_BRANCH}
     - pip install .
     - pip install -r requirements.txt
+    - pip install wcwidth
     - pip install .[xmltodict]
     - pip install PyInstaller
     - cd jtable
