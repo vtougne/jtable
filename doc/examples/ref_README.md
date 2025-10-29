@@ -78,7 +78,7 @@ Considering the following dataset you want to display as a table
 
 command: 
 ```bash
-cat host_list_of_dict.yml  | jtable
+cat host_list_of_dict.yml  | jtable-filter from_yaml to_table
 ```
 output:
 
@@ -95,7 +95,7 @@ host_3      linux          unreachable  qua
 
 command: 
 ```bash
-cat host_dict_of_dict.yml  | jtable
+cat host_dict_of_dict.yml  | jtable-filter from_yaml to_table
 ```
 output:
 
@@ -115,22 +115,7 @@ Instead of piping files, you can use the new command syntax:
 
 command: 
 ```bash
-jtable load_json host_list_of_dict.json
-```
-output:
-
-```text
-hostname    os     cost    state        env
-----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
-host_3      linux          unreachable  qua
-
-```
-
-command: 
-```bash
-jtable load_yaml host_list_of_dict.yml
+jtable-filter load_json host_list_of_dict.json to_table
 ```
 output:
 
@@ -148,7 +133,7 @@ When no file is provided, the commands read from stdin:
 
 command: 
 ```bash
-cat host_list_of_dict.yml | jtable load_yaml
+cat host_list_of_dict.yml | jtable-filter from_yaml to_table
 ```
 output:
 
@@ -190,7 +175,7 @@ hosts:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml  | jtable -p hosts
+cat host_list_of_dict_in_key.yml  | jtable-filter from_yaml to_table -p hosts
 ```
 output:
 
@@ -208,7 +193,7 @@ Here is what would look to if the path is omitted:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml | jtable
+cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table
 ```
 output:
 
@@ -277,7 +262,7 @@ region:
 
 command: 
 ```bash
-cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts"
+cat key_containing_space.yml | jtable-filter from_yaml to_table -p "region.East['Data Center'].dc_1.hosts"
 ```
 output:
 
@@ -298,11 +283,12 @@ Let's filter the hosts to show only Linux systems:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml | jtable -p hosts --when "os == 'linux'"
+cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "os == 'linux'"
 ```
 output:
 
 ```text
+Unknown option for filter to_table: when
 hostname    os     cost    state        env
 ----------  -----  ------  -----------  -----
 host_1      linux  5000    alive        qua
@@ -315,11 +301,12 @@ You can use logical operators like `and`, `or` for complex conditions:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml | jtable -p hosts --when "os != 'linux' and cost > 300"
+cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "os != 'linux' and cost > 300"
 ```
 output:
 
 ```text
+Unknown option for filter to_table: when
 hostname    os         cost  state    env
 ----------  -------  ------  -------  -----
 host_2      windows    5000  alive    qua
@@ -331,11 +318,12 @@ Filter hosts that are alive:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml | jtable -p hosts --when "state == 'alive'"
+cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "state == 'alive'"
 ```
 output:
 
 ```text
+Unknown option for filter to_table: when
 hostname    os         cost  state    env
 ----------  -------  ------  -------  -----
 host_1      linux      5000  alive    qua
@@ -348,11 +336,12 @@ You can also use bracket syntax for conditions:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml | jtable -p hosts --when "[os == 'linux']"
+cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "[os == 'linux']"
 ```
 output:
 
 ```text
+Unknown option for filter to_table: when
 hostname    os     cost    state        env
 ----------  -----  ------  -----------  -----
 host_1      linux  5000    alive        qua
@@ -365,11 +354,12 @@ Filter hosts where hostname contains specific text:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml | jtable -p hosts --when "'host_1' in hostname"
+cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "'host_1' in hostname"
 ```
 output:
 
 ```text
+Unknown option for filter to_table: when
 hostname    os       cost  state    env
 ----------  -----  ------  -------  -----
 host_1      linux    5000  alive    qua
@@ -384,7 +374,7 @@ You can display the query and redirect it to a given file using the following op
 
 command: 
 ```bash
-cat key_containing_space.yml | jtable -p "region.East['Data Center'].dc_1.hosts" --view_query
+cat key_containing_space.yml | jtable-filter from_yaml to_table -p "region.East['Data Center'].dc_1.hosts" --view_play
 ```
 output:
 
@@ -404,7 +394,7 @@ vars:
     - as: env
       expr: env
     format: simple
-stdout: '{{ stdin | from_json_or_yaml | to_table(queryset=queryset) }}'
+stdout: '{{ stdin | from_yaml | to_table(queryset=queryset) }}'
 
 
 ```
@@ -432,7 +422,7 @@ hosts:
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml  | jtable play select_host_basic.yml
+cat host_list_of_dict_in_key.yml  | jtable-play select_host_basic.yml
 ```
 output:
 
@@ -495,7 +485,7 @@ stdout: "{{ stdin | from_yaml | to_table(queryset=queryset) }}"
 
 command: 
 ```bash
-cat uptime_dataset.yml | jtable play uptime_view.yml
+cat uptime_dataset.yml | jtable-play uptime_view.yml
 ```
 output:
 
@@ -542,13 +532,13 @@ stdout: "{{ stdin | from_yaml | to_table(queryset=queryset)}}"
 
 command: 
 ```bash
-cat uptime_dataset.yml | jtable play uptime_view_with_views.yml
+cat uptime_dataset.yml | jtable-play uptime_view_with_views.yml
 ```
 output:
 
 ```text
 region    dc name    hostname    os type    uptime in days    sanity status
---------  ---------  ----------  ---------  ----------------  --------------------
+--------  ---------  ----------  ---------  ----------------  ---------------------
 East      dc_1       host_1      linux      21 days           ✅
 North     dc_2       host_2                 79 days           🔥 host.uptime exceed
           dc_3       host_3      linux      0 day             ✅
@@ -561,7 +551,7 @@ and avoid your variable coming from your input and the ones present.
 #### Store data in a namespace using path syntaxe stdin.hosts{```item```}
 
 ```
-cat uptime_dataset.yml | jtable play name_incoming_attribute.yml
+cat uptime_dataset.yml | jtable-play name_incoming_attribute.yml
 ```
 
 
@@ -603,12 +593,12 @@ regions:
 
 command: 
 ```bash
-cat region_dataset.yml | jtable play region_view.yml
+cat region_dataset.yml | jtable-play region_view.yml
 ```
 output:
 
 ```bash
-10:40:16 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+18:00:58 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -638,6 +628,8 @@ vars:
       expr: host.os
     - as: state
       expr: host.state
+
+stdout: "{{ stdin | from_yaml | to_table(queryset=queryset) }}"
 ```
 ## Use jtable with Ansible
 The playbook
@@ -689,12 +681,12 @@ dirty line
 
 command: 
 ```bash
-jtable load_yaml_files "{input}:data/*/*/config.yml" --play load_multi_json_queryset.yml
+jtable-filter load_files "data/*/*/config.yml" | jtable-play load_multi_json_queryset.yml
 ```
 output:
 
 ```bash
-10:40:16 cli.load_multiple_inputs | WARNING fail loading file data/dev/it_services/config.yml, skipping
+fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
@@ -709,56 +701,6 @@ prod   pay          host_prd_pay_33   win       200
 qua    pay          host_qua_pay_22   linux    5000
 qua    pay          host_qua_pay_444  linux     200
 qua    pay          host_qua_pay_3R3  win       200
-
-```
-
-```yaml
-vars:
-  queryset:
-    path: "{file}.content{}"
-    select:
-      - as: env
-        expr: file.path.split('/')[1]
-      - as: dept
-        expr: file.path.split('/')[2]
-      - as: hostname
-        expr: hostname
-      - as: os
-        expr: os
-      - as: cost
-        expr: cost
-
-stdout: '{{ input | to_table(queryset=queryset) }}'
-# stdout: '{{ input  }}'
-```
-### Load multiple JSON files
-Similarly, you can use `load_json_files` for JSON files:
-
-
-command: 
-```bash
-jtable load_json_files "{input}:data/*/*/config.json" --play load_multi_json_queryset.yml
-```
-output:
-
-```bash
-env    dept         hostname         os       cost
------  -----------  ---------------  -----  ------
-dev    it_services  host_dev_its_1   linux    5000
-dev    it_services  host_dev_its_2   linux     200
-dev    it_services  host_dev_its_3   win       200
-dev    pay          host_dev_pay_1   linux    5000
-dev    pay          host_dev_pay_2   linux     200
-dev    pay          host_dev_pay_3   win       200
-prod   it_services  host_prd_its_1   linux    5000
-prod   it_services  host_prd_its_2   linux     200
-prod   it_services  host_prd_its_3   win       200
-prod   pay          host_dev_pay_22  linux    5000
-prod   pay          host_dev_pay_22  linux     200
-prod   pay          host_dev_pay_22  win       200
-qua    pay          host_qua_pay_22  linux    5000
-qua    pay          host_qua_pay_22  linux     200
-qua    pay          host_qua_pay_22  win       200
 
 ```
 # Embded filters
@@ -795,7 +737,7 @@ stdout: "{{ host_list | to_table(queryset=queryset) }}"
 
 command: 
 ```bash
-jtable play strf_time_example.yml
+jtable-play strf_time_example.yml
 ```
 output:
 
@@ -814,7 +756,7 @@ host_3      linux     200  alive     2.02032e+07          12
 
 command: 
 ```bash
-jtable play uptime_view_colored.yml -f github
+jtable-play uptime_view_colored.yml --var format=github
 ```
 output:
 

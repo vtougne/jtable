@@ -2,7 +2,6 @@ default:
   tags:
     - docker
 stages:
-  - hello
   - build
   - test
   - make_release
@@ -11,18 +10,6 @@ stages:
 
 variables:
   nsis_download_url: "https://sourceforge.net/projects/nsis/files/NSIS%203/3.11/nsis-3.11.zip"
-
-hello_world:
-  stage: hello
-  tags:
-    - windows
-  script:
-    - echo "Hello World from Windows GitLab Runner!"
-    - echo "Current directory is $(Get-Location)"
-    - echo "Current user is $env:USERNAME"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "api"'
-    - when: manual
 
 workflow:
   rules:
