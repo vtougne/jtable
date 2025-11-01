@@ -25,7 +25,7 @@ Styling = to_table.Styling
 
 Filters = functions
 Plugin = functions.Plugin
-InspectDataset = functions.InspectDataset
+# InspectDataset = functions.InspectDataset
 running_context = functions.running_context()
 
 # Import Templater from the new module
@@ -389,9 +389,11 @@ class JtableCli:
             
         if hasattr(args, 'inspect') and args.inspect:
             if self.tabulate_var_name == "stdin":
-                inspected_paths = InspectDataset().view_paths(yaml.safe_load(stdin))
+                # inspected_paths = functions.InspectDataset().view_paths(yaml.safe_load(stdin))
+                inspected_paths = functions.inspect(yaml.safe_load(stdin))
             else:
-                inspected_paths = InspectDataset().view_paths(self.dataset[self.tabulate_var_name])
+                # inspected_paths = functions.InspectDataset().view_paths(self.dataset[self.tabulate_var_name])
+                inspected_paths = functions.inspect(self.dataset[self.tabulate_var_name])
             tbl = tabulate.tabulate(inspected_paths,['path','value'])
             print(tbl)
             return

@@ -17,7 +17,7 @@ import yaml
 import functions
 Filters = functions
 Plugin = functions.Plugin
-InspectDataset = functions.InspectDataset
+# InspectDataset = functions.InspectDataset
 running_context = functions.running_context()
 
 # Import Templater from the new module
