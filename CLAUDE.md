@@ -335,3 +335,70 @@ jtable-template:
 
 
 ```
+
+# Bug-fix
+
+## issue in jtable-filter with to_table path option:
+
+- Behavior ok
+```
+jtable-filter -vp load_files "data/*/*/config.yml"  to_table -p {file}.content{} -s file.path,hostname
+
+Give the correct playbook:
+
+vars:
+  queryset:
+    path: '{file}.content{}'
+    select:
+    - as: file.path
+      expr: file.path
+    - as: hostname
+      expr: hostname
+    format: simple
+stdout: '{{ load_files("data/*/*/config.yml") | to_table(queryset=queryset) }}'
+```
+
+while playing using jtable-play it works:
+```
+jtable-filter -vp load_files "data/*/*/config.yml"  to_table -p {file}.content{} -s file.path,hostname > /tmp/play.yml
+
+jtable-play /tmp/play.yml
+12:16:20 unknown.load_files      | WARNING fail loading file data/dev/it_services/config.yml, skipping
+file.path              hostname
+---------------------  ----------------
+data/dev/pay           host_dev_pay_1
+data/dev/pay           host_dev_pay_2
+data/dev/pay           host_dev_pay_3
+data/prod/it_services  host_dev_its_1
+data/prod/it_services  host_dev_its_2
+data/prod/it_services  host_dev_its_3
+data/prod/pay          host_prd_pay_22
+data/prod/pay          host_prd_pay_44
+data/prod/pay          host_prd_pay_33
+data/qua/pay           host_qua_pay_22
+data/qua/pay           host_qua_pay_444
+data/qua/pay           host_qua_pay_3R3
+```
+
+- Behavior Not OK
+
+while using arguement parsing itself, it doen't show the vrariable file:
+```
+
+jtable-filter load_files "data/*/*/config.yml"  to_table -p {file}.content{} -s file.path,hostname
+fail loading file data/dev/it_services/config.yml, skipping
+file.path    hostname
+-----------  ----------------
+             host_dev_pay_1
+             host_dev_pay_2
+             host_dev_pay_3
+             host_dev_its_1
+             host_dev_its_2
+             host_dev_its_3
+             host_prd_pay_22
+             host_prd_pay_44
+             host_prd_pay_33
+             host_qua_pay_22
+             host_qua_pay_444
+             host_qua_pay_3R3
+```

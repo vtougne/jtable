@@ -194,12 +194,16 @@ class ToTable:
                 fields_label = select.split(",")
                 item_name = 'item' if item_name == '' else item_name
                 # Transform field names into proper Jinja expressions that handle quotes safely
-                # Special handling for context keys (e.g., region.key, dc.key)
+                # Special handling for context variables (e.g., file.path, region.key)
                 def generate_expression(field):
-                    if '.key' in field:
-                        return field  # Direct context access (e.g., region.key)
-                    else:
-                        return item_name + '["' + escape_field_name(field) + '"]'  # Item field access
+                    if '.' in field:
+                        # Check if this field references a context variable
+                        field_prefix = field.split('.')[0]
+                        # If the prefix is in the context, it's a context variable access
+                        if field_prefix in context:
+                            return field  # Direct context access (e.g., file.path, region.key)
+                    # Otherwise it's an item field access
+                    return item_name + '["' + escape_field_name(field) + '"]'
                 expressions = list(map(generate_expression, fields_label))
             else:
                 expressions = [expressions['expr'] for expressions in select]
