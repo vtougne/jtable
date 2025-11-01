@@ -394,8 +394,10 @@ class JtableCli:
             else:
                 # inspected_paths = functions.InspectDataset().view_paths(self.dataset[self.tabulate_var_name])
                 inspected_paths = functions.inspect(self.dataset[self.tabulate_var_name])
-            tbl = tabulate.tabulate(inspected_paths,['path','value'])
-            print(tbl)
+            # tbl = tabulate.tabulate(inspected_paths,['path','value'])
+            # print(tbl)
+                inspected_paths = functions.inspect(self.dataset[self.tabulate_var_name])
+            print(inspected_paths)
             return
 
         if hasattr(args, 'view_query') and args.view_query:

@@ -914,7 +914,9 @@ def inspect(dataset):
                     self.cover_data(item, the_path)
             else:
                 self.add_row([path] + [str(dataset)])
-    return InspectDataset().view_paths(dataset)
+    # return InspectDataset().view_paths(dataset)
+    import tabulate
+    return tabulate.tabulate(InspectDataset().view_paths(dataset),['path','value'])
     # return "hello"
 
 
