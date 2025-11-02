@@ -133,7 +133,7 @@
 - text: |
     #### Inspect inputs command
 
-- play_cmd: cat host_list_of_dict_in_key.yml  | jtable --inspect
+- play_cmd: cat host_list_of_dict_in_key.yml  | jtable-filter from_yaml inspect
   box_as: text
   # collapse: command & output
 
