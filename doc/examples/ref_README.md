@@ -212,7 +212,7 @@ All paths are covered until meeting a value, the path is display on the lef and 
 
 command: 
 ```bash
-cat host_list_of_dict_in_key.yml  | jtable --inspect
+cat host_list_of_dict_in_key.yml  | jtable-filter from_yaml inspect
 ```
 output:
 
@@ -598,7 +598,7 @@ cat region_dataset.yml | jtable-play region_view.yml
 output:
 
 ```bash
-18:00:58 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+10:00:22 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
