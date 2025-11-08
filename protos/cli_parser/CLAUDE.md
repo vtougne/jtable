@@ -35,7 +35,7 @@ source jtable-completion.bash
 
 # Steps
 - [x] suggest entry Apps.AppsModule().list_all() while user using tabulattion
-- [ ] show preview when F4 pressed
-    - [x] main feature
-    - [ ] Bug/fix: the CtrlC in not taken in main completion menu (in preview it works)
+- [x] show preview when F4 pressed
+- [x] None interactive testing script
+
 

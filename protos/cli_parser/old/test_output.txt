@@ -1,0 +1,6 @@
+
+==========================================
+Test 1: Python API - Apps.AppsModule
+==========================================
+[1;33mINFO[0m: Testing Apps.AppsModule().list_all()
+[0;32m✓ PASS[0m: list_all() includes 'abs'

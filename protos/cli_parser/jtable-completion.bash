@@ -26,6 +26,9 @@ print(' '.join(Apps.AppsModule().list_all()[0:9]))
 }
 
 _preview() {
+    # Unbind F4 immediately to prevent re-triggering during preview
+    bind -r '\eOS' 2>/dev/null || true
+
     _swicth_secondary_screen
     tee <<EOF
 Hello $1
@@ -40,10 +43,10 @@ EOF
 
     read -n 1 -s -r -p "Press any key to exit preview..."
 
-    _back_primary_scrreen
+    # Clear any remaining input from buffer (in case of multi-char sequences like F4)
+    read -t 0.01 -n 100 2>/dev/null || true
 
-    # Clean up F4 binding after preview is done
-    bind -r '\eOS' 2>/dev/null || true
+    _back_primary_scrreen
 }
 
 _swicth_secondary_screen() {
