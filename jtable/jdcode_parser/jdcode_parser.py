@@ -70,10 +70,12 @@ def main():
     else:
         # No app specified, show help
         parser.print_help()
-        print(f"\nAvailable apps and filters ({len(get_available_apps())}):")
-        # for app in get_available_apps():
-        #     print(f"  - {app}")
-        print(", ".join(get_available_apps()))
+        print(f"\nAvailable filters ({len(apps().list_filters())}):")
+        print(", ".join(apps().list_filters()))
+
+        print(f"\nAvailable methods ({len(apps().list_methods())}):")
+        print(", ".join(apps().list_methods()))
+
 
     return 0
 
