@@ -47,6 +47,9 @@ EOF
     read -t 0.01 -n 100 2>/dev/null || true
 
     _back_primary_scrreen
+
+    # Re-bind F4 to allow preview to be triggered again
+    bind -x '"\eOS":"_preview $LOGNAME"'
 }
 
 _swicth_secondary_screen() {
