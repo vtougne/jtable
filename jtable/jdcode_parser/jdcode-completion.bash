@@ -5,22 +5,23 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Global cleanup function for Ctrl+C
-_jtable_sigint_handler() {
+_jdcode_sigint_handler() {
     # Clean up F4 binding on Ctrl+C
     bind -r '\eOS' 2>/dev/null || true
 }
 
 # Set up global SIGINT trap
-trap '_jtable_sigint_handler' SIGINT
+trap '_jdcode_sigint_handler' SIGINT
 
 # Function to get available apps from Python
-_jtable_get_apps() {
+_jdcode_get_apps() {
     # Call Python to get the list from Apps.AppsModule().list_all()
     python3 -c "
 import sys
 sys.path.insert(0, '$SCRIPT_DIR')
 import Apps
-print(' '.join(Apps.AppsModule().list_all()[0:9]))
+# print(' '.join(Apps.AppsModule().list_all()[0:9]))
+print(' '.join(Apps.AppsModule().list_all()))
 " 2>/dev/null
 # bind -r '\eOS'
 }
@@ -61,7 +62,7 @@ _back_primary_scrreen() {
 }
 
 # Main completion function
-_jtable_complete() {
+_jdcode_complete() {
     local cur prev opts
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
@@ -73,18 +74,18 @@ _jtable_complete() {
     # Set up F4 key to show preview
     bind -x '"\eOS":"_preview $LOGNAME"'
 
-    opts=$(_jtable_get_apps)
+    opts=$(_jdcode_get_apps)
 
     COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
     return 0
 }
 
-# Register completion for cli_parser.py
-complete -F _jtable_complete cli_parser.py
-complete -F _jtable_complete ./cli_parser.py
+# Register completion for jdcode_parser.py
+complete -F _jdcode_complete jdcode_parser.py
+complete -F _jdcode_complete ./jdcode_parser.py
 
 # Also register for common variations
-complete -F _jtable_complete python3\ cli_parser.py
-complete -F _jtable_complete python\ cli_parser.py
+complete -F _jdcode_complete python3\ jdcode_parser.py
+complete -F _jdcode_complete python\ jdcode_parser.py
 
-echo "jtable bash completion loaded (${COMP_WORDS[0]:-cli_parser.py})"
+echo "jdcode bash completion loaded (${COMP_WORDS[0]:-jdcode_parser.py})"

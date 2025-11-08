@@ -8,6 +8,7 @@ import argparse
 import sys
 
 import Apps
+from Apps import AppsModule as apps
 
 
 def get_available_apps():
@@ -36,7 +37,7 @@ def create_parser():
     )
 
     parser.add_argument(
-        '--list-apps',
+        '--list-filters',
         action='store_true',
         help='List all available apps and filters'
     )
@@ -51,8 +52,9 @@ def main():
     args = parser.parse_args()
 
     # Handle --list-apps flag
-    if args.list_apps:
-        print("\n".join(get_available_apps()))
+    if args.list_filters:
+        print("\t".join((sorted(Apps.AppsModule().list_filters()))))
+        # print(sorted(Apps.AppsModule().list_filters()))
         return 0
 
     # If app is specified, show what was selected

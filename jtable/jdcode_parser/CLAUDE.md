@@ -1,7 +1,7 @@
-# Exploring args parse and shell completion as part of jtable project
+# Exploring args parse and shell completion as part of jdcode project
 
 > Focus only on the following files:  
-- cli_parser.py
+- jdcode_cli_parser.py
 - Apps.py
 
 
@@ -17,8 +17,8 @@ Bash completion is used for comptabibility with git bash
 # how to test:
 
 ```bash
-source jtable-completion.bash
-./cli_parser.py <TAB>
+source jdcode-completion.bash
+./jdcode_cli_parser.py <TAB>
 # display:
 # abs             attr            batch           capitalize      [...]
 ./cli_parser.py <F4>
@@ -36,6 +36,5 @@ source jtable-completion.bash
 # Steps
 - [x] suggest entry Apps.AppsModule().list_all() while user using tabulattion
 - [x] show preview when F4 pressed
-- [x] None interactive testing script
 
 

@@ -75,7 +75,7 @@ https://github.com/aisbergg/python-templer
 
 | ShortCut	|	Project name                |
 |-----------|-------------------------------|
-|	jd      |	jdecode
+|	jd      |	jdcode
 |	ol      |	opslab
 |	ml      |	mylab
 |	frog    |	frog
