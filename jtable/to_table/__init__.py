@@ -8,6 +8,12 @@ jtable_path = os.path.dirname(os.path.abspath(__file__))
 
 if jtable_path not in sys.path:
     sys.path.insert(0, jtable_path)
+
+parent_path = os.path.dirname(jtable_path)
+
+if parent_path not in sys.path:
+    sys.path.insert(0, parent_path)
+
 from logger import CustomFormatter, CustomFilter, _ExcludeErrorsFilter, logging_config
 
 import version
@@ -478,3 +484,30 @@ class Styling:
 
             logging.info(f"format: {format}")   
         return value_colorized
+
+if __name__ == "__main__":
+    # Configure basic logging for testing
+    logging.basicConfig(
+        # level=logging.INFO,
+        format='%(levelname)s: %(message)s'
+    )
+
+    sample_dataset = {
+        "users": [
+            {"name": "Alice", "age": 30, "role": "admin"},
+            {"name": "Bob", "age": 25, "role": "user"},
+            {"name": "Charlie", "age": 35, "role": "user"}
+        ]
+    }
+
+    print("Sample dataset:", sample_dataset)
+
+    to_table = ToTable(render="jinja_native")
+    result = to_table.render_object(
+        dataset=sample_dataset,
+        path="users{}",
+        # select="name,age",
+        format="simple"
+    )
+    print("\nResult:")
+    print(result)
