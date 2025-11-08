@@ -31,7 +31,7 @@ import templater
 Templater = templater.Templater
 
 # Import Styling from the new module
-from styling import Styling
+from Styling import Styling
 
 
 
