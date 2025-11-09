@@ -75,3 +75,21 @@ class Styling:
 
             logging.info(f"format: {format}")
         return value_colorized
+
+
+if __name__ == "__main__":
+    import json
+    logging.basicConfig(level=logging.INFO)
+    styler = Styling()
+    sample_data = [
+        {"name": "Alice", "age": 30, "city": "New York"},
+        {"name": "Bob", "age": 25, "city": "Los Angeles"},
+        {"name": "Charlie", "age": 35, "city": "Chicago"},
+    ]
+    for person in sample_data:
+        styled_name = styler.apply(person['name'], format="simple", styling_attributes={"style": "color: Red", "formating": "bold"})
+        print(f"Name: {styled_name}, Age: {person['age']}, City: {person['city']}")
+    
+    # print(Styling().color_table)
+    json_output = json.dumps(Styling().color_table, indent=4)
+    print(json_output)

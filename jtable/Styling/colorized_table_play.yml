@@ -1,0 +1,16 @@
+vars:
+  queryset:
+    path: '{}'
+    select:
+    - as: name
+      expr: name
+    - as: ansi_code
+      expr: ansi_code
+    - as: hex
+      expr: hex
+    - as: color
+      expr: "'\e[0;' + (ansi_code | string)  + 'm' + name + '\e[0m'"
+
+
+    format: simple
+stdout: '{{ stdin | from_json | to_table(queryset=queryset) }}'

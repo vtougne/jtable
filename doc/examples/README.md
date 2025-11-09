@@ -598,7 +598,7 @@ cat region_dataset.yml | jtable-play region_view.yml
 output:
 
 ```bash
-16:09:08 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+16:57:58 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive

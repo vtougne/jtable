@@ -198,6 +198,38 @@ class Plugin:
         )
         return output.stdout
  
+def style(value, **kwargs):
+    """
+    Apply styling (color and formatting) to a value.
+
+    Args:
+        value (str): The text to style
+        **kwargs: Styling options including:
+            - style (str): Color style in format "color: ColorName" (e.g., "color: Red")
+            - formating (str): Text formatting - "normal", "bold", "dim", "italic", "underlined"
+            - format (str): Output format - "simple" (ANSI), "html", "github" (default: "simple")
+
+    Returns:
+        str: Styled text with ANSI codes, HTML tags, or GitHub markdown
+
+    Examples:
+        >>> style("Hello", style="color: Red")
+        '\x1b[0;31mHello\x1b[0m'
+        >>> style("World", style="color: Blue", formating="bold")
+        '\x1b[1;34mWorld\x1b[0m'
+        >>> style("Error", style="color: Red", format="html")
+        '<span style="color: Red;">Error</span>'
+    """
+    import Styling
+    styler = Styling.Styling()
+
+    # Extract format parameter, default to "simple"
+    output_format = kwargs.pop('format', 'simple')
+
+    # Remaining kwargs are styling attributes
+    styling_attributes = kwargs
+
+    return styler.apply(value, format=output_format, styling_attributes=styling_attributes)
 
 def b64decode(value):
     """
