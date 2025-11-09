@@ -160,7 +160,7 @@ class ToTable:
         
         for k,v in self.views.items():
             self.views = {**self.views, **{ k: '{{' + str(v) + '}}' } }
-        from jinja_path_splitter import JinjaPathSplitter
+        from .jinja_path_splitter import JinjaPathSplitter
 
         self.splitted_path = JinjaPathSplitter().split_path(self.path)
         
