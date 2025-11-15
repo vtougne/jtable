@@ -519,7 +519,7 @@ vars:
       - as: uptime in days
         expr: "(uptime_in_day | string ) + ' days' if uptime_in_day | int > 1 else (uptime_in_day | string ) +  ' day'"
       - as: sanity status
-        expr: "'ðŸ”¥ host.uptime exceed' if  uptime_in_day | int > 31 else 'âœ…'"
+        expr: "'🔥 host.uptime exceed' if  uptime_in_day | int > 31 else '✅'"
     views:
       dc_location:
         dc_1: East
@@ -538,10 +538,10 @@ output:
 
 ```text
 region    dc name    hostname    os type    uptime in days    sanity status
---------  ---------  ----------  ---------  ----------------  -----------------------
-East      dc_1       host_1      linux      21 days           âœ…
-North     dc_2       host_2                 79 days           ðŸ”¥ host.uptime exceed
-          dc_3       host_3      linux      0 day             âœ…
+--------  ---------  ----------  ---------  ----------------  ---------------------
+East      dc_1       host_1      linux      21 days           ✅
+North     dc_2       host_2                 79 days           🔥 host.uptime exceed
+          dc_3       host_3      linux      0 day             ✅
 
 ```
 ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
@@ -598,7 +598,7 @@ cat region_dataset.yml | jtable-play region_view.yml
 output:
 
 ```bash
-18:12:16 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+11:20:29 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -686,8 +686,21 @@ jtable-filter load_files "data/*/*/config.yml" | jtable-play load_multi_json_que
 output:
 
 ```bash
-Option non valide - "*".
-
+fail loading file data/dev/it_services/config.yml, skipping
+env    dept         hostname          os       cost
+-----  -----------  ----------------  -----  ------
+dev    pay          host_dev_pay_1    linux    5000
+dev    pay          host_dev_pay_2    linux     200
+dev    pay          host_dev_pay_3    win       200
+prod   it_services  host_dev_its_1    linux    5000
+prod   it_services  host_dev_its_2    linux     200
+prod   it_services  host_dev_its_3    win       200
+prod   pay          host_prd_pay_22   linux    5000
+prod   pay          host_prd_pay_44   linux     200
+prod   pay          host_prd_pay_33   win       200
+qua    pay          host_qua_pay_22   linux    5000
+qua    pay          host_qua_pay_444  linux     200
+qua    pay          host_qua_pay_3R3  win       200
 
 ```
 # Embded filters
@@ -748,6 +761,15 @@ jtable-play uptime_view_colored.yml --var format=github
 output:
 
 
+styling_attributes['formating']: {'when': ["host.state == 'unreachable'"], 'style': 'color: red', 'formating': 'bold'}
+styling_attributes['formating']: {'when': ['uptime_in_day | int < 30'], 'style': 'color: green'}
+styling_attributes['formating']: {'when': ["host.state == 'alive'"], 'style': 'color: green'}
+styling_attributes['formating']: {'when': ['uptime_in_day | int < 30'], 'style': 'color: green'}
+styling_attributes['formating']: {'when': ["host.state == 'alive'"], 'style': 'color: green'}
+styling_attributes['formating']: {'when': ['uptime_in_day | int >= 30'], 'style': 'color: red', 'formating': 'underlined'}
+styling_attributes['formating']: {'when': ['uptime_in_day | int < 30'], 'style': 'color: green'}
+styling_attributes['formating']: {'when': ["host.state == 'alive'"], 'style': 'color: green'}
+styling_attributes['formating']: {'when': ['uptime_in_day | int >= 30'], 'style': 'color: red', 'formating': 'underlined'}
 | hostname   | region   | dc name   | os      | state                                   | uptime                                |
 |------------|----------|-----------|---------|-----------------------------------------|---------------------------------------|
 | host_3     | East     | dc_1      | linux   | $`\textcolor{red}{\text{unreachable}}`$ | $`\textcolor{green}{\text{6 days}}`$  |
@@ -771,12 +793,27 @@ ansible-playbook ansible_playbook_example.yml
 ```
 output:
 
-```
-bash💥 Something was wrong with this report
- cmd was  ->  export ANSIBLE_FILTER_PLUGINS=./ansible_filter && \
-export ANSIBLE_ACTION_WARNINGS=False && \
-export ANSIBLE_STDOUT_CALLBACK=debug && \
-export ANSIBLE_INVENTORY=./local_inv && \
-ansible-playbook ansible_playbook_example.yml
+```bash
+
+PLAY [localhost] ***************************************************************
+
+TASK [debug] *******************************************************************
+ok: [localhost] => {}
+
+MSG:
+
+hostname    os         cost  state    service.name    ips
+----------  -------  ------  -------  --------------  ------------------------------
+host_1      linux      5000  alive    service1
+                                      service_3
+host_2      linux1      200  alive
+host_3      windows     200  alive
+host_4      windows    5000  decom                    ['192.168.1.1', '192.168.1.2']
+host_5      windows    5000  decom                    []
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
 
 ```
+![uptime_view_colored](./uptime_view_colored.png)
