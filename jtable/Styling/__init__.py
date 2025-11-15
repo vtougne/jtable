@@ -34,6 +34,7 @@ class Styling:
             color_label = "white"
         text_formating = 0
         formating = ""
+        print(f"styling_attributes['formating']: {styling_attributes}")
         if "formating" in styling_attributes:
             formating = styling_attributes['formating']
         if formating == "normal" or formating == "":

@@ -198,38 +198,6 @@ class Plugin:
         )
         return output.stdout
  
-def style(value, **kwargs):
-    """
-    Apply styling (color and formatting) to a value.
-
-    Args:
-        value (str): The text to style
-        **kwargs: Styling options including:
-            - style (str): Color style in format "color: ColorName" (e.g., "color: Red")
-            - formating (str): Text formatting - "normal", "bold", "dim", "italic", "underlined"
-            - format (str): Output format - "simple" (ANSI), "html", "github" (default: "simple")
-
-    Returns:
-        str: Styled text with ANSI codes, HTML tags, or GitHub markdown
-
-    Examples:
-        >>> style("Hello", style="color: Red")
-        '\x1b[0;31mHello\x1b[0m'
-        >>> style("World", style="color: Blue", formating="bold")
-        '\x1b[1;34mWorld\x1b[0m'
-        >>> style("Error", style="color: Red", format="html")
-        '<span style="color: Red;">Error</span>'
-    """
-    import Styling
-    styler = Styling.Styling()
-
-    # Extract format parameter, default to "simple"
-    output_format = kwargs.pop('format', 'simple')
-
-    # Remaining kwargs are styling attributes
-    styling_attributes = kwargs
-
-    return styler.apply(value, format=output_format, styling_attributes=styling_attributes)
 
 def b64decode(value):
     """
@@ -531,69 +499,40 @@ def running_context():
 
     return {"platform": running_platform, "shell_family": shell_family, "shell_type": shell_type, "terminal": terminal}
 
-def unescape(value,format="html"):
-    """
-    Unescape special characters in a string.
-    
-    Args:
-        value (str): String to unescape
-        format (str): Format to use for unescaping ('html' or 'quote')
-        
-    Returns:
-        str: Unescaped string
-    """
-    if format == "html":
-        return html.unescape(value)
-    elif format == "quote":
-        return value.replace('\\"', '"').replace('\\\\', '\\')
 
-def wrap_html(data,title=""):
+def style(value, **kwargs):
     """
-    Wrap data in an HTML template with CSS and JavaScript.
-    
-    Args:
-        data (str): Content to wrap
-        title (str): Page title
-        
-    Returns:
-        str: Complete HTML document
-    """
-    if running_context()['platform']['system'] == "Windows":
-        path_sep = "\\"
-    else:
-        path_sep = "/"
-    base_path = getattr(sys, '_MEIPASS', os.path.abspath(path_sep.join(__file__.split(path_sep)[:-1])))
-    logging.info(f"base_path: {base_path}")
-    resources_path = f"{base_path}{path_sep}resources"
-    def load_file(expected_file_name):
-        with open(resources_path + path_sep + expected_file_name, 'r') as file:
-            content = file.read()
-        return content
-    
-    js_wrapper_css = load_file("js_wrapper.css")
-    js_wrapper_script = load_file("js_wrapper.js")
+    Apply styling (color and formatting) to a value.
 
-    return f"""<!DOCTYPE html>
-<html lang="fr">
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title}</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <style>
-        {js_wrapper_css}
-    </style>
-<body>
-<div id="toc"></div>
-{data}
-<button id="scrollTopButton" onclick="scrollToTop()">Top</button>
-<script>
-    {js_wrapper_script}
-</script>
-</body>
-</html>
-        """
+    Args:
+        value (str): The text to style
+        **kwargs: Styling options including:
+            - style (str): Color style in format "color: ColorName" (e.g., "color: Red")
+            - formating (str): Text formatting - "normal", "bold", "dim", "italic", "underlined"
+            - format (str): Output format - "simple" (ANSI), "html", "github" (default: "simple")
+
+    Returns:
+        str: Styled text with ANSI codes, HTML tags, or GitHub markdown
+
+    Examples:
+        >>> style("Hello", style="color: Red")
+        '\x1b[0;31mHello\x1b[0m'
+        >>> style("World", style="color: Blue", formating="bold")
+        '\x1b[1;34mWorld\x1b[0m'
+        >>> style("Error", style="color: Red", format="html")
+        '<span style="color: Red;">Error</span>'
+    """
+    import Styling
+    styler = Styling.Styling()
+
+    # Extract format parameter, default to "simple"
+    output_format = kwargs.pop('format', 'simple')
+
+    # Remaining kwargs are styling attributes
+    styling_attributes = kwargs
+
+    return styler.apply(value, format=output_format, styling_attributes=styling_attributes)
+
 
 def m5(data):
     """
@@ -951,6 +890,70 @@ def inspect(dataset):
     return tabulate.tabulate(InspectDataset().view_paths(dataset),['path','value'])
     # return "hello"
 
+
+def unescape(value,format="html"):
+    """
+    Unescape special characters in a string.
+    
+    Args:
+        value (str): String to unescape
+        format (str): Format to use for unescaping ('html' or 'quote')
+        
+    Returns:
+        str: Unescaped string
+    """
+    if format == "html":
+        return html.unescape(value)
+    elif format == "quote":
+        return value.replace('\\"', '"').replace('\\\\', '\\')
+
+def wrap_html(data,title=""):
+    """
+    Wrap data in an HTML template with CSS and JavaScript.
+    
+    Args:
+        data (str): Content to wrap
+        title (str): Page title
+        
+    Returns:
+        str: Complete HTML document
+    """
+    if running_context()['platform']['system'] == "Windows":
+        path_sep = "\\"
+    else:
+        path_sep = "/"
+    base_path = getattr(sys, '_MEIPASS', os.path.abspath(path_sep.join(__file__.split(path_sep)[:-1])))
+    logging.info(f"base_path: {base_path}")
+    resources_path = f"{base_path}{path_sep}resources"
+    def load_file(expected_file_name):
+        with open(resources_path + path_sep + expected_file_name, 'r') as file:
+            content = file.read()
+        return content
+    
+    js_wrapper_css = load_file("js_wrapper.css")
+    js_wrapper_script = load_file("js_wrapper.js")
+
+    return f"""<!DOCTYPE html>
+<html lang="fr">
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <style>
+        {js_wrapper_css}
+    </style>
+<body>
+<div id="toc"></div>
+{data}
+<button id="scrollTopButton" onclick="scrollToTop()">Top</button>
+<script>
+    {js_wrapper_script}
+</script>
+</body>
+</html>
+        """
 
 
 

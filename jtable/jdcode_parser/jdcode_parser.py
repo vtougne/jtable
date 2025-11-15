@@ -37,7 +37,7 @@ def create_parser():
     )
 
     parser.add_argument(
-        '--list-filters',
+        '--list_filters',
         action='store_true',
         help='List all available apps and filters'
     )

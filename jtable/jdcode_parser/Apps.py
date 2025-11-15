@@ -2,6 +2,17 @@
 # import to_tablev
 # from functions import *
 
+import os
+import sys
+import inspect
+
+current_path = os.path.dirname(os.path.abspath(__file__))
+parent_path = os.path.dirname(current_path)
+if parent_path not in sys.path:
+    sys.path.insert(0, parent_path)
+
+import functions
+
 
 jinja_builtins = [
         'abs', 'attr', 'batch', 'capitalize', 'center', 'default',
@@ -43,9 +54,34 @@ class AppsModule(object):
   
   def list_methods(self):
     return [name for name, info in self.apps().items() if "method" in info["types"]]
+  
+  def list_functions(self):
+    # all_functions = [name[0] for name in inspect.getmembers(functions, predicate=inspect.isfunction)]
+
+
+    for func in inspect.getmembers(functions, predicate=inspect.isfunction):
+          print(f"*******           {func[0]}            ********")
+          for prop in dir(func):
+              print(f"      {prop}: {getattr(func, prop)}")
+          print("")
+
+    # return all_functions
 
 
 if __name__ == "__main__":
     apps_module = AppsModule()
-    print("Available methods:")
-    print("\n".join(apps_module.list_methods()))
+    # print("Available methods:")
+    # print("\n".join(apps_module.list_methods()))
+    # print(apps_module.list_functions())
+    # inspect_wrap_html=inspect.getmembers(functions.wrap_html)
+    # print(dir(inspect_wrap_html))
+    
+
+
+    for member in inspect.getmembers(functions.wrap_html):
+        print(f"{member[0]}: {member[1]}")
+        for prop in dir(member[1]):
+            if not prop.startswith("__"):
+              print(f"    {prop}: {getattr(member[1], prop)}")
+        
+
