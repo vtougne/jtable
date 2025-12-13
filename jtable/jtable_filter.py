@@ -40,11 +40,19 @@ def discover_filters_and_plugins():
 
     # Add to_table as a special filter (it's from to_table module, not functions)
     # to_table is a method that accepts various parameters for table rendering
-    filters_dict['to_table'] = lambda **kwargs: None  # Placeholder for parameter discovery
+    # Define placeholder with actual signature for parameter discovery
+    def to_table_placeholder(dataset, path="{}", select=[], unselect=[], views={}, when=[], format="", context={}, queryset={}):
+        """Render data as a table"""
+        pass
+    filters_dict['to_table'] = to_table_placeholder
     logging.debug(f"Added special filter: to_table")
 
     # Add to_table_x as a special filter (context-aware version of to_table)
-    filters_dict['to_table_x'] = lambda **kwargs: None  # Placeholder for parameter discovery
+    # to_table_x has the same signature as to_table
+    def to_table_x_placeholder(dataset, path="{}", select=[], unselect=[], views={}, when=[], format="", context={}, queryset={}):
+        """Render data as a table (context-aware)"""
+        pass
+    filters_dict['to_table_x'] = to_table_x_placeholder
     logging.debug(f"Added special filter: to_table_x")
 
     # Discover plugins (static methods in Plugin class)

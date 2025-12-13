@@ -288,7 +288,6 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 output:
 
 ```text
-Unknown option for filter to_table: when
 hostname    os     cost    state        env
 ----------  -----  ------  -----------  -----
 host_1      linux  5000    alive        qua
@@ -306,7 +305,6 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 output:
 
 ```text
-Unknown option for filter to_table: when
 hostname    os         cost  state    env
 ----------  -------  ------  -------  -----
 host_2      windows    5000  alive    qua
@@ -323,7 +321,6 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 output:
 
 ```text
-Unknown option for filter to_table: when
 hostname    os         cost  state    env
 ----------  -------  ------  -------  -----
 host_1      linux      5000  alive    qua
@@ -341,7 +338,6 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 output:
 
 ```text
-Unknown option for filter to_table: when
 hostname    os     cost    state        env
 ----------  -----  ------  -----------  -----
 host_1      linux  5000    alive        qua
@@ -359,7 +355,6 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 output:
 
 ```text
-Unknown option for filter to_table: when
 hostname    os       cost  state    env
 ----------  -----  ------  -------  -----
 host_1      linux    5000  alive    qua
@@ -598,7 +593,7 @@ cat region_dataset.yml | jtable-play region_view.yml
 output:
 
 ```bash
-11:20:29 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+11:00:37 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -761,15 +756,6 @@ jtable-play uptime_view_colored.yml --var format=github
 output:
 
 
-styling_attributes['formating']: {'when': ["host.state == 'unreachable'"], 'style': 'color: red', 'formating': 'bold'}
-styling_attributes['formating']: {'when': ['uptime_in_day | int < 30'], 'style': 'color: green'}
-styling_attributes['formating']: {'when': ["host.state == 'alive'"], 'style': 'color: green'}
-styling_attributes['formating']: {'when': ['uptime_in_day | int < 30'], 'style': 'color: green'}
-styling_attributes['formating']: {'when': ["host.state == 'alive'"], 'style': 'color: green'}
-styling_attributes['formating']: {'when': ['uptime_in_day | int >= 30'], 'style': 'color: red', 'formating': 'underlined'}
-styling_attributes['formating']: {'when': ['uptime_in_day | int < 30'], 'style': 'color: green'}
-styling_attributes['formating']: {'when': ["host.state == 'alive'"], 'style': 'color: green'}
-styling_attributes['formating']: {'when': ['uptime_in_day | int >= 30'], 'style': 'color: red', 'formating': 'underlined'}
 | hostname   | region   | dc name   | os      | state                                   | uptime                                |
 |------------|----------|-----------|---------|-----------------------------------------|---------------------------------------|
 | host_3     | East     | dc_1      | linux   | $`\textcolor{red}{\text{unreachable}}`$ | $`\textcolor{green}{\text{6 days}}`$  |
