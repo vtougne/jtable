@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import re
 import logging
 
@@ -87,6 +89,7 @@ if __name__ == "__main__":
     jpath= sys.argv[1] 
     jinja_path_splitter = JinjaPathSplitter()
     res = jinja_path_splitter.split_path(jpath)
+    print('result:')
     # For standalone usage, clean up the first element
     if res and res[0].startswith("['") and res[0].endswith("']"):
         res[0] = res[0][2:-2]
