@@ -82,13 +82,9 @@ cat host_list_of_dict.yml  | jtable-filter from_yaml to_table
 ```
 output:
 
-```text
-hostname    os     cost    state        env
-----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
-host_3      linux          unreachable  qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict.yml  | jtable-filter from_yaml to_table
 ```
 #### display dictionnaries of dictionnaries as a table
 
@@ -99,13 +95,9 @@ cat host_dict_of_dict.yml  | jtable-filter from_yaml to_table
 ```
 output:
 
-```text
-key     value.os    value.cost    value.state
-------  ----------  ------------  -------------
-host_1  linux       5000          alive
-host_2  linux       200           alive
-host_3  linux                     unreachable
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_dict_of_dict.yml  | jtable-filter from_yaml to_table
 ```
 ## Loading Files with Commands
 
@@ -119,13 +111,9 @@ jtable-filter load_json host_list_of_dict.json to_table
 ```
 output:
 
-```text
-hostname    os     cost    state        env
-----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
-host_3      linux          unreachable  qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  jtable-filter load_json host_list_of_dict.json to_table
 ```
 ### Load from stdin (when no file specified)
 When no file is provided, the commands read from stdin:
@@ -137,13 +125,9 @@ cat host_list_of_dict.yml | jtable-filter from_yaml to_table
 ```
 output:
 
-```text
-hostname    os     cost    state        env
-----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
-host_3      linux          unreachable  qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict.yml | jtable-filter from_yaml to_table
 ```
 ## Use path  
 This argument allow you accessing  your dataset when located under a key or a list  
@@ -179,13 +163,9 @@ cat host_list_of_dict_in_key.yml  | jtable-filter from_yaml to_table -p hosts
 ```
 output:
 
-```text
-hostname    os       cost    state        env
-----------  -------  ------  -----------  -----
-host_1      linux    5000    alive        qua
-host_2      windows  5000    alive        qua
-host_3      linux            unreachable  qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml  | jtable-filter from_yaml to_table -p hosts
 ```
 ### Inspect Option
 Here is what would look to if the path is omitted:  
@@ -197,11 +177,9 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table
 ```
 output:
 
-```text
-key    value
------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-hosts  [{'hostname': 'host_1', 'os': 'linux', 'cost': 5000, 'state': 'alive', 'env': 'qua'}, {'hostname': 'host_2', 'os': 'windows', 'cost': 5000, 'state': 'alive', 'env': 'qua'}, {'hostname': 'host_3', 'os': 'linux', 'state': 'unreachable', 'env': 'qua'}]
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table
 ```
 It looks to nothing... :)  
 Here is the way to inspect what is inside your dataset.  
@@ -216,24 +194,9 @@ cat host_list_of_dict_in_key.yml  | jtable-filter from_yaml inspect
 ```
 output:
 
-```text
-path               value
------------------  -----------
-hosts[0].hostname  host_1
-hosts[0].os        linux
-hosts[0].cost      5000
-hosts[0].state     alive
-hosts[0].env       qua
-hosts[1].hostname  host_2
-hosts[1].os        windows
-hosts[1].cost      5000
-hosts[1].state     alive
-hosts[1].env       qua
-hosts[2].hostname  host_3
-hosts[2].os        linux
-hosts[2].state     unreachable
-hosts[2].env       qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml  | jtable-filter from_yaml inspect
 ```
 
 ```yaml
@@ -266,13 +229,9 @@ cat key_containing_space.yml | jtable-filter from_yaml to_table -p "region.East[
 ```
 output:
 
-```text
-hostname    os     cost    state        env
-----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
-host_3      linux          unreachable  qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat key_containing_space.yml | jtable-filter from_yaml to_table -p "region.East['Data Center'].dc_1.hosts"
 ```
 ## Conditional Filtering with --when
 Filter data rows based on conditions using the `--when` option. This allows you to display only the data that meets specific criteria.
@@ -287,12 +246,9 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 ```
 output:
 
-```text
-hostname    os     cost    state        env
-----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_3      linux          unreachable  qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "os == 'linux'"
 ```
 ### Filter by multiple conditions
 You can use logical operators like `and`, `or` for complex conditions:
@@ -304,11 +260,9 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 ```
 output:
 
-```text
-hostname    os         cost  state    env
-----------  -------  ------  -------  -----
-host_2      windows    5000  alive    qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "os != 'linux' and cost > 300"
 ```
 ### Filter by state
 Filter hosts that are alive:
@@ -320,12 +274,9 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 ```
 output:
 
-```text
-hostname    os         cost  state    env
-----------  -------  ------  -------  -----
-host_1      linux      5000  alive    qua
-host_2      windows    5000  alive    qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "state == 'alive'"
 ```
 ### Alternative bracket syntax
 You can also use bracket syntax for conditions:
@@ -337,12 +288,9 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 ```
 output:
 
-```text
-hostname    os     cost    state        env
-----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_3      linux          unreachable  qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "[os == 'linux']"
 ```
 ### Filter with string contains
 Filter hosts where hostname contains specific text:
@@ -354,11 +302,9 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 ```
 output:
 
-```text
-hostname    os       cost  state    env
-----------  -----  ------  -------  -----
-host_1      linux    5000  alive    qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --when "'host_1' in hostname"
 ```
 ## Use query file
 if you want to hide, show a given filter you have to build a query file
@@ -373,25 +319,9 @@ cat key_containing_space.yml | jtable-filter from_yaml to_table -p "region.East[
 ```
 output:
 
-```yaml
-vars:
-  queryset:
-    path: region.East['Data Center'].dc_1.hosts{}
-    select:
-    - as: hostname
-      expr: hostname
-    - as: os
-      expr: os
-    - as: cost
-      expr: cost
-    - as: state
-      expr: state
-    - as: env
-      expr: env
-    format: simple
-stdout: '{{ stdin | from_yaml | to_table(queryset=queryset) }}'
-
-
+```
+yaml💥 Something was wrong with this report
+ cmd was  ->  cat key_containing_space.yml | jtable-filter from_yaml to_table -p "region.East['Data Center'].dc_1.hosts" --view_play
 ```
 ### Query file sample:
 
@@ -421,13 +351,9 @@ cat host_list_of_dict_in_key.yml  | jtable-play select_host_basic.yml
 ```
 output:
 
-```text
-hostname    os       cost    state        env
-----------  -------  ------  -----------  -----
-host_1      linux    5000    alive        qua
-host_2      windows  5000    alive        qua
-host_3      linux            unreachable  qua
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat host_list_of_dict_in_key.yml  | jtable-play select_host_basic.yml
 ```
 ## Transform table content using Jinja  
 Your data may not arrived exatcly how you want to represent them.  
@@ -484,13 +410,9 @@ cat uptime_dataset.yml | jtable-play uptime_view.yml
 ```
 output:
 
-```text
-host    os type    uptime in days
-------  ---------  ----------------
-host_1  linux      21 days
-host_2             79 days
-host_3  linux      0 days
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat uptime_dataset.yml | jtable-play uptime_view.yml
 ```
 ## Use variables in your query file
 this will helps to make mapping table, or behalf like view
@@ -531,13 +453,9 @@ cat uptime_dataset.yml | jtable-play uptime_view_with_views.yml
 ```
 output:
 
-```text
-region    dc name    hostname    os type    uptime in days    sanity status
---------  ---------  ----------  ---------  ----------------  ---------------------
-East      dc_1       host_1      linux      21 days           ✅
-North     dc_2       host_2                 79 days           🔥 host.uptime exceed
-          dc_3       host_3      linux      0 day             ✅
-
+```
+text💥 Something was wrong with this report
+ cmd was  ->  cat uptime_dataset.yml | jtable-play uptime_view_with_views.yml
 ```
 ## Name incoming attributes in namespace using **path** syntaxe ```stdin.hosts{item}```
 This feature will help you for the suite describe after to add more context in your  
@@ -592,20 +510,9 @@ cat region_dataset.yml | jtable-play region_view.yml
 ```
 output:
 
-```bash
-11:00:37 totable.cross_path      | ERROR .dc was not found in dataset level: 2
-dc name    region      hostname    os     state
----------  ----------  ----------  -----  -----------
-dc_a       west coast  host_a_1    linux  alive
-dc_a       west coast  host_a_2    linux  unreachable
-dc_a       west coast  host_a_3    linux  alive
-dc_b       west coast  host_b_1    linux  alive
-dc_b       west coast  host_b_2    linux  alive
-dc_b       west coast  host_b_3    linux  alive
-dc_c       east        host_c_1    linux  alive
-dc_c       east        host_c_2    linux  alive
-dc_c       east        host_c_3    linux  alive
-
+```
+bash💥 Something was wrong with this report
+ cmd was  ->  cat region_dataset.yml | jtable-play region_view.yml
 ```
 
 ```yaml
@@ -680,23 +587,9 @@ jtable-filter load_files "data/*/*/config.yml" | jtable-play load_multi_json_que
 ```
 output:
 
-```bash
-fail loading file data/dev/it_services/config.yml, skipping
-env    dept         hostname          os       cost
------  -----------  ----------------  -----  ------
-dev    pay          host_dev_pay_1    linux    5000
-dev    pay          host_dev_pay_2    linux     200
-dev    pay          host_dev_pay_3    win       200
-prod   it_services  host_dev_its_1    linux    5000
-prod   it_services  host_dev_its_2    linux     200
-prod   it_services  host_dev_its_3    win       200
-prod   pay          host_prd_pay_22   linux    5000
-prod   pay          host_prd_pay_44   linux     200
-prod   pay          host_prd_pay_33   win       200
-qua    pay          host_qua_pay_22   linux    5000
-qua    pay          host_qua_pay_444  linux     200
-qua    pay          host_qua_pay_3R3  win       200
-
+```
+bash💥 Something was wrong with this report
+ cmd was  ->  jtable-filter load_files "data/*/*/config.yml" | jtable-play load_multi_json_queryset.yml
 ```
 # Embded filters
 #### strf_time
@@ -736,14 +629,9 @@ jtable-play strf_time_example.yml
 ```
 output:
 
-```bash
-hostname    os       cost  state      order_date    strftime
-----------  -----  ------  -------  ------------  ----------
-host_1      linux    5000  alive     2.02032e+07          12
-host_2      linux     200            2.02032e+07          12
-host_3      linux     200  alive     2.02032e+07          12
-host_3      linux     200  alive     2.02032e+07          12
-
+```
+bash💥 Something was wrong with this report
+ cmd was  ->  jtable-play strf_time_example.yml
 ```
 # Conditional styling
 #### Styling option
@@ -755,16 +643,10 @@ jtable-play uptime_view_colored.yml --var format=github
 ```
 output:
 
-
-| hostname   | region   | dc name   | os      | state                                   | uptime                                |
-|------------|----------|-----------|---------|-----------------------------------------|---------------------------------------|
-| host_3     | East     | dc_1      | linux   | $`\textcolor{red}{\text{unreachable}}`$ | $`\textcolor{green}{\text{6 days}}`$  |
-| host_1     | North    | dc_2      | linux   | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{green}{\text{21 days}}`$ |
-| host_8     | North    | dc_2      |         | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{72 days}}`$   |
-| host_2     | North    | dc_2      | linux   |                                         | $`\textcolor{green}{\text{}}`$        |
-| host_7     | North    | dc_2      | windows | $`\textcolor{green}{\text{alive}}`$     | $`\textcolor{red}{\text{61 days}}`$   |
-
-
+```
+💥 Something was wrong with this report
+ cmd was  ->  jtable-play uptime_view_colored.yml --var format=github
+```
 #### Ansible again
 
 
