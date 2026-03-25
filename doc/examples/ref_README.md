@@ -83,10 +83,10 @@ cat host_list_of_dict.yml  | jtable-filter from_yaml to_table
 output:
 
 ```text
-hostname    os     cost    state        env
+hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
+host_1      linux    5000  alive        qua
+host_2      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
 ```
@@ -100,10 +100,10 @@ cat host_dict_of_dict.yml  | jtable-filter from_yaml to_table
 output:
 
 ```text
-key     value.os    value.cost    value.state
+key     value.os      value.cost  value.state
 ------  ----------  ------------  -------------
-host_1  linux       5000          alive
-host_2  linux       200           alive
+host_1  linux               5000  alive
+host_2  linux                200  alive
 host_3  linux                     unreachable
 
 ```
@@ -120,10 +120,10 @@ jtable-filter load_json host_list_of_dict.json to_table
 output:
 
 ```text
-hostname    os     cost    state        env
+hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
+host_1      linux    5000  alive        qua
+host_2      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
 ```
@@ -138,10 +138,10 @@ cat host_list_of_dict.yml | jtable-filter from_yaml to_table
 output:
 
 ```text
-hostname    os     cost    state        env
+hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
+host_1      linux    5000  alive        qua
+host_2      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
 ```
@@ -180,10 +180,10 @@ cat host_list_of_dict_in_key.yml  | jtable-filter from_yaml to_table -p hosts
 output:
 
 ```text
-hostname    os       cost    state        env
+hostname    os         cost  state        env
 ----------  -------  ------  -----------  -----
-host_1      linux    5000    alive        qua
-host_2      windows  5000    alive        qua
+host_1      linux      5000  alive        qua
+host_2      windows    5000  alive        qua
 host_3      linux            unreachable  qua
 
 ```
@@ -267,10 +267,10 @@ cat key_containing_space.yml | jtable-filter from_yaml to_table -p "region.East[
 output:
 
 ```text
-hostname    os     cost    state        env
+hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
-host_2      linux  5000    alive        qua
+host_1      linux    5000  alive        qua
+host_2      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
 ```
@@ -288,9 +288,9 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 output:
 
 ```text
-hostname    os     cost    state        env
+hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
+host_1      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
 ```
@@ -338,9 +338,9 @@ cat host_list_of_dict_in_key.yml | jtable-filter from_yaml to_table -p hosts --w
 output:
 
 ```text
-hostname    os     cost    state        env
+hostname    os       cost  state        env
 ----------  -----  ------  -----------  -----
-host_1      linux  5000    alive        qua
+host_1      linux    5000  alive        qua
 host_3      linux          unreachable  qua
 
 ```
@@ -422,10 +422,10 @@ cat host_list_of_dict_in_key.yml  | jtable-play select_host_basic.yml
 output:
 
 ```text
-hostname    os       cost    state        env
+hostname    os         cost  state        env
 ----------  -------  ------  -----------  -----
-host_1      linux    5000    alive        qua
-host_2      windows  5000    alive        qua
+host_1      linux      5000  alive        qua
+host_2      windows    5000  alive        qua
 host_3      linux            unreachable  qua
 
 ```
@@ -533,7 +533,7 @@ output:
 
 ```text
 region    dc name    hostname    os type    uptime in days    sanity status
---------  ---------  ----------  ---------  ----------------  ---------------------
+--------  ---------  ----------  ---------  ----------------  --------------------
 East      dc_1       host_1      linux      21 days           ✅
 North     dc_2       host_2                 79 days           🔥 host.uptime exceed
           dc_3       host_3      linux      0 day             ✅
@@ -593,7 +593,7 @@ cat region_dataset.yml | jtable-play region_view.yml
 output:
 
 ```bash
-11:00:37 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+15:28:48 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
