@@ -146,6 +146,16 @@ class JtableCli:
             args = parser.parse_args()
             return
             
+        # Handle -h <topic> help requests (e.g. jtable -h color)
+        if len(sys.argv) == 3 and sys.argv[1] in {'-h', '--help'} and sys.argv[2] not in {'load_json','load_yaml','load_json_files','load_yaml_files','play','template'}:
+            topic = sys.argv[2]
+            if topic == 'color':
+                print(Styling().view_all_colors())
+                exit(0)
+            else:
+                print(f"Error: No help available for '{topic}'")
+                exit(1)
+
         # Check for help requests
         help_requested = '--help' in sys.argv or '-h' in sys.argv
         
