@@ -56,6 +56,7 @@ class ToTable:
         self.views = {}
         self.path = "{}"
         self.format = ""
+        self.alias = []
 
     def cross_path(self, dataset, path, cross_path_context = {} ):
         level = len(path)
@@ -138,6 +139,8 @@ class ToTable:
                 self.when = query_data
             elif query_item == "format":
                 self.format = query_data
+            elif query_item == "alias":
+                self.alias = query_data
             else:
                 raise Exception(f"the queryset argument contains a non accepted key: {query_item}")
             
@@ -224,6 +227,10 @@ class ToTable:
             item_name = 'item' if item_name == '' else item_name
             # Use double quotes for dictionary access to handle single quotes in field names
             expressions = list(map(lambda item:  item_name + '["' + '"]["'.join([escape_field_name(part) for part in item]) + '"]' , fields))
+            # Apply positional aliases when no select was specified
+            for i, alias in enumerate(self.alias):
+                if i < len(fields_label):
+                    fields_label[i] = alias
         
         if self.unselect != [] and self.unselect != "":
             for field in self.unselect.split(','):

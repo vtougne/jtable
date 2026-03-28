@@ -86,6 +86,7 @@ class JtableCli:
         load_parser.add_argument("-w", "--when", help = "key_1 == 'value'")
         load_parser.add_argument("-f", "--format", help = "Table format applied in simple,json,th,td... list below")
         load_parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
+        load_parser.add_argument("-as", "--alias", help = "Rename column labels, comma-separated (e.g., new_name_1,new_name_2,...)")
         load_parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
         load_parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
         parser.add_argument('--version', action='version', version=version.__version__)
@@ -363,6 +364,21 @@ class JtableCli:
                     })
                 queryset['select'] = select_expressions
 
+        if hasattr(args, 'alias') and args.alias:
+            aliases = [a.strip() for a in args.alias.split(',')]
+            if 'select' in queryset and queryset['select']:
+                # Apply aliases to the existing select list
+                for i, alias in enumerate(aliases):
+                    if i < len(queryset['select']):
+                        queryset['select'][i]['as'] = alias
+            else:
+                # No select: store aliases for positional application during render
+                queryset['alias'] = aliases
+
+        # Sync select with queryset after -s/-as processing
+        if 'select' in queryset:
+            select = queryset['select']
+
         if hasattr(args, 'when') and args.when:
             queryset['when'] = args.when
 
@@ -420,8 +436,17 @@ class JtableCli:
             query_set_out = {}
             fields = out
             if select == []:
-                for field in fields:
-                    select = select + [ {'as': field, 'expr': field }  ]
+                if 'alias' in queryset:
+                    # Render without alias to get original field names
+                    queryset_no_alias = {k: v for k, v in queryset.items() if k != 'alias'}
+                    original_fields = create_templater(template_string=out_expr, static_context={**self.dataset, **{"queryset": queryset_no_alias}}).render({}, eval_str=True)
+                    aliases = queryset['alias']
+                    for i, field in enumerate(original_fields):
+                        alias = aliases[i] if i < len(aliases) else field
+                        select = select + [{'as': alias, 'expr': field}]
+                else:
+                    for field in fields:
+                        select = select + [ {'as': field, 'expr': field }  ]
             query_set_out['path'] = queryset['path']
             query_set_out['select'] = select
             query_set_out['format'] = original_format

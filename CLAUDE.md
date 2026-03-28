@@ -136,3 +136,43 @@ cd /mnt/c/data/perso/dev/project/jtable/doc/examples && cat key_containing_space
 - debug:
     msg: "{{ host_list | jtable }}"
 ```
+
+
+
+# Todo
+
+
+### Todo
+| #         | category    |   task |
+|------------------|-------|--------|
+|   | feature    | -as rename field in selection
+|   | feature    | --sort column by rows
+|   | feature    | --reverse column by rows
+
+
+#### featture: -as rename field in selection
+- This feature allows users to rename fields in the output table using the `-as` option
+- Example usage:
+```bash
+# Actual command without -as
+cat doc/examples/host_list_of_dict.yml | jtable
+
+hostname    os     cost    state        env
+----------  -----  ------  -----------  -----
+host_1      linux  5000    alive        qua
+host_2      linux  5000    alive        qua
+host_3      linux          unreachable  qua
+
+# With -as to rename 'hostname' to 'host_name'
+cat doc/examples/host_list_of_dict.yml | jtable -as host_name
+
+# should return:
+host_name    os     cost    state        env
+----------  -----  ------  -----------  -----
+host_1      linux  5000    alive        qua
+host_2      linux  5000    alive        qua
+host_3      linux          unreachable  qua
+
+# If the orinal table contains more fields than the ones specified in -as, the other fields should be kept with their original name
+
+```

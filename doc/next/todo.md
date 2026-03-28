@@ -42,9 +42,9 @@ jtable-template:
 ### Todo
 | #         | category    |   task |
 |------------------|-------|--------|
+|   | feature    | -as rename field in selection
 |   | feature    | --sort column by rows
 |   | feature    | --reverse column by rows
-|   | feature    | -as rename field in selection
 |   | feature    | --inspect as a filter
 |   | feature    | option as in to_table to name fileds --as hostname,os,cost
 |   | feature    | option custom filter / plugin /functions
