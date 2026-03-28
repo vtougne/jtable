@@ -608,7 +608,7 @@ cat region_dataset.yml | jtable play region_view.yml
 output:
 
 ```bash
-10:22:12 totable.cross_path      | ERROR .dc was not found in dataset level: 2
+11:17:23 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -696,7 +696,7 @@ jtable load_yaml_files "{input}:data/*/*/config.yml" --play load_multi_json_quer
 output:
 
 ```bash
-10:22:12 unknown.load_files      | WARNING fail loading file data/dev/it_services/config.yml, skipping
+11:17:23 unknown.load_files      | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
