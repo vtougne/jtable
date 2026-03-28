@@ -81,12 +81,12 @@ make_release:
     - git push -f origin ${CI_COMMIT_BRANCH}
     - git switch main
     - git pull origin main
-    - git merge ${CI_COMMIT_BRANCH}
+    - git merge -X theirs ${CI_COMMIT_BRANCH}
     - git push origin main
     - git tag -f $new_version
     - git push origin $new_version
-  # rules:
-  #   - when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
 
 
 build_windows_env:
