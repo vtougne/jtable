@@ -46,4 +46,4 @@ vars:
         dc_2: North
       uptime_in_day: "((( host.uptime | int ) / (60 * 60 * 24)) | string).split('.')[0]"
 
-stdout: "{{ hosts | sort (attribute='dc')| to_table(queryset=queryset,format=format)}}"
+stdout: "{{ hosts | sort (attribute='dc')| to_table(queryset=queryset,format=queryset.format)}}"
