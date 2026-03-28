@@ -159,7 +159,18 @@ class JtableCli:
         else:
             # Pas de commande explicite et pas de stdin → afficher aide
             parser.print_help()
-            sys.exit(1)
+            jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
+            jtable_plugins = [name for name, func in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
+            print(f"\njtable core filters:\n   {', '.join(jtable_core_filters)}\n")
+            tablulate_formats = next((value for name, value in inspect.getmembers(tabulate) if name == 'tabulate_formats'), None)
+            jtable_formats = ['json','gitlab_json_table','td','th']
+            print(f"tabulate formats:\n   {', '.join(sorted(tablulate_formats))}\n")
+            print(f"jtable additional formats:\n   {', '.join(sorted(jtable_formats))}\n")
+            print(f"jtable plugins:\n   {', '.join(jtable_plugins)}\n")
+            print(f"More help with jtable -h <help topic>")
+            print(f"  colors:\n    type jtable -h color | jtable\n")
+            exit(1)
+            # sys.exit(1)
 
         # print(args.debug)
         # exit(0)
@@ -213,17 +224,7 @@ class JtableCli:
                 # For general help, print main parser help
                 parser.print_help(sys.stdout)
             
-            jtable_core_filters = [name for name, func in inspect.getmembers(Filters, predicate=inspect.isfunction)]
-            jtable_plugins = [name for name, func in inspect.getmembers(Plugin, predicate=inspect.isfunction)]
-            print(f"\njtable core filters:\n   {', '.join(jtable_core_filters)}\n")
-            tablulate_formats = next((value for name, value in inspect.getmembers(tabulate) if name == 'tabulate_formats'), None)
-            jtable_formats = ['json','gitlab_json_table','td','th']
-            print(f"tabulate formats:\n   {', '.join(sorted(tablulate_formats))}\n")
-            print(f"jtable additional formats:\n   {', '.join(sorted(jtable_formats))}\n")
-            print(f"jtable plugins:\n   {', '.join(jtable_plugins)}\n")
-            print(f"More help with jtable -h <help topic>")
-            print(f"  colors:\n    type jtable -h color | jtable\n")
-            exit(1)
+
 
 
         def load_multiple_inputs(file_search_string,format):
