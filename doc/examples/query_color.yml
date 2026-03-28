@@ -9,7 +9,7 @@ vars:
 
   queryset:
     path: "{host}"
-    format: text
+    # format: text
     select:
       - as: hostname
         expr: host.hostname
@@ -28,8 +28,4 @@ vars:
         expr: host.order_date
   # when:
   #   - "host.os == 'linux'"
-stdout: "{{ host_list | jtable(queryset = queryset) }}"
-# stdout: |
-#   Hell every body
-#   How it going on ?
-#   {{ when }}
+stdout: "{{ host_list | to_table(queryset = queryset) }}"
