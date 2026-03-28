@@ -42,29 +42,27 @@ jtable-template:
 ### Todo
 | #         | category    |   task |
 |------------------|-------|--------|
- 1 | feature    | --inspect as a filter
- 1 | bug/fix     | jtable-play variable precedence
- 1 | bug/fix    | Plugin issue on git bash: printf "2025-04-12 11:19:32" | jtable.exe -o "{{ (stdin | to_epoch) }}"
- 1 | feature    | option as in to_table to name fileds --as hostname,os,cost
- 1 | feature    | option custom filter / plugin /functions
- 1 | feature    | option data caching, optioon: cached_vars = var_1, var_2
- 1 | feature    | encryption
- 1 | feature    | limit rendering / preview / pagination
- 2 | feature    | optional output formats: pdf, xls
- 2 | feature    | optional input formats: xml, html
- 2 | feature    | limit inspect to 1000 values found, 0 for unlimited, q0 for no pagination
- 2 | feature    | manage multijson inputs [stakoverflow](https://stackoverflow.com/questions/27907633/w-to-extract-multiple-json-objects-from-one-file)
- 2 | feature    | args copletion ++path
- 2 | bug/fix    | cross path can't target key containing double quotes, escaping must be implemented
- 2 | refacto    | class decoupling in seperated modules
-
-
-## Done
-| #         | category    |   task |
-|------------------|-------|--------|
- 2 | feature    | select as argument in cli ++ unselect
- 2 | feature    | from_xml
- 2 | feature    | from_flatten: convert text as list of dict [ "value": "row1","value": "row2",... ]
+|   | feature    | --sort column by rows
+|   | feature    | --reverse column by rows
+|   | feature    | -as rename field in selection
+|   | feature    | --inspect as a filter
+|   | feature    | option as in to_table to name fileds --as hostname,os,cost
+|   | feature    | option custom filter / plugin /functions
+|   | feature    | option data caching, optioon: cached_vars = var_1, var_2
+|   | feature    | limit rendering / preview / pagination
+|   | feature    | optional output formats: pdf, xls
+|   | feature    | limit inspect to 1000 values found, 0 for unlimited, q0 for no pagination
+|   | bug/fix    | jtable-play variable precedence
+|   | feature    | manage multijson inputs [stackoverflow](https://stackoverflow.com/questions/27907633/w-to-extract-multiple-json-objects-from-one-file)
+|   | feature    | args completion ++path
+|   | feature    | encryption
+|   | bug/fix    | Plugin issue on git bash: printf "2025-04-12 11:19:32" | jtable.exe -o "{{ (stdin | to_epoch) }}"
+ ✅ | feature    | optional input formats: xml, html
+ ✅ | feature    | select as argument in cli ++ unselect
+ ✅ | feature    | from_xml
+ ✅ | feature    | from_flatten: convert text as list of dict [ "value": "row1","value": "row2",... ]
+ ✅ | bug/fix    | cross path can't target key containing double quotes, escaping must be implemented
+ ✅ | refacto    | class decoupling in seperated modules
 
 
 ## Explore
