@@ -58,6 +58,22 @@ class ToTable:
         self.format = ""
         self.alias = []
 
+    def next_path_key(self, next_path):
+        # returns the dict key consumed by the next path segment, if any
+        if len(next_path) > 0:
+            next_segment = str(next_path[0])
+            if next_segment[0:2] == "['":
+                return next_segment[2:-2]
+            elif next_segment[0] == ".":
+                return next_segment[1:]
+        return None
+
+    def strip_crossed_key(self, value, crossed_key):
+        # keeps every key of the item but the one already crossed by the path
+        if crossed_key is not None and type(value) is dict and crossed_key in value:
+            return { k: v for k,v in value.items() if k != crossed_key }
+        return value
+
     def cross_path(self, dataset, path, cross_path_context = {} ):
         level = len(path)
         if level > 1:
@@ -95,19 +111,24 @@ class ToTable:
             elif current_path[0] == "{":
                 item_name = current_path[1:-1]
                 if level > 0:
+                    # the key crossed by the next path segment is already part of the
+                    # path, it is removed from the value stored in the context
+                    crossed_key = self.next_path_key(next_path)
                     if type(dataset) is dict:
                         for key,value in dataset.items():
                             next_path = path[1:]
+                            item_value = self.strip_crossed_key(value, crossed_key)
                             # new_cross_path_context = {item_name: {"key": key, "value": value}}
-                            cross_path_context = { **cross_path_context, **{item_name: {"key": key, "value": value}}}
+                            cross_path_context = { **cross_path_context, **{item_name: {"key": key, "value": item_value}}}
                             self.cross_path(dataset[key],next_path,cross_path_context=cross_path_context)
-                            
+
                     elif type(dataset) is list:
                         index = 0
                         for item in dataset:
                             next_path = path[1:]
+                            item_value = self.strip_crossed_key(item, crossed_key)
                             # new_cross_path_context = { item_name: item }
-                            cross_path_context = { **cross_path_context, **{ item_name: item }}
+                            cross_path_context = { **cross_path_context, **{ item_name: item_value }}
                             self.cross_path(dataset[index],next_path,cross_path_context=cross_path_context)
                             index += 1
                 else:
