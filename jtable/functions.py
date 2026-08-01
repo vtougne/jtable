@@ -451,6 +451,17 @@ def intersect(a, b):
     """
     return list(set(a).intersection(b))
 
+def items2dict(items_list, key_name):
+    """
+    Transforms list of dictionaries to dictionary.
+    key_name will be the key of final dictionary, 
+    and it will be removed from the values.
+    """
+    return {
+        item[key_name]: {k: v for k, v in item.items() if k != key_name} 
+        for item in items_list
+    }
+
 def running_context():
     """
     Get information about the current running environment.
