@@ -1,6 +1,5 @@
 regions:
   west coast:
-    country: France
     dc:
       dc_a: 
         - { hostname: host_a_1, os: linux, state: alive }
@@ -11,12 +10,11 @@ regions:
         - { hostname: host_b_2, os: linux, state: alive }
         - { hostname: host_b_3, os: linux, state: alive }
   east:
-    country: France
     dc:
       dc_c:
         - { hostname: host_c_1, os: linux, state: alive }
         - { hostname: host_c_2, os: linux, state: alive }
         - { hostname: host_c_3, os: linux, state: alive }
-  # north:
-  #   truc: coucou
+  north:
+    truc: coucou
 
