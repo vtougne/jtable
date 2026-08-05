@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform
+import sys, json, re, os, ast, inspect, datetime, time, logging, logging.config, html, shutil, platform, warnings
 from os import isatty
 from sys import exit
 from typing import Any, Dict, Optional
@@ -127,7 +127,11 @@ class Templater:
             
         if eval_str == True:
             try:
-                expr = ast.parse(out_str, mode='eval').body
+                # backslashes in the rendered data (ex: "echo \*.asc") are not python
+                # escape sequences, silence the SyntaxWarning raised while parsing them
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", SyntaxWarning)
+                    expr = ast.parse(out_str, mode='eval').body
                 expr_type = expr.__class__.__name__
                 if expr_type == 'List' or expr_type == 'Dict':
                     out =  ast.literal_eval(out_str)

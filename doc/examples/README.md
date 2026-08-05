@@ -580,7 +580,6 @@ vars:
 ```yaml
 regions:
   west coast:
-    country: France
     dc:
       dc_a: 
         - { hostname: host_a_1, os: linux, state: alive }
@@ -591,14 +590,13 @@ regions:
         - { hostname: host_b_2, os: linux, state: alive }
         - { hostname: host_b_3, os: linux, state: alive }
   east:
-    country: France
     dc:
       dc_c:
         - { hostname: host_c_1, os: linux, state: alive }
         - { hostname: host_c_2, os: linux, state: alive }
         - { hostname: host_c_3, os: linux, state: alive }
-  # north:
-  #   truc: coucou
+  north:
+    truc: coucou
 
 
 ```
@@ -610,6 +608,7 @@ cat region_dataset.yml | jtable play region_view.yml
 output:
 
 ```bash
+18:47:35 totable.cross_path      | ERROR .dc was not found in dataset level: 2
 dc name    region      hostname    os     state
 ---------  ----------  ----------  -----  -----------
 dc_a       west coast  host_a_1    linux  alive
@@ -697,7 +696,7 @@ jtable load_yaml_files "{input}:data/*/*/config.yml" --play load_multi_json_quer
 output:
 
 ```bash
-12:40:35 unknown.load_files      | WARNING fail loading file data/dev/it_services/config.yml, skipping
+18:47:36 unknown.load_files      | WARNING fail loading file data/dev/it_services/config.yml, skipping
 env    dept         hostname          os       cost
 -----  -----------  ----------------  -----  ------
 dev    pay          host_dev_pay_1    linux    5000
