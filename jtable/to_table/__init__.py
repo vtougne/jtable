@@ -368,7 +368,14 @@ class ToTable:
                 for expr in expressions:
                     loop_context = { item_name: item } if item_name != '' else item
                     try:
-                        value_for_json = value = column_templates[column_index].render({**loop_context,**view_context,**context},eval_str=True)
+                        render_context = {**loop_context,**view_context,**context}
+                        value_for_json = value = column_templates[column_index].render(render_context,eval_str=True)
+                        # the table is rendered as text while the json output keeps
+                        # the type of the source data (int, float, bool, ...)
+                        native_value = column_templates[column_index].render_native(render_context)
+                        if native_value is not None:
+                            value_for_json = native_value
+                        del render_context
                     except:
                         break
                     del loop_context
