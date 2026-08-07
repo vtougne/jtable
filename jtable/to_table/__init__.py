@@ -46,6 +46,9 @@ class ToTable:
         logging.info(f"Initilizing render: {render}")
         self.td = []
         self.th = []
+        # rows kept as [(label, value), ...] so tables rendered with different
+        # field sets can be aligned on a common header at the end
+        self.labeled_rows = []
         self.table_headers = []
         self.json = []
         self.render = render
@@ -190,6 +193,7 @@ class ToTable:
         
         logging.info(f"Crossing paths")
         self.cross_path(self.dataset, self.splitted_path )
+        self.align_rows()
 
         if self.format == "json":
             return json.dumps(self.json)
@@ -214,6 +218,24 @@ class ToTable:
         
         # return out_return[self.format]
     
+    def align_rows(self):
+        # each row is placed under the columns it was rendered with, missing
+        # fields are left empty
+        aligned_td = []
+        for labeled_row in self.labeled_rows:
+            available = list(labeled_row)
+            row = []
+            for field in self.th:
+                value = ""
+                for index,(label,label_value) in enumerate(available):
+                    if label == field:
+                        value = label_value
+                        del available[index]
+                        break
+                row = row + [ value ]
+            aligned_td = aligned_td + [ row ]
+        self.td = aligned_td
+
     def render_table(self, dataset, select=[], item_name='', context={}):
         stylings = []
         logging.info(f"unselect: {self.unselect}")
@@ -375,6 +397,7 @@ class ToTable:
                     del value
                     column_index += 1
                 self.json = self.json + [ json_dict ]
+                self.labeled_rows = self.labeled_rows + [ list(zip(fields_label, row)) ]
                 self.td = self.td + [ row ]
         
         
@@ -382,8 +405,12 @@ class ToTable:
             headers = list(map(lambda item: '.'.join(item), expressions))
             fields_label = headers
         
-        self.th = fields_label
-            
+        # several tables can be rendered when the path crosses many items, the
+        # header is the union of all fields, in order of first appearance
+        for field in fields_label:
+            if field not in self.th:
+                self.th = self.th + [ field ]
+
         try:
             self.json_content = json.dumps(self.json)
         except Exception as error:
