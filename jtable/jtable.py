@@ -87,6 +87,7 @@ class JtableCli:
         load_parser.add_argument("-f", "--format", help = "Table format applied in simple,json,th,td... list below")
         load_parser.add_argument("-us", "--unselect", help = "Unselect unwanted key_1,key_2,...")
         load_parser.add_argument("-as", "--alias", help = "Rename column labels, comma-separated (e.g., new_name_1,new_name_2,...)")
+        load_parser.add_argument("--reverse", help = "Pivot the table, using the given column as the new header row (e.g., hostname)")
         load_parser.add_argument("--inspect", action="store_true", help="Inspect stdin")
         load_parser.add_argument("-vq", "--view_query", action="store_true", help = "View query")
         parser.add_argument('--version', action='version', version=version.__version__)
@@ -381,6 +382,9 @@ class JtableCli:
 
         if hasattr(args, 'when') and args.when:
             queryset['when'] = args.when
+
+        if hasattr(args, 'reverse') and args.reverse:
+            queryset['reverse'] = args.reverse
 
         if not 'path' in queryset:
             queryset['path'] = "{}"

@@ -60,6 +60,7 @@ class ToTable:
         self.path = "{}"
         self.format = ""
         self.alias = []
+        self.reverse = None
 
     def next_path_key(self, next_path):
         # returns the dict key consumed by the next path segment, if any
@@ -145,7 +146,7 @@ class ToTable:
             # logging.info(f"item_name: {item_name}")
             self.render_table(dataset=dataset,select=self.select, item_name = item_name, context=cross_path_context)
     
-    def render_object(self, dataset, path="{}", select=[], unselect=[], views={}, when=[], format="", context={}, queryset={}):
+    def render_object(self, dataset, path="{}", select=[], unselect=[], views={}, when=[], format="", context={}, queryset={}, reverse=""):
         # exit(0)
         for query_item,query_data in queryset.items():
             logging.info(f"query_item: {query_item}")
@@ -165,6 +166,8 @@ class ToTable:
                 self.format = query_data
             elif query_item == "alias":
                 self.alias = query_data
+            elif query_item == "reverse":
+                self.reverse = query_data
             else:
                 raise Exception(f"the queryset argument contains a non accepted key: {query_item}")
             
@@ -180,6 +183,7 @@ class ToTable:
         logging.info(f"when: {self.when}")
         # exit(0)
         self.format = format if format != "" else self.format
+        self.reverse = reverse if reverse != "" else self.reverse
         self.context = context
         logging.info(f"unselect: {self.unselect}")
 
@@ -194,6 +198,7 @@ class ToTable:
         logging.info(f"Crossing paths")
         self.cross_path(self.dataset, self.splitted_path )
         self.align_rows()
+        self.reverse_table()
 
         if self.format == "json":
             return json.dumps(self.json)
@@ -235,6 +240,22 @@ class ToTable:
                 row = row + [ value ]
             aligned_td = aligned_td + [ row ]
         self.td = aligned_td
+
+    def reverse_table(self):
+        # pivots the table: the given key column becomes the header row,
+        # every other field becomes a row labeled with its own field name
+        if not self.reverse or self.reverse not in self.th:
+            return
+        key_index = self.th.index(self.reverse)
+        key_values = [row[key_index] for row in self.td]
+        other_fields = [field for field in self.th if field != self.reverse]
+        reversed_th = [self.reverse] + [str(value) for value in key_values]
+        reversed_td = []
+        for field in other_fields:
+            field_index = self.th.index(field)
+            reversed_td = reversed_td + [ [field] + [row[field_index] for row in self.td] ]
+        self.th = reversed_th
+        self.td = reversed_td
 
     def render_table(self, dataset, select=[], item_name='', context={}):
         stylings = []
