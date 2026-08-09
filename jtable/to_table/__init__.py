@@ -201,6 +201,18 @@ class ToTable:
         self.align_rows()
         self.reverse_table()
 
+
+        def ret_separated_able(th,td,sep):
+            headers=f"{sep.join(th)}"
+            return headers + "\n" + "\n".join([ sep.join(line) for line in td])
+        
+        if self.format == "csv":
+            return ret_separated_able(self.th, self.td, ",")
+        if self.format == "ssv":
+            return ret_separated_able(self.th, self.td, ";")
+        if self.format == "psv":
+            return ret_separated_able(self.th, self.td, "|")
+        
         if self.format == "json":
             return functions.to_json(self.json)
         elif self.format == "th":
