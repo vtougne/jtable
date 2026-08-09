@@ -42,21 +42,19 @@ jtable-template:
 ### Todo
 | #         | category    |   task |
 |------------------|-------|--------|
-|   | feature    | -as rename field in selection
 |   | feature    | --sort column by rows
-|   | feature    | --reverse column by rows
-|   | feature    | --inspect as a filter
-|   | feature    | option as in to_table to name fileds --as hostname,os,cost
+|   | feature    | limit rendering / preview / pagination
+|   | feature    | limit inspect to 1000 values found, 0 for unlimited, q0 for no pagination
 |   | feature    | option custom filter / plugin /functions
 |   | feature    | option data caching, optioon: cached_vars = var_1, var_2
-|   | feature    | limit rendering / preview / pagination
 |   | feature    | optional output formats: pdf, xls
-|   | feature    | limit inspect to 1000 values found, 0 for unlimited, q0 for no pagination
 |   | bug/fix    | jtable-play variable precedence
 |   | feature    | manage multijson inputs [stackoverflow](https://stackoverflow.com/questions/27907633/w-to-extract-multiple-json-objects-from-one-file)
-|   | feature    | args completion ++path
 |   | feature    | encryption
 |   | bug/fix    | Plugin issue on git bash: printf "2025-04-12 11:19:32" | jtable.exe -o "{{ (stdin | to_epoch) }}"
+ ✅ | feature    | -as rename field in selection
+✅  | feature    | --inspect as a filter
+✅  | feature    | --reverse column by rows
  ✅ | feature    | optional input formats: xml, html
  ✅ | feature    | select as argument in cli ++ unselect
  ✅ | feature    | from_xml

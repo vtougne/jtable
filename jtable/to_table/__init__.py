@@ -177,9 +177,10 @@ class ToTable:
         self.views = views if views != {} else self.views
         # self.when = when if when != [] else self.when
         self.when = when if when != [] and when != "" else self.when
-        logging.info(f"when: {self.when.__class__.__name__}")
-        if self.when.__class__.__name__ == "str":
-            self.when = self.when.split(',')
+        # logging.info(f"when: {self.when.__class__.__name__}")
+        # if self.when.__class__.__name__ == "str":
+        #     self.when = self.when.split(',')
+            
         logging.info(f"when: {self.when}")
         # exit(0)
         self.format = format if format != "" else self.format

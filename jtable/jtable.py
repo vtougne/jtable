@@ -61,6 +61,20 @@ class JtableCli:
         
     def parse_args(self):
 
+        def parse_cli_tokens(s: str) -> list[str]:
+            """
+            Retourne la liste des tokens séparés par des virgules,
+            en ignorant les virgules précédées d’un antislash.
+            """
+            # 1. Split on commas not preceded by a backslash
+            parts = re.split(r'(?<!\\),', s)
+
+            # 2. Un‑escape the escaped commas
+            parts = [p.replace(r'\,', ',') for p in parts]
+
+            return parts
+
+
         select = []
         queryset = {}
         self.tabulate_var_name="stdin"
@@ -348,13 +362,19 @@ class JtableCli:
             # If queryset already has a complex select definition, filter it
             if 'select' in queryset and isinstance(queryset['select'], list):
                 # Filter existing select fields by the 'as' field names
-                requested_fields = args.select.split(',')
+                # requested_fields = args.select.split(',')
+                requested_fields = parse_cli_tokens(args.select)
+                # print(requested_fields)
+                # exit(0)
                 filtered_select = [field for field in queryset['select'] 
                                  if 'as' in field and field['as'] in requested_fields]
                 queryset['select'] = filtered_select
             else:
                 # Convert CLI select string to proper select expressions
-                requested_fields = args.select.split(',')
+                # requested_fields = args.select.split(',')
+                requested_fields = parse_cli_tokens(args.select)
+                # print(requested_fields)
+                # exit(0)
                 select_expressions = []
                 for field in requested_fields:
                     field = field.strip()
@@ -381,7 +401,8 @@ class JtableCli:
             select = queryset['select']
 
         if hasattr(args, 'when') and args.when:
-            queryset['when'] = args.when
+            # queryset['when'] = args.when
+            queryset['when'] = parse_cli_tokens(args.when)
 
         if hasattr(args, 'reverse') and args.reverse:
             queryset['reverse'] = args.reverse
@@ -420,13 +441,9 @@ class JtableCli:
             
         if hasattr(args, 'inspect') and args.inspect:
             if self.tabulate_var_name == "stdin":
-                # inspected_paths = functions.InspectDataset().view_paths(yaml.safe_load(stdin))
                 inspected_paths = functions.inspect(yaml.safe_load(stdin))
             else:
-                # inspected_paths = functions.InspectDataset().view_paths(self.dataset[self.tabulate_var_name])
                 inspected_paths = functions.inspect(self.dataset[self.tabulate_var_name])
-            # tbl = tabulate.tabulate(inspected_paths,['path','value'])
-            # print(tbl)
                 inspected_paths = functions.inspect(self.dataset[self.tabulate_var_name])
             print(inspected_paths)
             return
@@ -455,7 +472,7 @@ class JtableCli:
             query_set_out['select'] = select
             query_set_out['format'] = original_format
             if hasattr(args, 'when') and args.when:
-                query_set_out['when'] = args.when
+                query_set_out['when'] = parse_cli_tokens(args.when)
             query_file_out['vars'] = {'queryset': query_set_out }
             query_file_out['stdout'] = out_expr
 
