@@ -53,8 +53,8 @@ jtable-template:
 |   | feature    | encryption
 |   | bug/fix    | Plugin issue on git bash: printf "2025-04-12 11:19:32" | jtable.exe -o "{{ (stdin | to_epoch) }}"
  ✅ | feature    | -as rename field in selection
-✅  | feature    | --inspect as a filter
-✅  | feature    | --reverse column by rows
+ ✅ | feature    | --inspect as a filter
+ ✅ | feature    | --reverse column by rows
  ✅ | feature    | optional input formats: xml, html
  ✅ | feature    | select as argument in cli ++ unselect
  ✅ | feature    | from_xml
