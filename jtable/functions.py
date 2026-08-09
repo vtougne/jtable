@@ -679,26 +679,6 @@ def to_epoch(date_str):
     """
     return int(time.mktime(datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S").timetuple()))
 
-def to_json(a, *args, **kw):
-    """
-    Convert a Python object to JSON string.
-    
-    Args:
-        a: Python object to convert
-        *args: Additional positional arguments for json.dumps
-        **kw: Additional keyword arguments for json.dumps
-        
-    Returns:
-        str: JSON string representation of the object
-
-    Examples:
-        >>> to_json({'name': 'John', 'age': 30})
-        '{"name": "John", "age": 30}'
-        >>> to_json([1, 2, 3, 4])
-        '[1, 2, 3, 4]'
-    """
-    return json.dumps(a, *args, **kw)
-
 def to_pie(dataset):
     """
     Convert dataset to Mermaid pie chart format.
@@ -723,14 +703,13 @@ def to_pie(dataset):
     out = out + "```"
     return out
 
-def to_nice_json(v, *args, **kw):
+def to_json(v, indent=2):
     """
     Convert a Python object to a nicely formatted JSON string.
     
     Args:
         v: Python object to convert
-        *args: Additional positional arguments for json.dumps
-        **kw: Additional keyword arguments for json.dumps
+        indent: key identation
         
     Returns:
         str: Formatted JSON string
@@ -741,10 +720,11 @@ def to_nice_json(v, *args, **kw):
         >>> to_nice_json([1, 2, 3, 4])
         '[\n  1,\n  2,\n  3,\n  4\n]'
     """
-    out = json.dumps(v, indent=2, separators=(',', ': '))
+    # out = json.dumps(v, indent=2, separators=(',', ': '))
+    out = json.dumps(v, indent=indent)
     return out    
 
-def to_nice_yaml(v,indent=2):
+def to_yaml(v,indent=2):
     """
     Convert a Python object to a nicely formatted YAML string.
     
@@ -761,27 +741,11 @@ def to_nice_yaml(v,indent=2):
         >>> to_nice_yaml([1, 2, 3, 4])
         '- 1\n- 2\n- 3\n- 4\n'
     """
-    return yaml.dump(v, allow_unicode=True,indent=indent)
-
-def to_yaml(v):
-    """
-    Convert a Python object to a compact YAML string.
+    if indent:
+        return yaml.dump(v, allow_unicode=True,indent=indent)
+    else:
+        return "".join([v.strip() for v in yaml.dump(v,default_flow_style=True).split('\n')])
     
-    Args:
-        v: Python object to convert
-        
-    Returns:
-        str: Compact YAML string
-
-    Examples:
-        >>> to_yaml({'name': 'John', 'age': 30})
-        'name: John age: 30'
-        >>> to_yaml([1, 2, 3, 4])
-        '[1, 2, 3, 4]'
-    """
-    out = "".join([v.strip() for v in yaml.dump(v,default_flow_style=True).split('\n')])
-    return out
-
 def type_debug(o):
     """
     Get the class name of an object.

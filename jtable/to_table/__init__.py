@@ -202,7 +202,7 @@ class ToTable:
         self.reverse_table()
 
         if self.format == "json":
-            return json.dumps(self.json)
+            return functions.to_json(self.json)
         elif self.format == "th":
             return self.th
         elif self.format == "td":
