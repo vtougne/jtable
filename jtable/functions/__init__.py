@@ -2,6 +2,8 @@
 import yaml,json,logging, sys, os, time, datetime
 import re
 import html
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 
 class Plugin:
     @staticmethod
@@ -42,25 +44,14 @@ class Plugin:
                 raise Exception(f"Environment variable {var_name} not found")
         else:
             return os.environ[var_name]
-
-    @staticmethod
-    def load_os_vars():
-        """
-        Get all environment variables as a dictionary.
-        
-        Returns:
-            dict: Dictionary containing all environment variables
-            
-        Examples:
-            >>> env_vars = Plugin.load_os_vars()
-            >>> 'PATH' in env_vars
-            True
-            >>> type(env_vars['HOME'])
-            <class 'str'>
-        """
-        return dict(os.environ)
-
    
+    @staticmethod
+    def load_excel(file_path):
+        # sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import excel
+        return excel.excel_to_dict(file_path)
+
+
     @staticmethod
     def load_files(search_string, format='yaml', ignore_errors=True):
         """
@@ -131,6 +122,23 @@ class Plugin:
         logging.info(f"Loading JSON file: {filename}")
         with open(filename, 'r') as file:
             return json.load(file)
+
+    @staticmethod
+    def load_os_vars():
+        """
+        Get all environment variables as a dictionary.
+        
+        Returns:
+            dict: Dictionary containing all environment variables
+            
+        Examples:
+            >>> env_vars = Plugin.load_os_vars()
+            >>> 'PATH' in env_vars
+            True
+            >>> type(env_vars['HOME'])
+            <class 'str'>
+        """
+        return dict(os.environ)
 
     @staticmethod
     def load_yaml(filename):

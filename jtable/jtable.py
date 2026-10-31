@@ -119,6 +119,10 @@ class JtableCli:
         # parse_known_args = load_parser.parse_known_args()[0]
         # print(parse_known_args)
 
+        load_excel_parser = subparsers.add_parser(
+        'load_excel', parents=[load_parser], help='Load Excel first worksheet'
+        )
+
         load_json_parser = subparsers.add_parser(
         'load_json', parents=[load_parser], help='Load JSON dataset'
         )
@@ -150,6 +154,7 @@ class JtableCli:
         template_parser.add_argument('-os', '--load_os_vars', action="store_true", help='Load OS environment variables into vars context')
 
         load_json_parser.add_argument('file', nargs='?', help='Path to JSON file (or piped via stdin)')
+        load_excel_parser.add_argument('file', nargs='?', help='Path to Excel')
         load_yaml_parser.add_argument('file', nargs='?', help='Path to YAML file (or piped via stdin)')
         load_json_files_parser.add_argument('files', nargs='+', help='File patterns for JSON files (e.g., "folder/*/*.json" or "{var_name}:folder/*/*.json")')
         load_yaml_files_parser.add_argument('files', nargs='+', help='File patterns for YAML files (e.g., "folder/*/*.yml" or "{var_name}:folder/*/*.yml")')
@@ -163,7 +168,7 @@ class JtableCli:
             return
             
         # Handle -h <topic> help requests (e.g. jtable -h color)
-        if len(sys.argv) == 3 and sys.argv[1] in {'-h', '--help'} and sys.argv[2] not in {'load_json','load_yaml','load_json_files','load_yaml_files','play','template'}:
+        if len(sys.argv) == 3 and sys.argv[1] in {'-h', '--help'} and sys.argv[2] not in {'load_excel','load_json','load_yaml','load_json_files','load_yaml_files','play','template'}:
             topic = sys.argv[2]
             if topic == 'color':
                 print(Styling().view_all_colors())
@@ -175,7 +180,7 @@ class JtableCli:
         # Check for help requests
         help_requested = '--help' in sys.argv or '-h' in sys.argv
         
-        if len(sys.argv) > 1 and sys.argv[1] in {'load_json','load_yaml','load_json_files','load_yaml_files','play','template'}:
+        if len(sys.argv) > 1 and sys.argv[1] in {'load_excel','load_json','load_yaml','load_json_files','load_yaml_files','play','template'}:
             # Commande explicite → on parse normalement
             args = parser.parse_args()
         elif stdin_has_data():
@@ -239,7 +244,7 @@ class JtableCli:
             for line in sys.stdin:
                 stdin = stdin + line
             self.dataset = { self.tabulate_var_name: stdin }
-        load_parser_commands = {'load_json', 'load_yaml', 'load_json_files', 'load_yaml_files', 'play'}
+        load_parser_commands = {'load_excel', 'load_json', 'load_yaml', 'load_json_files', 'load_yaml_files', 'play'}
         should_show_detailed_help = (not is_pipe and not args.command) or (help_requested and args.command in load_parser_commands)
         
         if should_show_detailed_help:
@@ -304,6 +309,19 @@ class JtableCli:
                     logging.error(f"Loaded content from {file_name} is None. Please check the file content.")
                     exit(2)
                     
+            self.dataset = {**self.dataset, **{ self.tabulate_var_name: dict_content } }
+        elif args.command == 'load_excel':
+            if not args.file:
+                logging.error("No Excel file provided, please provide a file")
+                exit(1)
+            logging.info(f"loading {args.command} file: {args.file}")
+            self.tabulate_var_name = "input"
+            try:
+                dict_content = Plugin.load_excel(args.file)
+            except Exception as error:
+                logging.error(f"Failed to load Excel file {args.file}, error was:\n{error}")
+                logging.error(f"File path: {os.path.abspath(args.file)}")
+                exit(2)
             self.dataset = {**self.dataset, **{ self.tabulate_var_name: dict_content } }
         elif args.command == 'load_json_files' or args.command == 'load_yaml_files':
             file_type = "_".join(args.command.split('_')[1:]).upper()
